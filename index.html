@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PFG Planner — MKS Iskra Pszczyna</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--g:#1D9E75;--dg:#085041;--lg:#E1F5EE;--pu:#7F77DD;--am:#EF9F27;--bl:#378ADD;--bg:#F7F6F3;--sur:#fff;--sur2:#F1EFE8;--brd:#E0DDD6;--txt:#1a1918;--txt2:#6B6860;--txt3:#A8A49E;--red:#D85A30;--lred:#FAECE7;--r:9px;--r2:6px;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-size:13px;}
+.shell{display:flex;height:100vh;}
+/* SIDEBAR */
+.sb{width:210px;background:var(--sur);border-right:1px solid var(--brd);display:flex;flex-direction:column;flex-shrink:0;}
+.sb-logo{padding:16px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:9px;}
+.sb-icon{width:30px;height:30px;background:var(--g);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.sb-icon svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8;}
+.sb-nm{font-size:14px;font-weight:600;}
+.sb-cl{font-size:11px;color:var(--txt2);}
+.sb-s{padding:10px 8px 3px;}
+.sb-lbl{font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;padding:0 8px;margin-bottom:3px;}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r2);cursor:pointer;font-size:13px;color:var(--txt2);}
+.ni:hover{background:var(--sur2);}
+.ni.active{background:var(--lg);color:var(--dg);font-weight:500;}
+.ni svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;}
+.sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--brd);display:flex;align-items:center;gap:9px;}
+.av{width:28px;height:28px;border-radius:50%;background:var(--lg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--dg);}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.tb{background:var(--sur);border-bottom:1px solid var(--brd);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.t1{font-size:16px;font-weight:600;}
+.t2{font-size:11px;color:var(--txt2);margin-top:1px;}
+.tb-r{display:flex;gap:8px;align-items:center;}
+.pg{display:none;flex:1;overflow-y:auto;}
+.pg.act{display:flex;flex-direction:column;}
+.inner{padding:18px;flex:1;overflow-y:auto;}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r2);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--brd);background:var(--sur);color:var(--txt);font-family:inherit;transition:all .12s;}
+.btn:hover{background:var(--sur2);}
+.btn:active{transform:scale(.98);}
+.btn.pri{background:var(--g);color:#fff;border-color:var(--g);}
+.btn.pri:hover{background:var(--dg);}
+.btn.dan{background:var(--lred);color:var(--red);border-color:#F0997B;}
+.btn.sm{padding:4px 9px;font-size:11px;}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
+/* CARDS */
+.card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;}
+/* FORMS */
+.fi{width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r2);font-size:13px;color:var(--txt);background:var(--sur);outline:none;font-family:inherit;}
+.fi:focus{border-color:var(--g);}
+.fsel{width:100%;padding:8px 26px 8px 10px;border:1px solid var(--brd);border-radius:var(--r2);font-size:13px;color:var(--txt);background:var(--sur);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23A8A49E' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;font-family:inherit;}
+.fsel:focus{border-color:var(--g);}
+.fsel:disabled{color:var(--txt3);background:var(--sur2);}
+.fta{width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r2);font-size:13px;color:var(--txt);background:var(--sur);outline:none;resize:vertical;min-height:72px;font-family:inherit;line-height:1.5;}
+.fta:focus{border-color:var(--g);}
+.fl{display:block;font-size:11px;font-weight:500;color:var(--txt2);margin-bottom:4px;}
+.fr{margin-bottom:12px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+.sh{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;padding-bottom:8px;border-bottom:1px solid var(--brd);margin:16px 0 12px;}
+.sh:first-child{margin-top:0;}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.sc{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;}
+.sl{font-size:11px;color:var(--txt2);margin-bottom:4px;}
+.sv{font-size:24px;font-weight:600;}
+.sd{font-size:11px;color:var(--g);margin-top:2px;}
+/* GANTT */
+.gw{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
+.ghdr{display:flex;border-bottom:1px solid var(--brd);background:var(--sur2);}
+.glc{width:110px;flex-shrink:0;border-right:1px solid var(--brd);padding:7px 10px;font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;}
+.mgr{flex:1;display:grid;grid-template-columns:repeat(12,1fr);}
+.mc{font-size:9px;font-weight:600;color:var(--txt3);text-align:center;padding:7px 2px;border-right:1px solid var(--brd);}
+.mc:last-child{border-right:none;}
+.grow{display:flex;border-bottom:1px solid var(--brd);}
+.grow:last-child{border-bottom:none;}
+.grl{width:110px;flex-shrink:0;border-right:1px solid var(--brd);padding:0 10px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px;height:34px;}
+.gtl{flex:1;position:relative;height:34px;}
+.gl2{position:absolute;top:0;bottom:0;width:1px;background:var(--brd);pointer-events:none;}
+.bar{position:absolute;top:5px;height:24px;border-radius:4px;cursor:pointer;display:flex;align-items:center;padding:0 7px;font-size:10px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.bar:hover{filter:brightness(.93);}
+.bar.macro{background:#E6F1FB;color:#0C447C;border:1px solid #85B7EB;}
+.bar.meso{background:#EEEDFE;color:#3C3489;border:1px solid #AFA9EC;}
+.bar.micro{background:var(--lg);color:var(--dg);border:1px solid #5DCAA5;}
+.az{position:absolute;inset:0;cursor:crosshair;}
+.cc3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.ccd{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px;}
+.cch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.cct{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.cdo{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.ccv{font-size:22px;font-weight:600;}
+.ccs{font-size:11px;color:var(--txt2);margin-bottom:8px;}
+.ci{display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:4px;cursor:pointer;margin-bottom:2px;}
+.ci:hover{background:var(--sur2);}
+.ci-n{font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ci-d{font-size:10px;color:var(--txt2);}
+.ci-x{background:none;border:none;cursor:pointer;color:var(--txt3);font-size:14px;line-height:1;}
+.ci-x:hover{color:var(--red);}
+/* KONCEPTY TAGI */
+.ktag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500;background:var(--lg);color:var(--dg);border:1px solid #5DCAA5;margin:2px;}
+.ktag-x{background:none;border:none;cursor:pointer;color:var(--dg);font-size:13px;line-height:1;padding:0;opacity:.7;}
+.ktag-x:hover{opacity:1;}
+.ktags{display:flex;flex-wrap:wrap;min-height:26px;}
+.ki{display:flex;gap:6px;margin-bottom:6px;}
+.kinp{flex:1;padding:6px 9px;border:1px solid var(--brd);border-radius:var(--r2);font-size:13px;color:var(--txt);background:var(--sur);outline:none;font-family:inherit;}
+.kinp:focus{border-color:var(--g);}
+.kadd{padding:6px 10px;border-radius:var(--r2);border:1px solid var(--brd);background:transparent;cursor:pointer;font-size:12px;color:var(--txt2);font-family:inherit;}
+.kadd:hover{background:var(--sur2);}
+/* BAZA */
+.exg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.ec{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px;cursor:pointer;transition:border-color .15s;}
+.ec:hover{border-color:var(--g);}
+.ei{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.ei svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;}
+.en{font-size:13px;font-weight:600;margin-bottom:4px;}
+.eb{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;}
+.ed{font-size:11px;color:var(--txt2);line-height:1.5;margin-bottom:8px;}
+.ef{display:flex;gap:5px;flex-wrap:wrap;}
+/* KREATOR */
+.kl{display:flex;height:100%;overflow:hidden;}
+.ksb{width:170px;flex-shrink:0;background:var(--sur);border-right:1px solid var(--brd);padding:14px 8px;display:flex;flex-direction:column;gap:3px;}
+.ks{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:var(--r2);cursor:pointer;}
+.ksn{width:22px;height:22px;border-radius:50%;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--txt3);flex-shrink:0;}
+.ks.act .ksn{background:var(--g);color:#fff;border-color:var(--g);}
+.ks.dn .ksn{background:var(--lg);color:var(--dg);border-color:var(--g);}
+.ksl{font-size:12px;color:var(--txt2);}
+.ks.act .ksl{color:var(--txt);font-weight:500;}
+.ks.dn .ksl{color:var(--dg);}
+.ksline{width:1px;height:10px;background:var(--brd);margin:0 10px;}
+.kb{flex:1;overflow-y:auto;padding:20px 24px;}
+.ksp{display:none;}
+.ksp.vis{display:block;}
+.ktb{margin-top:auto;padding-top:14px;border-top:1px solid var(--brd);}
+/* PHASE BLOCKS */
+.pb{background:var(--sur2);border-radius:var(--r);padding:14px;margin-bottom:12px;border:1px solid var(--brd);}
+.pbh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.pbt{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;}
+.pbd{width:9px;height:9px;border-radius:50%;}
+.pbd-t{font-size:11px;color:var(--txt2);}
+.exi{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r2);padding:10px 12px;margin-bottom:7px;}
+.exih{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.exin{width:20px;height:20px;border-radius:50%;background:var(--sur2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--txt2);flex-shrink:0;}
+.exiname{font-size:13px;font-weight:500;flex:1;}
+.exifdb{font-size:9px;color:var(--g);background:var(--lg);padding:1px 6px;border-radius:8px;}
+.exiacts{display:flex;gap:3px;}
+.exia{width:22px;height:22px;border-radius:4px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt3);}
+.exia:hover{background:var(--sur2);}
+.exia svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;}
+.exim{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.eximi{padding:3px 8px;border:1px solid var(--brd);border-radius:4px;font-size:12px;background:var(--sur);color:var(--txt);outline:none;width:56px;font-family:inherit;}
+.eximi:focus{border-color:var(--g);}
+.exinta{width:100%;margin-top:6px;padding:5px 8px;border:1px solid var(--brd);border-radius:4px;font-size:11px;background:var(--sur);color:var(--txt);outline:none;resize:none;height:34px;font-family:inherit;}
+.exinta:focus{border-color:var(--g);}
+.aer{display:flex;gap:7px;align-items:center;}
+.aei{flex:1;padding:7px 10px;border:1px solid var(--brd);border-radius:var(--r2);font-size:12px;background:var(--sur);color:var(--txt);outline:none;font-family:inherit;}
+.aei:focus{border-color:var(--g);}
+.dbr{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r2);margin-top:4px;display:none;box-shadow:0 4px 12px rgba(0,0,0,.08);}
+.dbr.op{display:block;}
+.dbri{padding:8px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--brd);}
+.dbri:last-child{border-bottom:none;}
+.dbri:hover{background:var(--sur2);}
+.dbrm{font-size:10px;color:var(--txt2);margin-left:auto;}
+/* CAL */
+.cfg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-left:1px solid var(--brd);border-top:1px solid var(--brd);}
+.cc2{border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);min-height:80px;padding:6px;cursor:pointer;}
+.cc2:hover{background:var(--sur2);}
+.ccn{font-size:11px;color:var(--txt2);margin-bottom:3px;}
+.tn2{width:22px;height:22px;background:var(--g);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+.cev{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cdh{border-right:1px solid var(--brd);padding:6px;font-size:11px;font-weight:600;color:var(--txt2);text-align:center;background:var(--sur2);}
+/* KONSP */
+.kc{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.kc:hover{border-color:var(--g);}
+.kci{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.kci svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;}
+.kcn{font-size:14px;font-weight:600;}
+.kcm{font-size:11px;color:var(--txt2);margin-top:3px;display:flex;gap:10px;}
+/* SUMMARY */
+.sr{display:flex;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--brd);}
+.sr:last-child{border-bottom:none;}
+.srl{font-size:12px;color:var(--txt2);width:150px;flex-shrink:0;}
+.srv{font-size:13px;font-weight:500;}
+.tbar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:6px 0 3px;}
+.ts{height:100%;}
+/* TEAMS */
+.tc{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.tav{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0;}
+/* PHASE SEL */
+.phs{display:flex;gap:6px;margin-bottom:12px;}
+.pho{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--brd);color:var(--txt2);}
+.pho:hover{background:var(--sur2);}
+.pho.sm{background:#E6F1FB;border-color:#85B7EB;color:#0C447C;font-weight:500;}
+.pho.se{background:#EEEDFE;border-color:#AFA9EC;color:#3C3489;font-weight:500;}
+.pho.si{background:var(--lg);border-color:#5DCAA5;color:var(--dg);font-weight:500;}
+/* VIEW */
+.vf{margin-bottom:12px;}
+.vl{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
+.vv{font-size:13px;line-height:1.6;}
+.vv.m{color:var(--txt2);font-style:italic;}
+.v2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;}
+.v3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+.vbr{display:flex;gap:5px;flex-wrap:wrap;}
+/* MODALS */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:100;align-items:center;justify-content:center;}
+.mo.op{display:flex;}
+.mbox{background:var(--sur);border-radius:var(--r);border:1px solid var(--brd);box-shadow:0 8px 40px rgba(0,0,0,.15);width:460px;max-width:95%;max-height:88vh;display:flex;flex-direction:column;}
+.mbox.wide{width:580px;}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--brd);flex-shrink:0;}
+.mt2{font-size:14px;font-weight:600;}
+.mc2{width:26px;height:26px;border-radius:4px;border:1px solid var(--brd);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--txt2);}
+.mc2:hover{background:var(--sur2);}
+.mc2 svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;}
+.mbody{padding:16px 18px;overflow-y:auto;flex:1;}
+.mf{padding:12px 18px;border-top:1px solid var(--brd);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;}
+.mfs{padding:12px 18px;border-top:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+/* MISC */
+.empty{display:flex;flex-direction:column;align-items:center;padding:70px 20px;text-align:center;}
+.ei2{width:48px;height:48px;border-radius:12px;background:var(--sur2);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.ei2 svg{width:22px;height:22px;stroke:var(--txt3);fill:none;stroke-width:1.8;}
+.db-fc{padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--brd);color:var(--txt2);}
+.db-fc.ac{background:var(--lg);border-color:#5DCAA5;color:var(--dg);font-weight:500;}
+.fsel-sm{padding:6px 22px 6px 8px;border:1px solid var(--brd);border-radius:var(--r2);font-size:12px;color:var(--txt);background:var(--sur);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23A8A49E' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;font-family:inherit;}
+.fsel-sm:disabled{color:var(--txt3);background:var(--sur2);}
+.fsel-sm:focus{border-color:var(--g);}
+.toast{display:none;position:fixed;bottom:20px;right:20px;background:var(--dg);color:#fff;padding:10px 16px;border-radius:var(--r2);font-size:13px;z-index:300;box-shadow:0 4px 16px rgba(0,0,0,.2);}
+.toast.show{display:block;}
+.hf{display:none;}
+.legend{display:flex;gap:14px;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt2);}
+.leg-dot{width:11px;height:11px;border-radius:3px;}
+/* IOZ */
+.ioz-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+.ioz-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.ioz-card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:0;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.ioz-card:hover{border-color:var(--g);box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.ioz-card-top{padding:14px 14px 10px;}
+.ioz-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.ioz-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.ioz-grade{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;}
+.ioz-grade.A{background:#E1F5EE;color:#085041;}
+.ioz-grade.B{background:#FAEEDA;color:#633806;}
+.ioz-grade.C{background:#FAECE7;color:#712B13;}
+.ioz-grade.none{background:var(--sur2);color:var(--txt3);font-size:12px;}
+.ioz-name{font-size:14px;font-weight:600;margin-bottom:2px;}
+.ioz-team{font-size:11px;color:var(--txt2);}
+.ioz-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--brd);border-top:1px solid var(--brd);}
+.ioz-stat{background:var(--sur);padding:8px 10px;text-align:center;}
+.ioz-stat-lbl{font-size:9px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+.ioz-stat-val{font-size:13px;font-weight:600;color:var(--txt);}
+.ioz-bottom{padding:10px 14px;border-top:1px solid var(--brd);}
+.ioz-ocena-preview{font-size:11px;color:var(--txt2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ioz-grade-sel{display:flex;gap:8px;margin-bottom:14px;}
+.ioz-grade-btn{flex:1;padding:10px;border-radius:var(--r2);border:2px solid var(--brd);cursor:pointer;text-align:center;font-weight:700;font-size:18px;transition:all .15s;}
+.ioz-grade-btn.A{color:#085041;background:#E1F5EE;}
+.ioz-grade-btn.B{color:#633806;background:#FAEEDA;}
+.ioz-grade-btn.C{color:#712B13;background:#FAECE7;}
+.ioz-grade-btn.sel{border-color:currentColor;box-shadow:0 0 0 3px rgba(0,0,0,.1);}
+.ioz-grade-btn:not(.sel){opacity:.5;}
+.ioz-grade-label{font-size:10px;font-weight:500;margin-top:3px;}
+.ioz-hist-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--brd);}
+.ioz-hist-item:last-child{border-bottom:none;}
+.ioz-hist-grade{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+.ioz-hist-grade.A{background:#E1F5EE;color:#085041;}
+.ioz-hist-grade.B{background:#FAEEDA;color:#633806;}
+.ioz-hist-grade.C{background:#FAECE7;color:#712B13;}
+.ioz-phv-info{background:var(--sur2);border-radius:var(--r2);padding:10px 12px;font-size:11px;color:var(--txt2);margin-bottom:12px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="sb">
+  <div class="sb-logo"><div class="sb-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2v12M2 8h12" stroke-width="1.2"/><path d="M4 4Q8 6 12 4M4 12Q8 10 12 12" stroke-width="1"/></svg></div><div><div class="sb-nm">PFG Planner</div><div class="sb-cl">MKS Iskra Pszczyna</div></div></div>
+  <div class="sb-s">
+    <div class="sb-lbl">Główne</div>
+    <div class="ni active" id="ni-dash" onclick="SP('dash')"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Przegląd</div>
+    <div class="ni" id="ni-plan" onclick="SP('plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
+    <div class="ni" id="ni-cal" onclick="SP('cal')"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>Kalendarz</div>
+  </div>
+  <div class="sb-s">
+    <div class="sb-lbl">Trening</div>
+    <div class="ni" id="ni-ex" onclick="SP('ex')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Baza ćwiczeń</div>
+    <div class="ni" id="ni-konsp" onclick="SP('konsp')"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/></svg>Konspekty</div>
+    <div class="ni" id="ni-teams" onclick="SP('teams')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 11c1 0 2 .8 2 2"/></svg>Drużyny</div>
+    <div class="ni" id="ni-ioz" onclick="SP('ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M11 9l1.5 1.5M12.5 10.5L14 12"/><circle cx="12.5" cy="11.5" r="2.5" fill="none"/></svg>IOZ</div>
+  </div>
+  <div class="sb-bot"><div class="av" id="sb-av">MK</div><div><div style="font-size:12px;font-weight:500;" id="sb-coach-name">Marek Kowalski</div><div style="font-size:11px;color:var(--txt2);" id="sb-coach-role">Trener główny</div></div></div>
+</div>
+<div class="main">
+
+<!-- PRZEGLĄD -->
+<div id="pg-dash" class="pg act">
+  <div class="tb"><div><div class="t1">Przegląd</div><div class="t2" id="d-date">Niedziela, 19 kwietnia 2026</div></div><div class="tb-r"><button class="btn" onclick="SP('konsp')">+ Nowy konspekt</button><button class="btn pri" onclick="ST('Eksport PDF')">Eksportuj PDF</button></div></div>
+  <div class="inner">
+    <div class="stats"><div class="sc"><div class="sl">Konspekty</div><div class="sv" id="s-k">0</div><div class="sd" id="s-kd">brak konspektów</div></div><div class="sc"><div class="sl">Ćwiczenia w bazie</div><div class="sv" id="s-e">0</div><div class="sd" id="s-ed">baza pusta</div></div><div class="sc"><div class="sl">Cykli w planie</div><div class="sv" id="s-c">0</div><div class="sd" id="s-cd">brak cykli</div></div><div class="sc"><div class="sl">Drużyny</div><div class="sv">5</div><div class="sd">sezon 2025/26</div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-size:13px;font-weight:600;">Ostatnie konspekty</div><div style="font-size:11px;color:var(--g);cursor:pointer;" onclick="SP('konsp')">Wszystkie →</div></div><div id="d-klist" style="font-size:12px;color:var(--txt2);">Brak konspektów.</div></div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="font-size:13px;font-weight:600;">Plan sezonu</div><div style="font-size:11px;color:var(--g);cursor:pointer;" onclick="SP('plan')">Planowanie →</div></div><div id="d-cyc" style="font-size:12px;color:var(--txt2);">Brak cykli.</div></div>
+        <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="font-size:13px;font-weight:600;">Kwiecień 2026</div><div style="font-size:11px;color:var(--g);cursor:pointer;" onclick="SP('cal')">Kalendarz →</div></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;"><div style="font-size:9px;color:var(--txt3);text-align:center;font-weight:600;">Pn</div><div style="font-size:9px;color:var(--txt3);text-align:center;font-weight:600;">Wt</div><div style="font-size:9px;color:var(--txt3);text-align:center;font-weight:600;">Śr</div><div style="font-size:9px;color:var(--txt3);text-align:center;font-weight:600;">Cz</div><div style="font-size:9px;color:var(--txt3);text-align:center;font-weight:600;">Pt</div><div style="font-size:9px;color:var(--txt3);text-align:center;font-weight:600;">So</div><div style="font-size:9px;color:var(--txt3);text-align:center;font-weight:600;">Nd</div></div><div id="d-mini-cal" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLANOWANIE -->
+<div id="pg-plan" class="pg">
+  <div class="tb"><div><div class="t1">Planowanie</div><div class="t2" id="plan-sub">Sezon 2025/26</div></div><div class="tb-r"><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div><button class="btn pri" onclick="oAC()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj okres</button></div></div>
+  <div class="inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;"><button onclick="chY(-1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2L4 6l4 4"/></svg></button><div id="yr-l" style="font-size:15px;font-weight:600;min-width:72px;text-align:center;">2025/26</div><button onclick="chY(1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></button></div><div style="font-size:11px;color:var(--txt2);">Przeciągnij myszką na osi aby narysować nowy okres</div></div>
+    <div class="gw"><div class="ghdr"><div class="glc">Cykl</div><div class="mgr" id="m-hdr"></div></div><div id="g-rows"></div></div>
+    <div class="cc3"><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:#378ADD;"></div>Makrocykle</div><button class="btn sm" onclick="oAC('macro')">+ Dodaj</button></div><div class="ccv" id="cnt-macro">0</div><div class="ccs">zdefiniowanych</div><div id="list-macro"></div></div><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:var(--pu);"></div>Mezocykle</div><button class="btn sm" onclick="oAC('meso')">+ Dodaj</button></div><div class="ccv" id="cnt-meso">0</div><div class="ccs">zdefiniowanych</div><div id="list-meso"></div></div><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:var(--g);"></div>Mikrocykle</div><button class="btn sm" onclick="oAC('micro')">+ Dodaj</button></div><div class="ccv" id="cnt-micro">0</div><div class="ccs">zdefiniowanych</div><div id="list-micro"></div></div></div>
+    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:8px;">Notatki do planu sezonu</div><textarea class="fta" placeholder="Cele sezonu, priorytety, założenia planowania..."></textarea></div>
+  </div>
+</div>
+
+<!-- KALENDARZ -->
+<div id="pg-cal" class="pg">
+  <div class="tb">
+    <div>
+      <div class="t1">Kalendarz treningów</div>
+      <div class="t2" id="cal-sub">Kwiecień 2026</div>
+    </div>
+    <div class="tb-r">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="calNav(-1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2L4 6l4 4"/></svg></button>
+        <button onclick="calGoToday()" class="btn" style="font-size:11px;padding:5px 10px;">Dziś</button>
+        <button onclick="calNav(1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></button>
+      </div>
+      <button class="btn pri" onclick="oAddTraining(null)"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj trening</button>
+    </div>
+  </div>
+  <div class="inner" style="padding:0;">
+    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-left:1px solid var(--brd);border-top:1px solid var(--brd);" id="cal-dow-hdr">
+      <div class="cdh">Pn</div><div class="cdh">Wt</div><div class="cdh">Śr</div><div class="cdh">Cz</div><div class="cdh">Pt</div><div class="cdh">So</div><div class="cdh">Nd</div>
+    </div>
+    <div class="cfg" id="cfg"></div>
+  </div>
+</div>
+<!-- BAZA ĆWICZEŃ -->
+<div id="pg-ex" class="pg">
+  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
+  <div class="inner">
+    <div style="display:flex;gap:8px;margin-bottom:10px;"><input class="fi" id="ex-s" placeholder="Szukaj po nazwie lub opisie..." oninput="RE()" style="flex:1;"/></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Faza</div><select class="fsel-sm" id="ff" onchange="FFC()"><option value="">Wszystkie fazy</option><option>Atakowanie</option><option>Bronienie</option><option>Umiejętności</option><option>Motoryka</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Temat</div><select class="fsel-sm" id="ft" onchange="FTC()" disabled><option value="">Wszystkie tematy</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Koncept</div><select class="fsel-sm" id="fk" onchange="RE()" disabled><option value="">Wszystkie koncepty</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Intensywność</div><select class="fsel-sm" id="fi2" onchange="RE()"><option value="">Każda</option><option>Niska</option><option>Średnia</option><option>Wysoka</option></select></div>
+      <div style="font-size:11px;color:var(--g);cursor:pointer;padding:6px 0;" onclick="CF()">Wyczyść ×</div>
+    </div>
+    <div id="ex-grid" class="exg"></div>
+  </div>
+</div>
+
+<!-- KONSPEKTY -->
+<div id="pg-konsp" class="pg">
+  <div class="tb"><div><div class="t1">Konspekty treningowe</div><div class="t2" id="k-lbl">0 konspektów · sezon 2025/26</div></div><div class="tb-r"><button class="btn" onclick="ST('Filtruj')">Filtruj</button><button class="btn pri" onclick="startK()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Nowy konspekt</button></div></div>
+  <div class="inner" id="k-list"></div>
+</div>
+
+<!-- KREATOR -->
+<div id="pg-kreator" class="pg" style="overflow:hidden;">
+  <div class="tb"><div><div class="t1" id="kr-t">Nowy konspekt</div><div class="t2" id="kr-s">Krok 1 z 4</div></div><div class="tb-r"><button class="btn" onclick="SP('konsp')">← Wróć do listy</button><button class="btn" onclick="saveK()"><svg viewBox="0 0 16 16"><path d="M3 5h10v8H3zM6 5V3h4v2"/></svg>Zapisz konspekt</button><button class="btn pri" onclick="dlPDF()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 11l5 3 5-3"/></svg>Pobierz PDF</button></div></div>
+  <div class="kl">
+    <div class="ksb">
+      <div class="ks act" id="ks-1" onclick="gKS(1)"><div class="ksn">1</div><div class="ksl">Informacje</div></div>
+      <div class="ksline"></div>
+      <div class="ks" id="ks-2" onclick="gKS(2)"><div class="ksn">2</div><div class="ksl">Rozgrzewka</div></div>
+      <div class="ksline"></div>
+      <div class="ks" id="ks-3" onclick="gKS(3)"><div class="ksn">3</div><div class="ksl">Część główna</div></div>
+      <div class="ksline"></div>
+      <div class="ks" id="ks-4" onclick="gKS(4)"><div class="ksn">4</div><div class="ksl">Zakończenie & PDF</div></div>
+      <div class="ktb"><div style="font-size:10px;color:var(--txt2);margin-bottom:3px;">Łączny czas</div><div style="font-size:20px;font-weight:600;" id="kt-total">0 min</div><div class="tbar" id="kt-bar"></div><div style="font-size:9px;color:var(--txt3);margin-top:2px;" id="kt-bar-legend"></div></div>
+    </div>
+    <div class="kb">
+      <div class="ksp vis" id="ksp-1">
+        <div class="sh">Podstawowe informacje</div>
+        <div class="fr"><label class="fl">Tytuł konspektu *</label><input class="fi" id="k-title" placeholder="np. Budowanie od bramkarza — U14" oninput="document.getElementById('kr-t').textContent=this.value||'Nowy konspekt'"/></div>
+        <div class="fr2"><div><label class="fl">Drużyna *</label><select class="fsel" id="k-team" onchange="onKTeam()"><option value="">— wybierz —</option></select></div><div><label class="fl">Data *</label><input class="fi" id="k-date" type="date" value="2026-04-17"/></div></div>
+        <div class="fr3"><div><label class="fl">Czas (min)</label><input class="fi" id="k-dur" type="number" value="90" min="30" max="180"/></div><div><label class="fl">Miejsce</label><input class="fi" id="k-place" placeholder="np. Boisko główne"/></div></div>
+        <div class="fr2"><div><label class="fl">I Trener *</label><select class="fsel" id="k-coach"><option value="">— wybierz —</option></select></div><div><label class="fl">II Trener</label><select class="fsel" id="k-coach2"><option value="">— brak —</option></select></div></div>
+        <div class="sh">Powiązanie z planowaniem</div>
+        <div class="fr2">
+          <div><label class="fl">Mikrocykl</label><select class="fsel" id="k-mikro" onchange="onKMikro()"><option value="">— brak powiązania —</option></select></div>
+          <div><label class="fl">Mezocykl (auto)</label><input class="fi" id="k-mezo" value="—" readonly style="background:var(--sur2);color:var(--txt2);"/></div>
+        </div>
+        <div id="k-mikro-info" style="display:none;background:var(--lg);border-radius:var(--r2);padding:9px 12px;font-size:12px;color:var(--dg);margin-bottom:12px;line-height:1.6;"></div>
+        <div class="sh">Cel i klasyfikacja</div>
+        <div class="fr2"><div><label class="fl">Faza</label><select class="fsel" id="k-faza" onchange="onKF()"><option value="">— wybierz —</option><option selected>Atakowanie</option><option>Bronienie</option><option>Umiejętności</option><option>Motoryka</option></select></div><div><label class="fl">Temat</label><select class="fsel" id="k-temat"><option selected>Budowanie niskie-Budowanie wysokie</option><option>Budowanie wysokie-Finalizacja</option><option>Finalizacja</option><option>Utrzymanie piłki</option></select></div></div>
+        <div class="fr"><label class="fl">Cel główny treningu</label><input class="fi" id="k-goal" placeholder="np. Poprawa budowania od bramkarza, relacje trójki obrońców"/></div>
+        <div class="fr">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <label class="fl" style="margin-bottom:0;">Cele szczegółowe</label>
+            <button class="btn sm" id="k-goals-auto-btn" onclick="autoFillGoals()" style="display:none;"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M2 8a6 6 0 1011.7-2M14 2l-2 4-3-2"/></svg>Uzupełnij z mikrocyklu</button>
+          </div>
+          <textarea class="fta" id="k-goals" placeholder="• Zawodnik szuka partnera przed przyjęciem&#10;• Szybkie podania do poruszającego się&#10;• Percepcja i orientacja przed przyjęciem"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--brd);"><button class="btn pri" onclick="gKS(2)">Rozgrzewka →</button></div>
+      </div>
+      <div class="ksp" id="ksp-2">
+        <div class="pb"><div class="pbh"><div class="pbt"><div class="pbd" style="background:var(--am);"></div>Rozgrzewka</div><span class="pbd-t" id="pd-warm">0 min</span></div><div id="el-warm"></div><div class="aer"><input class="aei" id="aei-warm" placeholder="Szukaj z bazy lub wpisz ćwiczenie ręcznie..." oninput="sDB('warm')" onkeydown="if(event.key==='Enter')addME('warm')"/><button class="btn sm" onclick="oDB('warm')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Z bazy</button><button class="btn sm pri" onclick="addME('warm')">+ Dodaj</button></div><div class="dbr" id="dbr-warm"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--brd);"><button class="btn" onclick="gKS(1)">← Informacje</button><button class="btn pri" onclick="gKS(3)">Część główna →</button></div>
+      </div>
+      <div class="ksp" id="ksp-3">
+        <div class="pb"><div class="pbh"><div class="pbt"><div class="pbd" style="background:var(--g);"></div>Część główna</div><span class="pbd-t" id="pd-main">0 min</span></div><div id="el-main"></div><div class="aer"><input class="aei" id="aei-main" placeholder="Szukaj z bazy lub wpisz ćwiczenie ręcznie..." oninput="sDB('main')" onkeydown="if(event.key==='Enter')addME('main')"/><button class="btn sm" onclick="oDB('main')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Z bazy</button><button class="btn sm pri" onclick="addME('main')">+ Dodaj</button></div><div class="dbr" id="dbr-main"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--brd);"><button class="btn" onclick="gKS(2)">← Rozgrzewka</button><button class="btn pri" onclick="gKS(4)">Zakończenie →</button></div>
+      </div>
+      <div class="ksp" id="ksp-4">
+        <div class="pb"><div class="pbh"><div class="pbt"><div class="pbd" style="background:var(--pu);"></div>Zakończenie</div><span class="pbd-t" id="pd-cool">0 min</span></div><div id="el-cool"></div><div class="aer"><input class="aei" id="aei-cool" placeholder="Szukaj z bazy lub wpisz ćwiczenie ręcznie..." oninput="sDB('cool')" onkeydown="if(event.key==='Enter')addME('cool')"/><button class="btn sm" onclick="oDB('cool')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Z bazy</button><button class="btn sm pri" onclick="addME('cool')">+ Dodaj</button></div><div class="dbr" id="dbr-cool"></div></div>
+        <div class="sh">Podsumowanie czasowe</div>
+        <div class="card" id="t-sum" style="margin-bottom:14px;"></div>
+        <div style="background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r2);padding:12px 14px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:var(--txt3);fill:none;stroke-width:1.8;flex-shrink:0;"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg><div style="font-size:12px;font-weight:500;color:var(--txt2);">Notatki i ocena sesji dostępne po zapisaniu konspektu</div></div>
+          <div style="font-size:11px;color:var(--txt3);">Po zapisaniu wróć do konspektu na liście, otwórz go i dodaj ocenę oraz notatki po zrealizowanym treningu.</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--brd);">
+          <button class="btn" onclick="gKS(3)">← Część główna</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" onclick="saveK()"><svg viewBox="0 0 16 16"><path d="M3 5h10v8H3zM6 5V3h4v2"/></svg>Zapisz konspekt</button>
+            <button class="btn pri" onclick="dlPDF()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 11l5 3 5-3"/></svg>Pobierz PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRUŻYNY -->
+<div id="pg-teams" class="pg">
+  <div class="tb"><div><div class="t1">Drużyny i trenerzy</div><div class="t2">MKS Iskra Pszczyna</div></div><div class="tb-r"><button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button><button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button></div></div>
+  <div class="inner" id="t-body"></div>
+</div>
+
+<!-- IOZ -->
+<div id="pg-ioz" class="pg">
+  <div class="tb">
+    <div><div class="t1">Indywidualna Ocena Zawodników</div><div class="t2" id="ioz-sub">0 zawodników</div></div>
+    <div class="tb-r">
+      <button class="btn pri" onclick="oAddPlayer()"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj zawodnika</button>
+    </div>
+  </div>
+  <div class="inner">
+    <div class="ioz-filters">
+      <select class="fsel-sm" id="ioz-ff-team" onchange="rIOZ()" style="min-width:140px;">
+        <option value="">Wszystkie drużyny</option>
+      </select>
+      <select class="fsel-sm" id="ioz-ff-grade" onchange="rIOZ()">
+        <option value="">Wszystkie oceny</option>
+        <option value="A">A — bezpieczny</option>
+        <option value="B">B — zagrożony</option>
+        <option value="C">C — opuszcza drużynę</option>
+        <option value="">Bez oceny</option>
+      </select>
+      <input class="fi" id="ioz-search" placeholder="Szukaj zawodnika..." oninput="rIOZ()" style="width:200px;padding:6px 10px;font-size:12px;"/>
+      <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;"><div style="width:22px;height:22px;background:#E1F5EE;color:#085041;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;">A</div>Bezpieczny</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;"><div style="width:22px;height:22px;background:#FAEEDA;color:#633806;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;">B</div>Zagrożony</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:11px;"><div style="width:22px;height:22px;background:#FAECE7;color:#712B13;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;">C</div>Opuszcza drużynę</div>
+      </div>
+    </div>
+    <div id="ioz-grid" class="ioz-grid"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- MODALS -->
+<div class="mo" id="mo-cyc"><div class="mbox"><div class="mh"><div class="mt2" id="mc-ttl">Dodaj okres</div><button class="mc2" onclick="cM('mo-cyc')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody"><div class="fr"><div class="fl">Typ cyklu</div><div class="phs" id="ph-sel"><div class="pho" data-t="macro" onclick="sT('macro')">Makrocykl</div><div class="pho" data-t="meso" onclick="sT('meso')">Mezocykl</div><div class="pho" data-t="micro" onclick="sT('micro')">Mikrocykl</div></div></div><div class="fr"><label class="fl">Nazwa okresu *</label><input class="fi" id="mc-n" placeholder="np. Sezon zasadniczy"/></div><div class="fr2"><div><label class="fl">Rozpoczęcie *</label><input class="fi" id="mc-s" type="date"/></div><div><label class="fl">Zakończenie *</label><input class="fi" id="mc-e" type="date"/></div></div><div class="fr"><label class="fl">Opis / Cel / Temat</label><textarea class="fta" id="mc-d" placeholder="Cel okresu, główny temat i założenia pracy..."></textarea></div><div class="fr"><label class="fl">Koncepty <span style="font-weight:400;color:var(--txt3);"> — nad którymi pracujemy</span></label><div class="ki"><input class="kinp" id="mc-ki" placeholder="np. Pressing, Budowanie, Percepcja..." onkeydown="if(event.key==='Enter'){event.preventDefault();aK();}"/><button class="kadd" onclick="aK()">+ Dodaj</button></div><div class="ktags" id="mc-kt"></div><div style="font-size:10px;color:var(--txt3);margin-top:3px;">Wpisz i naciśnij Enter lub kliknij + Dodaj</div></div></div><div class="mf"><button class="btn" onclick="cM('mo-cyc')">Anuluj</button><button class="btn pri" onclick="sC()">Zapisz okres</button></div></div></div>
+
+<div class="mo" id="mo-ec"><div class="mbox"><div class="mh"><div class="mt2" id="mec-ttl">Edytuj okres</div><button class="mc2" onclick="cM('mo-ec')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody"><div class="fr"><label class="fl">Nazwa</label><input class="fi" id="mec-n"/></div><div class="fr2"><div><label class="fl">Rozpoczęcie</label><input class="fi" id="mec-s" type="date"/></div><div><label class="fl">Zakończenie</label><input class="fi" id="mec-e" type="date"/></div></div><div class="fr"><label class="fl">Opis / Cel / Temat</label><textarea class="fta" id="mec-d"></textarea></div><div class="fr"><label class="fl">Koncepty</label><div class="ki"><input class="kinp" id="mec-ki" placeholder="Dodaj koncept..." onkeydown="if(event.key==='Enter'){event.preventDefault();aKE();}"/><button class="kadd" onclick="aKE()">+ Dodaj</button></div><div class="ktags" id="mec-kt"></div></div></div><div class="mfs"><button class="btn dan sm" onclick="dEC()">Usuń okres</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM('mo-ec')">Anuluj</button><button class="btn pri" onclick="uC()">Zapisz zmiany</button></div></div></div></div>
+
+<div class="mo" id="mo-ex"><div class="mbox wide"><div class="mh"><div class="mt2" id="mo-ex-t">Nowe ćwiczenie</div><div style="display:flex;gap:6px;"><span id="ex-eb"></span><button class="mc2" onclick="cM('mo-ex')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div></div><div class="mbody" id="mo-ex-b"></div><div id="mo-ex-f" style="padding:12px 18px;border-top:1px solid var(--brd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;"></div></div></div>
+
+<div class="mo" id="mo-vc"><div class="mbox"><div class="mh"><div class="mt2" id="mvc-t">Szczegóły okresu</div><div style="display:flex;gap:6px;"><button class="btn sm" id="mvc-eb">Edytuj</button><button class="mc2" onclick="cM('mo-vc')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div></div><div class="mbody" id="mvc-b"></div><div class="mf"><button class="btn" onclick="cM('mo-vc')">Zamknij</button></div></div></div>
+
+<div class="mo" id="mo-db"><div class="mbox wide"><div class="mh"><div class="mt2">Wybierz ćwiczenie z bazy</div><button class="mc2" onclick="cM('mo-db')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody"><input class="fi" id="mo-dbs" placeholder="Szukaj ćwiczenia..." oninput="rDL()" style="margin-bottom:10px;"/><div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;" id="db-frow"><div class="db-fc ac" onclick="sDF(this,'')">Wszystkie</div><div class="db-fc" onclick="sDF(this,'Atakowanie')">Atakowanie</div><div class="db-fc" onclick="sDF(this,'Bronienie')">Bronienie</div><div class="db-fc" onclick="sDF(this,'Umiejętności')">Umiejętności</div><div class="db-fc" onclick="sDF(this,'Motoryka')">Motoryka</div></div><div id="mo-dbl"></div></div><div class="mf"><button class="btn" onclick="cM('mo-db')">Anuluj</button></div></div></div>
+
+<input type="file" class="hf" id="fi-inp" accept="image/*" onchange="HFS(event)"/>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL DRUŻYNY -->
+<div class="mo" id="mo-team"><div class="mbox"><div class="mh"><div class="mt2" id="mo-team-ttl">Nowa drużyna</div><button class="mc2" onclick="cM('mo-team')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-team-body"></div><div class="mfs"><button class="btn dan sm" id="mo-team-del" onclick="delTeamModal()" style="display:none;">Usuń drużynę</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM('mo-team')">Anuluj</button><button class="btn pri" onclick="saveTeam()">Zapisz drużynę</button></div></div></div></div>
+
+<!-- MODAL TRENERA -->
+<div class="mo" id="mo-coach"><div class="mbox"><div class="mh"><div class="mt2" id="mo-coach-ttl">Nowy trener</div><button class="mc2" onclick="cM('mo-coach')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-coach-body"></div><div class="mfs"><button class="btn dan sm" id="mo-coach-del" onclick="delCoachModal()" style="display:none;">Usuń trenera</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM('mo-coach')">Anuluj</button><button class="btn pri" onclick="saveCoach()">Zapisz trenera</button></div></div></div></div>
+
+<!-- MODAL TRENINGU -->
+<div class="mo" id="mo-training">
+  <div class="mbox wide">
+    <div class="mh">
+      <div class="mt2" id="mo-tr-ttl">Nowy trening</div>
+      <button class="mc2" onclick="cM('mo-training')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+    </div>
+    <div class="mbody" id="mo-tr-body"></div>
+    <div class="mfs" id="mo-tr-foot"></div>
+  </div>
+</div>
+
+<!-- MODAL DNIA (lista treningów w danym dniu) -->
+<div class="mo" id="mo-day">
+  <div class="mbox">
+    <div class="mh">
+      <div class="mt2" id="mo-day-ttl">Treningi</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn sm" id="mo-day-add-btn">+ Dodaj trening</button>
+        <button class="mc2" onclick="cM('mo-day')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+      </div>
+    </div>
+    <div class="mbody" id="mo-day-body"></div>
+    <div class="mf"><button class="btn" onclick="cM('mo-day')">Zamknij</button></div>
+  </div>
+</div>
+
+<!-- MODAL ZAWODNIKA IOZ -->
+<div class="mo" id="mo-player">
+  <div class="mbox wide" style="max-height:90vh;">
+    <div class="mh">
+      <div class="mt2" id="mo-player-ttl">Nowy zawodnik</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span id="mo-player-eb"></span>
+        <button class="mc2" onclick="cM('mo-player')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+      </div>
+    </div>
+    <div class="mbody" id="mo-player-body"></div>
+    <div class="mfs" id="mo-player-foot"></div>
+  </div>
+</div>
+
+<!-- MODAL OCENY IOZ -->
+<div class="mo" id="mo-ocena">
+  <div class="mbox wide" style="max-height:90vh;">
+    <div class="mh">
+      <div class="mt2" id="mo-ocena-ttl">Nowa ocena</div>
+      <button class="mc2" onclick="cM('mo-ocena')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+    </div>
+    <div class="mbody" id="mo-ocena-body"></div>
+    <div class="mf">
+      <button class="btn" onclick="cM('mo-ocena')">Anuluj</button>
+      <button class="btn pri" onclick="saveOcena()">Zapisz ocenę</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ DANE ═══════════════
+var EXS=[],EI=null,IMG=null,IMN=null;
+var CYC=[],eCYI=null,sCT='macro',cY=2025;
+var KONSP=[],sRat=5;
+var PHS={warm:[],main:[],cool:[]};
+var dT=null,aKL=[],eKL=[],dbFP='',dbTP='warm';
+var PLAYERS=[];var editPlayerIdx=null;var viewPlayerIdx=null;var editOcenaIdx=null;
+
+var TX={
+  Atakowanie:{
+    'Budowanie niskie-Budowanie wysokie':['Percepcja','Progresja – relacja trzeciego zawodnika','Progresja – prowadzeniem','Progresja – tworzenie i wypełnianie przestrzeni','Zmiana strony – relacja trzeciego zawodnika','Zmiana strony – przeciążenie do słabej strony','Zmiana strony – gra przez półprzestrzenie'],
+    'Budowanie wysokie-Finalizacja':['Percepcja','Progresja – tworzenie i wypełnianie przestrzeni','Progresja – relacje dwójkowe','Zmiana strony – przeciążenie do słabej strony','Zmiana strony – atak przestrzeni za linią obrony'],
+    'Finalizacja':['Percepcja','Finalizacja środkiem – zajmowanie przestrzeni','Finalizacja środkiem – wykończenie akcji','Finalizacja środkiem – nabieganie / wyjście na pozycję','Finalizacja skrzydłami – 2v1 na skrzydle','Finalizacja skrzydłami – 1v1 na skrzydle','Finalizacja skrzydłami – atakowanie dalszego słupka','Finalizacja skrzydłami – zajmowanie przestrzeni strzału'],
+    'Utrzymanie piłki':['Percepcja','Utrzymanie piłki – wsparcie dla zawodnika z piłką','Utrzymanie piłki – tworzenie linii podań','Gra pozycyjna – tworzenie wolnych przestrzeni','Gra pozycyjna – strona silna – strona słaba']
+  },
+  Bronienie:{
+    'Obrona wysoka-Obrona niska':['Percepcja','Progresja – pressing','Progresja – niema grania między nami','Progresja – uniemożliwienie progresji','Zmiana strony – blokowanie i ochrona przestrzeni','Zmiana strony – niema grania między nami','Zmiana strony – uniemożliwienie zmiany strony'],
+    'Obrona niska-Obrona pola karnego':['Percepcja','Progresja – zamykanie linii podań','Progresja – niema grania między nami','Progresja – wypychanie','Progresja – górna piłka','Zmiana strony – niema grania między nami','Zmiana strony – ochrona słabej strony','Zmiana strony – wypychanie'],
+    'Obrona pola karnego':['Percepcja','Obrona pola karnego – blokowanie strzału','Obrona pola karnego – kontrola w polu karnym','Obrona pola karnego – wypychanie']
+  },
+  'Umiejętności':{
+    'Zdobycie pola gry':['Percepcja','Prowadzenie piłki','Drybling 1v1','Ochrona piłki'],
+    'Krycie':['Percepcja','Krycie – indywidualne','Krycie – strefowe'],
+    'Strzały':['Percepcja','Strzał z prowadzenia','Strzał z powietrza','Strzał z 1 kontaktu','Strzał po przyjęciu'],
+    'Presja':['Percepcja','Odbiór piłki','Opóźnienie'],
+    'Wsparcie':['Percepcja','Podania piłki','Przyjęcie piłki','Gra na trzeciego','Gubienie krycia']
+  },
+  Motoryka:{Koordynacja:['Percepcja'],Wytrzymałość:['Percepcja'],Szybkość:['Percepcja'],Siła:['Percepcja'],Moc:['Percepcja']}
+};
+
+// ─── SZCZEGÓŁY KONCEPTÓW (z dokumentu MKS Iskra Pszczyna) ───
+var KONCEPT_SZCZEGOLY={
+  'Percepcja':{
+    'Atak – przed sobą':['Bądź ustawiony po skosie względem piłki','Bądź w pozycji otwartej (plecy do linii)','Bądź w pozycji otwartej (ustawienie stóp i bioder)','Bądź w pozycji otwartej (rotacja w biodrach)','Obracaj głową (przed wykonaniem podania) – obserwacja ustawienia partnerów i przeciwników','Obracaj głową (w momencie lotu piłki) – obserwacja ustawienia przeciwników'],
+    'Atak – za sobą':['Obracaj głową w pozycji zamkniętej – obserwacja ustawienia partnerów i przeciwników'],
+    'Obrona – przed sobą':['Identyfikuj krycie – obracaj głową, by znaleźć przeciwnika','Obserwuj piłkę i krytego przeciwnika – ustawiaj swoje ciało w pozycji otwartej + obracaj głowę','Kontroluj piłkę i przestrzeń','Kontroluj linię spalonego'],
+    'Obrona – za sobą':['Identyfikuj krycie (twórz cień) – wchodź w linię podania','Obracaj głową, by kontrolować przestrzeń za sobą']
+  },
+  'Prowadzenie piłki':{
+    'Szczegóły':['Postrzeganie partnerów / pozycji przeciwnika','Prowadzenie piłki (sznurówkami), co krok to kontakt','Dalekie prowadzenie piłki zewnętrzną częścią stopy, jeśli przeciwnik daleko','Bliskie prowadzenie piłki, jeżeli przeciwnik bliżej','Prowadzenie piłki nogą dalszą lub bliższą od przeciwnika','Prowadź piłkę między zawodnikami, gdy są ustawieni szeroko od siebie','Gdy masz przeciwnika za sobą to wbiegnij w jego tor biegu','Zmieniaj tempo i kierunek prowadzenia','Prowadzenie do skupienia']
+  },
+  'Drybling 1v1':{
+    'Szczegóły':['Obserwacja partnerska i przeciwna','Przesuwanie zasłony','Zmiana ruchu = ruch przeciwnika','Zmiana tempa prowadzenia ruchu = brak ruchu przeciwnika','Zabiegniecie drogi – ochroń piłkę ręką i ciałem w momencie mijania przeciwnika','Przyspieszenie w kierunku bramki']
+  },
+  'Ochrona piłki':{
+    'Szczegóły':['Obserwacja przeciwnika','Próba wygrania pozycji – „czucie" rywala','Obniżenie środka ciężkości, ramiona szeroko – wejście „pod zawodnika"','Ustawienie między piłką a przeciwnikiem','Praca ramieniem, praca biodrem']
+  },
+  'Krycie – indywidualne':{
+    'Szczegóły':['4P – obserwacja przeciwników, piłki, partnerów i przestrzeni','Podjęcie decyzji, którego przeciwnika kryć','Zajęcie otwartej pozycji podczas krycia','Ustawienie obok przeciwnika','Unikanie wejścia przeciwnika „za swoje plecy"']
+  },
+  'Krycie – strefowe':{
+    'Szczegóły':['Zorientowanie na krycie zawodnika w swojej strefie','Kompaktowość (przesuwnie)','Przekazywanie krycia, gdy przeciwnicy zmieniają pozycję','Gotowość do presji','Po otrzymaniu podania przez przeciwnika presja do momentu pozbycia się piłki przez presowanego przeciwnika']
+  },
+  'Strzał z prowadzenia':{
+    'Szczegóły':['Obserwacja ustawienia bramkarza i bramki','Podjęcie decyzji o kierunku uderzenia','Ustawienie w przestrzeni z której padają bramki','Szybkie oddanie strzału','Wykonanie rozbiegu i zamachu','Następna akcja po strzale']
+  },
+  'Strzał z powietrza':{
+    'Szczegóły':['Obserwacja ustawienia bramkarza i bramki','Podjęcie decyzji o kierunku uderzenia','Ustawienie w przestrzeni z której padają bramki','Szybkie oddanie strzału','Następna akcja po strzale']
+  },
+  'Strzał z 1 kontaktu':{
+    'Szczegóły':['Obserwacja ustawienia bramkarza i bramki','Podjęcie decyzji o kierunku uderzenia','Ustawienie w przestrzeni z której padają bramki','Szybkie oddanie strzału','Następna akcja po strzale']
+  },
+  'Strzał po przyjęciu':{
+    'Szczegóły':['Obserwacja ustawienia bramkarza i bramki','Podjęcie decyzji o kierunku uderzenia','Ustawienie w przestrzeni z której padają bramki','Szybkie oddanie strzału','Wykonanie rozbiegu i zamachu','Następna akcja po strzale']
+  },
+  'Odbiór piłki':{
+    'Szczegóły':['Maksymalne skrócenie odległości do przeciwnika','Obserwacja piłki','Wyhamowanie przed przeciwnikiem','Wyciągnięcie ramiona','Ustawienie boczne – obniżenie środka ciężkości i szerokie ustawienie ramion','Kierowanie działań – zamknięcie linii prowadzenia – zmuszaj do gry z dala od bramki','Poruszanie się małymi krokami w bliskiej odległości od atakującego','Wybór momentu do odbioru – strata kontroli nad piłką','Wejście między przeciwnika a piłkę','Odcinanie linii podania','Blokowanie uderzeń']
+  },
+  'Opóźnienie':{
+    'Szczegóły':['Maksymalne skrócenie odległości do przeciwnika','Obserwacja piłki','Wyhamowanie przed przeciwnikiem','Wyciągnięcie ramiona','Ustawienie boczne – obniżenie środka ciężkości i szerokie ustawienie ramion','Kierowanie działań – zamknięcie linii prowadzenia – zmuszaj do gry z dala od bramki','Poruszanie się małymi krokami w bliskiej odległości od atakującego']
+  },
+  'Podania piłki':{
+    'Szczegóły':['Postrzeganie ustawienia partnerów – ruch głową','Priorytetem podanie do partnerów najbliżej bramki przeciwnika','Posiadanie piłki przed sobą','Moment podania po prowadzeniu – przeciwnik blisko','Podanie zdobywające lub zmiana strony','Podanie utrzymujące, by skupić uwagę przeciwników – tworzyć przestrzeń','Podanie na dalszą od przeciwnika nogę partnera','Szybkie podjęcie kolejnej akcji (gra bez piłki)']
+  },
+  'Przyjęcie piłki':{
+    'Szczegóły':['Obserwacja (ruch głową za siebie)','Obserwacja partnerów i przeciwników (faza 1 – przed podaniem)','Obserwacja presji przeciwnika (faza 2 – w trakcie lotu piłki)','Pozycja otwarta – mieć szeroką perspektywę','Obniżenie środka ciężkości','Atakowanie wolnego podania, amortyzowanie szybkiego','Wykorzystanie dużej powierzchni ciała do przyjęcia','Przyjęcie: stopą możliwości od przeciwnika / z przepuszczeniem (z obrotem) / pod siebie z otwarciem / od presji','Ochrona piłki po przyjęciu','Szybkie podjęcie kolejnej akcji (gra bez piłki)']
+  },
+  'Gra na trzeciego':{
+    'Szczegóły':['Ruch do piłki (między linie)','Podanie zdobywające do zawodnika linię wyżej','Przepuszczenie – zagranie w sposób sytuacyjny','Diagonalna linia podania','Podanie zwrotne do zawodnika ustawionego przodem do kierunku ataku','Ochrona piłki – wygranie pozycji','Obserwacja – znalezienie linii podania do partnera przodem do bramki','Wsparcie / kolejna linia podania dla 3-ciego zawodnika – następna akcja']
+  },
+  'Gubienie krycia':{
+    'Szczegóły':['Synchronizacja ruchów z pozostałymi partnerami','Obserwacja, kiedy obrońca nie widzi, aby rozpocząć ruch','Naprzemienna obserwacja piłki i partnerów','Poruszanie się zawsze twarzą do piłki','Absolutny zakaz wbiegnięcia dwóch graczy w tę samą przestrzeń','Zdobywanie kolejnych przestrzeni po wejściu w posiadanie piłki','Ruchy zwodne od i do, do i od','Możliwa zmiana kierunku biegu w każdym kroku']
+  }
+};
+
+function getAllSzczegoly(k){var d=KONCEPT_SZCZEGOLY[k];if(!d)return[];var a=[];Object.values(d).forEach(function(arr){arr.forEach(function(s){a.push(s);});});return a;}
+function getSzczegolyAsGoals(k){return getAllSzczegoly(k).map(function(s){return'• '+s;}).join('\n');}
+
+var CC={Atakowanie:{bg:'#E6F1FB',tc:'#0C447C',ic:'#185FA5'},Bronienie:{bg:'#FAECE7',tc:'#712B13',ic:'#993C1D'},Motoryka:{bg:'#EAF3DE',tc:'#27500A',ic:'#3B6D11'},'Umiejętności':{bg:'#EEEDFE',tc:'#3C3489',ic:'#534AB7'}};
+var IC={Niska:{bg:'#EAF3DE',tc:'#27500A'},Średnia:{bg:'#FAEEDA',tc:'#633806'},Wysoka:{bg:'#FAECE7',tc:'#712B13'}};
+var KATS=['Skrzat U6/U7','Żak U8/U9','Orlik U10/U11','Młodzik U12/U13','Trampkarz U14/U15','Junior U16/U17','Junior U18/U19','Senior'];
+var MS=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
+var PNC={warm:'Rozgrzewka',main:'Część główna',cool:'Zakończenie'};
+
+// ═══════════════ HELPERS ═══════════════
+function ST(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+function GT(f){return f&&TX[f]?Object.keys(TX[f]):[];}
+function GK(f,t){return f&&t&&TX[f]&&TX[f][t]?TX[f][t]:[];}
+function fd(ds){if(!ds)return'';var p=ds.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+function wr(tx,mc){var ls=[];(tx||'').split('\n').forEach(p2=>{var ws=p2.split(' '),cur='';ws.forEach(w=>{if(cur.length+w.length+(cur?1:0)<=mc)cur+=(cur?' ':'')+w;else{if(cur)ls.push(cur);cur=w;}});if(cur)ls.push(cur);});return ls;}
+
+// ═══════════════ NAWIGACJA ═══════════════
+function SP(n){
+  document.querySelectorAll('.pg').forEach(p=>{p.classList.remove('act');});
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  var pg=document.getElementById('pg-'+n);
+  if(pg)pg.classList.add('act');
+  var ni=document.getElementById('ni-'+n);if(ni)ni.classList.add('active');
+  if(n==='plan'){rYL();rG();}
+  if(n==='cal')rCal();
+  if(n==='ex')RE();
+  if(n==='teams')rTeams();
+  if(n==='dash')uD();
+  if(n==='konsp')rKL();
+  if(n==='ioz')rIOZ();
+}
+function oM(id){document.getElementById(id).classList.add('op');}
+function cM(id){document.getElementById(id).classList.remove('op');}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('op');}));
+
+// ═══════════════ DASHBOARD ═══════════════
+function uD(){
+  var seasonTeamCount=TEAMS.filter(t=>t.season===currentSeason).length;
+  ['s-k','s-e','s-c'].forEach(id=>{var e=document.getElementById(id);if(e)e.textContent=id==='s-k'?KONSP.length:id==='s-e'?EXS.length:CYC.length;});
+  document.getElementById('s-kd').textContent=KONSP.length?KONSP.length+' konspektów':'brak konspektów';
+  document.getElementById('s-ed').textContent=EXS.length?EXS.length+' ćwiczeń':'baza pusta';
+  document.getElementById('s-cd').textContent=CYC.length?CYC.length+' cykli':'brak cykli';
+  // stat drużyny
+  var sc4=document.querySelector('.stats .sc:last-child');
+  if(sc4){sc4.querySelector('.sv').textContent=seasonTeamCount;sc4.querySelector('.sd').textContent='sezon '+currentSeason;}
+  // sidebar coach
+  var mainCoach=COACHES[0];
+  if(mainCoach){var ini=mainCoach.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();var av=document.getElementById('sb-av');var cn=document.getElementById('sb-coach-name');var cr=document.getElementById('sb-coach-role');if(av)av.textContent=ini;if(cn)cn.textContent=mainCoach.name;if(cr)cr.textContent=mainCoach.role;}
+  var kl=document.getElementById('d-klist');
+  if(kl){if(!KONSP.length)kl.innerHTML='<div style="font-size:12px;color:var(--txt2);">Brak konspektów. Utwórz pierwszy konspekt klikając "+ Nowy konspekt".</div>';
+  else kl.innerHTML=KONSP.slice(0,4).map(k=>{var c=CC[k.faza]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'};return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--brd);" onclick="SP(\'konsp\')"><div style="width:30px;height:30px;border-radius:8px;background:'+c.bg+';display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg style="width:15px;height:15px;stroke:'+c.ic+';fill:none;stroke-width:1.8;" viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/></svg></div><div style="flex:1;min-width:0;cursor:pointer;"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+k.title+'</div><div style="font-size:11px;color:var(--txt2);">'+k.team+' · '+fd(k.date)+'</div></div><span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+(k.total||0)+' min</span></div>';}).join('');}
+  var cp=document.getElementById('d-cyc');
+  if(cp){if(!CYC.length)cp.innerHTML='<div style="font-size:12px;color:var(--txt2);">Brak zdefiniowanych cykli.</div>';
+  else cp.innerHTML=CYC.slice(0,5).map(c=>{var bg=c.type==='macro'?'#E6F1FB':c.type==='meso'?'#EEEDFE':'#E1F5EE';var tc=c.type==='macro'?'#0C447C':c.type==='meso'?'#3C3489':'#085041';var tp=c.type==='macro'?'Makrocykl':c.type==='meso'?'Mezocykl':'Mikrocykl';return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);cursor:pointer;" onclick="SP(\'plan\')"><span class="bdg" style="background:'+bg+';color:'+tc+';">'+tp+'</span><span style="font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.name+'</span><span style="font-size:10px;color:var(--txt2);">'+fd(c.start).slice(0,5)+'–'+fd(c.end).slice(0,5)+'</span></div>';}).join('')+(CYC.length>5?'<div style="font-size:11px;color:var(--g);cursor:pointer;margin-top:6px;" onclick="SP(\'plan\')">+'+(CYC.length-5)+' więcej →</div>':'');}
+  var mc=document.getElementById('d-mini-cal');
+  if(mc){var evs=[2,8,15,18,22,25];var c2='<div style="font-size:9px;color:var(--txt3);text-align:center;">31</div>';for(var d=1;d<=30;d++){var isT=d===15,hE=evs.includes(d);c2+='<div style="height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;border-radius:4px;position:relative;cursor:pointer;'+(isT?'background:var(--g);color:#fff;font-weight:600;':'color:var(--txt2);')+'">'+(isT?'15':d)+(hE&&!isT?'<span style="position:absolute;bottom:1px;width:3px;height:3px;border-radius:50%;background:var(--bl);"></span>':'')+'</div>';}c2+='<div></div>'.repeat(4);mc.innerHTML=c2;}
+}
+
+// ═══════════════ PLANOWANIE ═══════════════
+function getSM(){var r=[];for(var i=0;i<12;i++){var mi=(6+i)%12,yr=i<6?cY:cY+1;r.push({lbl:MS[i],yr,mi});}return r;}
+function d2f(ds){if(!ds)return null;var d=new Date(ds),yr=d.getFullYear(),m=d.getMonth();var ms=getSM();for(var i=0;i<ms.length;i++){var mo=ms[i];if(mo.yr===yr&&mo.mi===m){var dim=new Date(yr,m+1,0).getDate();return(i+(d.getDate()-1)/dim)/12;}}return null;}
+function f2d(fr){var ms=getSM(),mi=Math.min(11,Math.floor(fr*12)),mo=ms[mi];var dim=new Date(mo.yr,mo.mi+1,0).getDate(),day=Math.max(1,Math.round((fr*12-mi)*dim));return mo.yr+'-'+String(mo.mi+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');}
+function chY(d){cY+=d;rYL();rG();}
+function rYL(){document.getElementById('yr-l').textContent=cY+'/'+(String(cY+1).slice(2));document.getElementById('plan-sub').textContent='Sezon '+cY+'/'+(String(cY+1).slice(2));}
+var RC=[{type:'macro',label:'Makrocykl',col:'#0C447C'},{type:'meso',label:'Mezocykl',col:'#3C3489'},{type:'micro',label:'Mikrocykl',col:'#085041'}];
+
+function rG(){
+  var ms=getSM();
+  document.getElementById('m-hdr').innerHTML=ms.map(m=>'<div class="mc">'+m.lbl+'</div>').join('');
+  var rows=document.getElementById('g-rows');rows.innerHTML='';
+  RC.forEach(rc=>{
+    var row=document.createElement('div');row.className='grow';
+    var rl=document.createElement('div');rl.className='grl';rl.style.color=rc.col;
+    rl.innerHTML='<svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;" viewBox="0 0 16 16"><rect x="2" y="5" width="12" height="6" rx="1.5"/></svg>'+rc.label;
+    row.appendChild(rl);
+    var tl=document.createElement('div');tl.className='gtl';
+    for(var i=1;i<12;i++){var gl=document.createElement('div');gl.className='gl2';gl.style.left=(i/12*100)+'%';tl.appendChild(gl);}
+    var az=document.createElement('div');az.className='az';
+    (function(type,tlEl){
+      var ds2=null;
+      az.addEventListener('mousedown',function(e){if(e.target.classList.contains('bar'))return;var r=tlEl.getBoundingClientRect();ds2=(e.clientX-r.left)/r.width;dT=type;e.preventDefault();});
+      document.addEventListener('mousemove',function(e){if(ds2===null||dT!==type)return;var r=tlEl.getBoundingClientRect();var cur=(e.clientX-r.left)/r.width;var s=Math.max(0,Math.min(ds2,cur)),en=Math.min(1,Math.max(ds2,cur));var pv=document.getElementById('pv-'+type);if(!pv){pv=document.createElement('div');pv.id='pv-'+type;pv.className='bar '+type;pv.style.opacity='.5';tlEl.appendChild(pv);}pv.style.left=(s*100)+'%';pv.style.width=((en-s)*100)+'%';});
+      document.addEventListener('mouseup',function(e){if(ds2===null||dT!==type)return;var r=tlEl.getBoundingClientRect();var cur=(e.clientX-r.left)/r.width;var s=Math.max(0,Math.min(ds2,cur)),en=Math.min(1,Math.max(ds2,cur));var pv=document.getElementById('pv-'+type);if(pv)pv.remove();var tmp=ds2;ds2=null;dT=null;if(en-tmp<0.02)return;document.getElementById('mc-s').value=f2d(s);document.getElementById('mc-e').value=f2d(en);document.getElementById('mc-n').value='';document.getElementById('mc-d').value='';aKL=[];rKT('mc-kt',aKL,false);document.getElementById('mc-ki').value='';sT(type);oM('mo-cyc');});
+    })(rc.type,tl);
+    tl.appendChild(az);
+    CYC.filter(c=>c.type===rc.type).forEach(c=>{
+      var s=d2f(c.start),e2=d2f(c.end);if(s===null||e2===null)return;
+      var bar=document.createElement('div');bar.className='bar '+c.type;bar.style.left=(s*100)+'%';bar.style.width=((e2-s)*100)+'%';bar.textContent=c.name;bar.title=c.name+(c.desc?' — '+c.desc:'');
+      var gi=CYC.indexOf(c);bar.onclick=function(ev){ev.stopPropagation();oVC(gi);};tl.appendChild(bar);
+    });
+    row.appendChild(tl);rows.appendChild(row);
+  });
+  rCL();uD();
+}
+
+function rCL(){
+  ['macro','meso','micro'].forEach(tp=>{
+    var items=CYC.filter(c=>c.type===tp);
+    document.getElementById('cnt-'+tp).textContent=items.length;
+    var list=document.getElementById('list-'+tp);
+    if(!items.length){list.innerHTML='<div style="font-size:11px;color:var(--txt3);padding:3px 0;">Brak</div>';return;}
+    list.innerHTML=items.map(c=>{var idx=CYC.indexOf(c);return '<div class="ci"><div class="ci-n" onclick="oVC('+idx+')" title="'+c.name+'">'+c.name+'</div><div class="ci-d">'+fd(c.start).slice(0,5)+'–'+fd(c.end).slice(0,5)+'</div><button class="ci-x" onclick="dC('+idx+')">×</button></div>';}).join('');
+  });
+}
+
+function sT(t){sCT=t;document.querySelectorAll('.pho').forEach(o=>{o.className='pho';if(o.dataset.t===t)o.classList.add(t==='macro'?'sm':t==='meso'?'se':'si');});}
+function oAC(t){sT(t||'macro');['mc-n','mc-d'].forEach(id=>document.getElementById(id).value='');aKL=[];rKT('mc-kt',aKL,false);document.getElementById('mc-ki').value='';if(!t){document.getElementById('mc-s').value='';document.getElementById('mc-e').value='';}oM('mo-cyc');}
+function sC(){var name=document.getElementById('mc-n').value.trim();if(!name){ST('Podaj nazwę okresu');return;}var s=document.getElementById('mc-s').value,e=document.getElementById('mc-e').value;if(!s||!e){ST('Podaj daty');return;}if(s>e){ST('Data końca musi być po dacie początku');return;}CYC.push({type:sCT,name,start:s,end:e,desc:document.getElementById('mc-d').value,koncepty:[...aKL]});cM('mo-cyc');rG();ST('"'+name+'" dodano do planu');}
+function oVC(idx){var c=CYC[idx];var tpn=['macro','meso','micro'],tpl=['Makrocykl','Mezocykl','Mikrocykl'];var bg=c.type==='macro'?'#E6F1FB':c.type==='meso'?'#EEEDFE':'#E1F5EE';var tc=c.type==='macro'?'#0C447C':c.type==='meso'?'#3C3489':'#085041';document.getElementById('mvc-t').innerHTML='<span class="bdg" style="background:'+bg+';color:'+tc+';">'+tpl[tpn.indexOf(c.type)]+'</span> '+c.name;document.getElementById('mvc-eb').onclick=function(){cM('mo-vc');oEC(idx);};var b='<div class="v2"><div class="vf"><div class="vl">Rozpoczęcie</div><div class="vv">'+fd(c.start)+'</div></div><div class="vf"><div class="vl">Zakończenie</div><div class="vv">'+fd(c.end)+'</div></div></div>';if(c.desc)b+='<div class="vf"><div class="vl">Opis / Cel / Temat</div><div class="vv">'+c.desc.replace(/\n/g,'<br>')+'</div></div>';if(c.koncepty&&c.koncepty.length)b+='<div class="vf"><div class="vl">Koncepty</div><div style="display:flex;gap:5px;flex-wrap:wrap;">'+c.koncepty.map(k=>'<span class="ktag">'+k+'</span>').join('')+'</div></div>';document.getElementById('mvc-b').innerHTML=b;oM('mo-vc');}
+function oEC(idx){eCYI=idx;var c=CYC[idx];document.getElementById('mec-ttl').textContent='Edytuj: '+c.name;document.getElementById('mec-n').value=c.name;document.getElementById('mec-s').value=c.start;document.getElementById('mec-e').value=c.end;document.getElementById('mec-d').value=c.desc||'';document.getElementById('mec-ki').value='';eKL=[...(c.koncepty||[])];rKT('mec-kt',eKL,true);oM('mo-ec');}
+function uC(){if(eCYI===null)return;var name=document.getElementById('mec-n').value.trim();if(!name){ST('Podaj nazwę');return;}var c=CYC[eCYI];c.name=name;c.start=document.getElementById('mec-s').value;c.end=document.getElementById('mec-e').value;c.desc=document.getElementById('mec-d').value;c.koncepty=[...eKL];cM('mo-ec');rG();ST('"'+name+'" zaktualizowany');}
+function dC(idx){if(!confirm('Usunąć "'+CYC[idx].name+'"?'))return;var n=CYC[idx].name;CYC.splice(idx,1);rG();ST('"'+n+'" usunięty');}
+function dEC(){if(eCYI===null)return;if(!confirm('Usunąć "'+CYC[eCYI].name+'"?'))return;dC(eCYI);eCYI=null;cM('mo-ec');}
+function rKT(id,list,isEdit){var c=document.getElementById(id);if(!c)return;c.innerHTML=list.map((k,i)=>'<span class="ktag">'+k+'<button class="ktag-x" onclick="rmK('+i+','+isEdit+')">×</button></span>').join('');}
+function aK(){var inp=document.getElementById('mc-ki');var v=(inp.value||'').trim();if(!v)return;aKL.push(v);inp.value='';rKT('mc-kt',aKL,false);}
+function aKE(){var inp=document.getElementById('mec-ki');var v=(inp.value||'').trim();if(!v)return;eKL.push(v);inp.value='';rKT('mec-kt',eKL,true);}
+function rmK(i,isEdit){if(isEdit){eKL.splice(i,1);rKT('mec-kt',eKL,true);}else{aKL.splice(i,1);rKT('mc-kt',aKL,false);}}
+
+// ═══════════════ KALENDARZ ═══════════════
+// ═══════════════ KALENDARZ ═══════════════
+var TRAININGS=[];  // {id, date:'YYYY-MM-DD', time:'HH:MM', team, coach, place, konspektId, notes}
+var calYear=2026, calMonth=3; // 0-indexed month (3=kwiecień)
+var editTrainingIdx=null;
+var MONTH_NAMES=['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+var TODAY=new Date();
+
+function calNav(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}rCal();}
+function calGoToday(){calYear=TODAY.getFullYear();calMonth=TODAY.getMonth();rCal();}
+
+function rCal(){
+  var sub=document.getElementById('cal-sub');
+  if(sub)sub.textContent=MONTH_NAMES[calMonth]+' '+calYear;
+
+  var g=document.getElementById('cfg');if(!g)return;
+
+  // Pierwszy dzień miesiąca (ISO: 0=Pn)
+  var firstDay=new Date(calYear,calMonth,1).getDay();
+  var firstMon=(firstDay===0?6:firstDay-1); // shift: Mon=0
+  var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  var daysInPrev=new Date(calYear,calMonth,0).getDate();
+
+  var todayStr=TODAY.getFullYear()+'-'+String(TODAY.getMonth()+1).padStart(2,'0')+'-'+String(TODAY.getDate()).padStart(2,'0');
+
+  var cells='';
+
+  // Poprzedni miesiąc (szare)
+  for(var p=firstMon-1;p>=0;p--){
+    cells+='<div class="cc2" style="background:var(--sur2);opacity:.5;"><div class="ccn" style="color:var(--txt3);">'+(daysInPrev-p)+'</div></div>';
+  }
+
+  // Dni bieżącego miesiąca
+  for(var d=1;d<=daysInMonth;d++){
+    var ds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var isToday=ds===todayStr;
+    var dayTrainings=TRAININGS.filter(t=>t.date===ds).sort((a,b)=>((a.time||'00:00')>(b.time||'00:00')?1:-1));
+
+    var evHtml=dayTrainings.slice(0,3).map(t=>{
+      var tc=TEAMS.find(x=>x.name===t.team);
+      var bg=tc?tc.color:'#1D9E75';
+      var konsp=t.konspektId?KONSP.find(k=>k.savedAt===t.konspektId||k.title===t.konspektId):null;
+      return '<div class="cev" style="background:'+hexToRgba(bg,0.18)+';color:'+bg+';border-left:2px solid '+bg+';padding-left:4px;" onclick="event.stopPropagation();oViewTraining(\''+t.id+'\')">'
+        +(t.time?'<span style="font-size:9px;opacity:.8;">'+t.time+'</span> ':'')
+        +escH(t.team||'Trening')
+        +(konsp?'<span style="font-size:9px;opacity:.7;"> · 📋</span>':'')
+        +'</div>';
+    }).join('');
+    if(dayTrainings.length>3)evHtml+='<div style="font-size:9px;color:var(--txt3);padding:1px 4px;">+'+(dayTrainings.length-3)+' więcej</div>';
+
+    cells+='<div class="cc2" onclick="oDay(\''+ds+'\')" style="'+(isToday?'background:var(--lg);':'')+'cursor:pointer;">'
+      +'<div class="ccn">'+(isToday?'<div class="tn2">'+d+'</div>':d)+'</div>'
+      +evHtml
+      +'<div style="opacity:0;position:absolute;bottom:4px;right:4px;font-size:16px;color:var(--g);" class="cc2-add">+</div>'
+      +'</div>';
+  }
+
+  // Następny miesiąc
+  var total=firstMon+daysInMonth;
+  var remaining=(7-total%7)%7;
+  for(var n=1;n<=remaining;n++){
+    cells+='<div class="cc2" style="background:var(--sur2);opacity:.5;"><div class="ccn" style="color:var(--txt3);">'+n+'</div></div>';
+  }
+
+  g.innerHTML=cells;
+}
+
+function hexToRgba(hex,a){
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r=parseInt(hex.slice(0,2),16),gv=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return 'rgba('+r+','+gv+','+b+','+a+')';
+}
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── WIDOK DNIA ──
+function oDay(ds){
+  var dt=new Date(ds+'T12:00:00');
+  var label=dt.getDate()+' '+MONTH_NAMES[dt.getMonth()]+' '+dt.getFullYear();
+  document.getElementById('mo-day-ttl').textContent=label;
+  document.getElementById('mo-day-add-btn').onclick=function(){cM('mo-day');oAddTraining(ds);};
+
+  var dayT=TRAININGS.filter(t=>t.date===ds).sort((a,b)=>((a.time||'00:00')>(b.time||'00:00')?1:-1));
+  var html='';
+  if(!dayT.length){
+    html='<div style="text-align:center;padding:28px 20px;"><div style="font-size:32px;margin-bottom:10px;">📅</div><div style="font-size:13px;color:var(--txt2);margin-bottom:12px;">Brak treningów w tym dniu</div><button class="btn pri sm" onclick="cM(\'mo-day\');oAddTraining(\''+ds+'\')">+ Dodaj trening</button></div>';
+  } else {
+    dayT.forEach(t=>{
+      var ti=TRAININGS.indexOf(t);
+      var tc=TEAMS.find(x=>x.name===t.team);
+      var bg=tc?tc.color:'#1D9E75';
+      var konsp=t.konspektId?KONSP.find(k=>k.savedAt===t.konspektId||k.title===t.konspektId):null;
+      var coach=COACHES.find(c=>c.name===t.coach);
+      html+='<div style="background:var(--sur2);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;border-left:4px solid '+bg+';">';
+      html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">';
+      html+='<div><div style="font-size:14px;font-weight:600;color:var(--txt);">'+(t.time?'<span style="color:'+bg+';">'+t.time+'</span> · ':'')+escH(t.team||'Trening')+'</div>';
+      if(t.place)html+='<div style="font-size:11px;color:var(--txt2);margin-top:2px;">📍 '+escH(t.place)+'</div>';
+      if(t.coach)html+='<div style="font-size:11px;color:var(--txt2);">👤 '+escH(t.coach)+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;gap:5px;flex-shrink:0;"><button class="btn sm" onclick="oEditTraining('+ti+')">Edytuj</button><button class="btn sm dan" onclick="delTraining('+ti+',\''+ds+'\')">Usuń</button></div>';
+      html+='</div>';
+      if(konsp){
+        var c2=konsp.c||{bg:'#E1F5EE',tc:'#085041'};
+        // Wyszukaj indeks po savedAt lub tytule — bezpieczne po reload z localStorage
+        var ki=KONSP.findIndex(function(k){return k.savedAt&&k.savedAt===konsp.savedAt||(k.title===konsp.title&&k.date===konsp.date);});
+        if(ki<0)ki=KONSP.indexOf(konsp); // fallback
+        html+='<div style="background:var(--sur);border-radius:var(--r2);padding:8px 10px;margin-top:4px;">';
+        html+='<div style="display:flex;align-items:center;gap:8px;">';
+        html+='<div style="width:26px;height:26px;border-radius:6px;background:'+c2.bg+';display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;" onclick="cM(\'mo-day\');oViewKonsp('+ki+')"><svg style="width:13px;height:13px;stroke:'+c2.tc+';fill:none;stroke-width:1.8;" viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/></svg></div>';
+        html+='<div style="flex:1;min-width:0;cursor:pointer;" onclick="cM(\'mo-day\');oViewKonsp('+ki+')">';
+        html+='<div style="font-size:12px;font-weight:500;">'+escH(konsp.title)+'</div>';
+        html+='<div style="font-size:10px;color:var(--txt2);">';
+        var tKonsp=['warm','main','cool'].reduce((s,ph)=>s+(konsp.phases[ph]||[]).reduce((ss,e)=>ss+(parseInt(e.time)||0),0),0);
+        html+=tKonsp+' min';
+        if(konsp.faza)html+=' · '+escH(konsp.faza);
+        html+='</div></div>';
+        if(ki>=0){
+          html+='<button class="btn sm pri" onclick="dlPDFFor('+ki+')" title="Pobierz PDF konspektu" style="flex-shrink:0;"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/></svg>PDF</button>';
+        }
+        html+='</div>';
+        html+='</div>';
+      } else {
+        html+='<button class="btn sm" style="margin-top:4px;" onclick="oLinkKonsp('+ti+',\''+ds+'\')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/></svg>Przypisz konspekt</button>';
+      }
+      if(t.notes)html+='<div style="font-size:11px;color:var(--txt2);margin-top:6px;font-style:italic;">'+escH(t.notes)+'</div>';
+      html+='</div>';
+    });
+  }
+  document.getElementById('mo-day-body').innerHTML=html;
+  oM('mo-day');
+}
+
+// ── DODAJ / EDYTUJ TRENING ──
+function oAddTraining(dateStr){
+  editTrainingIdx=null;
+  renderTrainingForm({date:dateStr||new Date().toISOString().slice(0,10),time:'17:00'});
+  oM('mo-training');
+}
+function oEditTraining(idx){
+  editTrainingIdx=idx;
+  renderTrainingForm(TRAININGS[idx]);
+  oM('mo-training');
+}
+function oViewTraining(id){
+  var idx=TRAININGS.findIndex(t=>t.id===id);
+  if(idx<0)return;
+  var ds=TRAININGS[idx].date;
+  cM('mo-training');
+  oDay(ds);
+}
+
+function renderTrainingForm(t){
+  document.getElementById('mo-tr-ttl').textContent=editTrainingIdx===null?'Nowy trening':'Edytuj trening';
+  var teamOpts='<option value="">— wybierz —</option>';
+  TEAMS.filter(x=>x.season===currentSeason).forEach(x=>{teamOpts+='<option value="'+escH(x.name)+'"'+(x.name===t.team?' selected':'')+'>'+escH(x.name)+'</option>';});
+  var coachOpts='<option value="">— wybierz —</option>';
+  COACHES.forEach(c=>{coachOpts+='<option value="'+escH(c.name)+'"'+(c.name===t.coach?' selected':'')+'>'+escH(c.name)+' ('+escH(c.role)+')</option>';});
+  var konspOpts='<option value="">— brak / dodaj później —</option>';
+  KONSP.forEach(k=>{var kid=k.savedAt||k.title;konspOpts+='<option value="'+escH(kid)+'"'+(kid===t.konspektId?' selected':'')+'>'+escH(k.title)+(k.team?' ['+escH(k.team)+']':'')+' · '+fd(k.date)+'</option>';});
+
+  var html='';
+  html+='<div class="sh" style="margin-top:0;">Podstawowe informacje</div>';
+  html+='<div class="fr2"><div><label class="fl">Data *</label><input class="fi" id="tr-date" type="date" value="'+(t.date||'')+'"/></div><div><label class="fl">Godzina</label><input class="fi" id="tr-time" type="time" value="'+(t.time||'17:00')+'"/></div></div>';
+  html+='<div class="fr2"><div><label class="fl">Drużyna *</label><select class="fsel" id="tr-team">'+teamOpts+'</select></div><div><label class="fl">Prowadzący</label><select class="fsel" id="tr-coach">'+coachOpts+'</select></div></div>';
+  html+='<div class="fr"><label class="fl">Miejsce</label><input class="fi" id="tr-place" value="'+escH(t.place||'')+'" placeholder="np. Boisko główne, Hala Widowiskowa"/></div>';
+  html+='<div class="sh">Konspekt treningu</div>';
+  html+='<div class="fr"><label class="fl">Przypisz konspekt</label><select class="fsel" id="tr-konsp">'+konspOpts+'</select></div>';
+  html+='<div style="background:var(--lg);border-radius:var(--r2);padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--dg);">💡 Konspekt możesz przypisać teraz lub później z widoku dnia. Możesz też najpierw zapisać trening a potem stworzyć nowy konspekt i go przypisać.</div>';
+  html+='<div class="fr"><label class="fl">Notatki do treningu</label><textarea class="fta" id="tr-notes" style="min-height:60px;" placeholder="Dodatkowe informacje, szczególne wymagania...">'+(t.notes||'')+'</textarea></div>';
+
+  document.getElementById('mo-tr-body').innerHTML=html;
+  var fl=editTrainingIdx!==null?'<button class="btn dan sm" onclick="delTrainingModal()">Usuń trening</button>':'<span></span>';
+  document.getElementById('mo-tr-foot').innerHTML=fl+'<div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-training\')">Anuluj</button><button class="btn pri" onclick="saveTraining()">Zapisz trening</button></div>';
+}
+
+function saveTraining(){
+  var date=(document.getElementById('tr-date')||{}).value||'';
+  if(!date){ST('Wybierz datę');return;}
+  var team=(document.getElementById('tr-team')||{}).value||'';
+  if(!team){ST('Wybierz drużynę');return;}
+  var tr={
+    id:editTrainingIdx===null?genId():(TRAININGS[editTrainingIdx].id),
+    date,
+    time:(document.getElementById('tr-time')||{}).value||'',
+    team,
+    coach:(document.getElementById('tr-coach')||{}).value||'',
+    place:(document.getElementById('tr-place')||{}).value||'',
+    konspektId:(document.getElementById('tr-konsp')||{}).value||null,
+    notes:(document.getElementById('tr-notes')||{}).value||''
+  };
+  if(editTrainingIdx===null)TRAININGS.push(tr);
+  else TRAININGS[editTrainingIdx]=tr;
+  cM('mo-training');
+  saveLS();rCal();
+  ST('Trening zapisany · '+fd(date));
+  // Pokaż dzień
+  setTimeout(()=>oDay(date),300);
+}
+
+function delTraining(idx,ds){
+  if(!confirm('Usunąć trening?'))return;
+  TRAININGS.splice(idx,1);
+  saveLS();rCal();
+  cM('mo-day');
+  setTimeout(()=>oDay(ds),200);
+}
+function delTrainingModal(){
+  if(editTrainingIdx===null)return;
+  var ds=TRAININGS[editTrainingIdx].date;
+  TRAININGS.splice(editTrainingIdx,1);
+  editTrainingIdx=null;
+  cM('mo-training');
+  saveLS();rCal();
+  ST('Trening usunięty');
+}
+
+// ── PRZYPISZ KONSPEKT DO ISTNIEJĄCEGO TRENINGU ──
+function oLinkKonsp(trainingIdx,ds){
+  cM('mo-day');
+  var mo=document.getElementById('mo-link-konsp');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-link-konsp';
+    mo.innerHTML='<div class="mbox"><div class="mh"><div class="mt2">Przypisz konspekt</div><button class="mc2" onclick="cM(\'mo-link-konsp\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-lk-body"></div><div class="mf"><button class="btn" onclick="cM(\'mo-link-konsp\')">Anuluj</button><button class="btn pri" onclick="saveLinkKonsp()">Przypisz</button></div></div>';
+    mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+  mo._tidx=trainingIdx;mo._ds=ds;
+  var t=TRAININGS[trainingIdx];
+  var opts='<option value="">— brak —</option>';
+  KONSP.forEach(k=>{var kid=k.savedAt||k.title;opts+='<option value="'+escH(kid)+'"'+(kid===t.konspektId?' selected':'')+'>'+escH(k.title)+(k.team?' ['+escH(k.team)+']':'')+' · '+fd(k.date)+'</option>';});
+  document.getElementById('mo-lk-body').innerHTML='<div class="fr"><label class="fl">Wybierz konspekt</label><select class="fsel" id="lk-konsp">'+opts+'</select></div><div style="font-size:11px;color:var(--txt2);margin-top:8px;">Nie masz odpowiedniego konspektu? <span style="color:var(--g);cursor:pointer;" onclick="cM(\'mo-link-konsp\');startK()">Utwórz nowy →</span></div>';
+  oM('mo-link-konsp');
+}
+function saveLinkKonsp(){
+  var mo=document.getElementById('mo-link-konsp');
+  var idx=mo._tidx,ds=mo._ds;
+  TRAININGS[idx].konspektId=(document.getElementById('lk-konsp')||{}).value||null;
+  cM('mo-link-konsp');
+  saveLS();rCal();
+  ST('Konspekt przypisany');
+  setTimeout(()=>oDay(ds),200);
+}
+
+
+// ═══════════════ BAZA ĆWICZEŃ ═══════════════
+function FFC(){var f=document.getElementById('ff').value;var ts=document.getElementById('ft'),ks=document.getElementById('fk');ts.innerHTML='<option value="">Wszystkie tematy</option>';ts.disabled=!f;ks.innerHTML='<option value="">Wszystkie koncepty</option>';ks.disabled=true;if(f)GT(f).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});RE();}
+function FTC(){var f=document.getElementById('ff').value,t=document.getElementById('ft').value;var ks=document.getElementById('fk');ks.innerHTML='<option value="">Wszystkie koncepty</option>';ks.disabled=!t;if(t)GK(f,t).forEach(k=>{var o=document.createElement('option');o.textContent=k;ks.appendChild(o);});RE();}
+function CF(){document.getElementById('ex-s').value='';['ff','ft','fk','fi2'].forEach(id=>{var e=document.getElementById(id);if(e)e.value='';});document.getElementById('ft').disabled=true;document.getElementById('ft').innerHTML='<option value="">Wszystkie tematy</option>';document.getElementById('fk').disabled=true;document.getElementById('fk').innerHTML='<option value="">Wszystkie koncepty</option>';RE();}
+function RE(){
+  var q=(document.getElementById('ex-s').value||'').toLowerCase();
+  var f=document.getElementById('ff').value,t=document.getElementById('ft').value,k=document.getElementById('fk').value,i=document.getElementById('fi2').value;
+  var fil=EXS.filter(e=>(!q||e.n.toLowerCase().includes(q)||(e.o||'').toLowerCase().includes(q))&&(!f||e.f===f)&&(!t||e.t===t)&&(!k||e.k===k)&&(!i||e.i===i));
+  var lbl=document.getElementById('ex-lbl');if(lbl)lbl.textContent=EXS.length+' ćwiczeń'+(fil.length!==EXS.length?' ('+fil.length+' wyników)':'');
+  var g=document.getElementById('ex-grid');var oe=document.getElementById('eex');if(oe)oe.remove();
+  if(!fil.length){g.innerHTML='';g.insertAdjacentHTML('beforebegin','<div id="eex" class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(EXS.length?'Brak wyników':'Baza ćwiczeń jest pusta')+'</div><div style="font-size:12px;color:var(--txt2);">'+(EXS.length?'Zmień kryteria wyszukiwania.':'Kliknij "+ Dodaj ćwiczenie" aby zacząć.')+'</div></div>');return;}
+  g.innerHTML=fil.map(e=>{var idx=EXS.indexOf(e),c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'},ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div class="ec" onclick="oVE('+idx+')">'+(e.img?'<img src="'+e.img+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')+'<div class="en">'+e.n+'</div><div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+'</div><div class="ed">'+(e.o||'Brak opisu')+'</div><div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div></div>';}).join('');
+}
+
+function oAE(){EI=null;IMG=null;IMN=null;rEF({},true);oM('mo-ex');}
+function oVE(idx){EI=idx;IMG=EXS[idx].img||null;IMN=EXS[idx].imn||null;rEV(EXS[idx],idx);oM('mo-ex');}
+function oEE(idx){EI=idx;IMG=EXS[idx].img||null;IMN=EXS[idx].imn||null;rEF(EXS[idx],false);oM('mo-ex');}
+
+function bS(id,opts,val,dis,onch){return '<select class="fsel" id="'+id+'"'+(dis?' disabled':'')+''+(onch?' onchange="'+onch+'"':'')+'>'+opts.map(o=>'<option value="'+(o.v!==undefined?o.v:o)+'"'+((o.v!==undefined?o.v:o)===val?' selected':'')+'>'+( o.l||o)+'</option>').join('')+'</select>';}
+
+function rEF(e,isNew){
+  var fa=e.f||'',tm=e.t||'';
+  document.getElementById('mo-ex-t').innerHTML='<svg style="width:15px;height:15px;stroke:var(--g);fill:none;stroke-width:1.8;vertical-align:middle;" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg> '+(isNew?'Nowe ćwiczenie':'Edytuj: '+e.n);
+  document.getElementById('ex-eb').innerHTML='';
+  var tem=GT(fa),kon=GK(fa,tm);
+  var b='<div class="sh">Identyfikacja</div>';
+  b+='<div class="fr"><label class="fl">Nazwa ćwiczenia *</label><input class="fi" id="ef-n" value="'+(e.n||'')+'" placeholder="np. Rondo 5v2"/></div>';
+  b+='<div class="fr"><label class="fl">Link do wideo</label><input class="fi" id="ef-v" value="'+(e.lv||'')+'" placeholder="https://youtube.com/..."/></div>';
+
+  // ── GRAFIKA ──
+  b+='<div class="sh">Grafika ćwiczenia</div>';
+  b+='<div class="fr">';
+  // Podgląd jeśli jest zdjęcie
+  if(IMG){
+    b+='<div style="position:relative;margin-bottom:8px;">';
+    b+='<img src="'+IMG+'" id="ef-img-preview" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--r2);display:block;">';
+    b+='<button onclick="clearImg()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">✕ Usuń zdjęcie</button>';
+    b+='<div style="font-size:10px;color:var(--txt2);margin-top:4px;">📎 '+(IMN||'zdjęcie')+'</div>';
+    b+='</div>';
+  } else {
+    b+='<div id="ef-drop-zone" style="border:2px dashed var(--brd);border-radius:var(--r2);padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;background:var(--sur2);" onclick="document.getElementById(\'fi-inp\').click()" ondragover="event.preventDefault();this.style.borderColor=\'var(--g)\'" ondragleave="this.style.borderColor=\'var(--brd)\'" ondrop="handleImgDrop(event)">';
+    b+='<svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--txt3);fill:none;stroke-width:1.5;margin-bottom:8px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+    b+='<div style="font-size:13px;font-weight:500;color:var(--txt2);margin-bottom:4px;">Kliknij lub przeciągnij zdjęcie</div>';
+    b+='<div style="font-size:11px;color:var(--txt3);">JPG, PNG, WEBP · maks. 5 MB</div>';
+    b+='</div>';
+  }
+  b+='</div>';
+
+  b+='<div class="sh">Klasyfikacja</div>';
+  b+='<div class="fr2"><div><label class="fl">Faza *</label>'+bS('ef-f',[{v:'',l:'— wybierz —'},'Atakowanie','Bronienie','Umiejętności','Motoryka'],fa,false,'MFC()')+'</div><div><label class="fl">Temat *</label>'+bS('ef-t',[{v:'',l:fa?'— wybierz —':'— wybierz fazę —'},...tem],tm,!fa,'MTC()')+'</div></div>';
+  b+='<div class="fr"><label class="fl">Koncept *</label>'+bS('ef-k',[{v:'',l:'— wybierz —'},...kon],e.k||'',!tm)+'</div>';
+  b+='<div class="fr2"><div><label class="fl">Intensywność</label>'+bS('ef-i',[{v:'',l:'— wybierz —'},'Niska','Średnia','Wysoka'],e.i||'')+'</div><div></div></div>';
+  b+='<div class="fr2"><div><label class="fl">Kategoria min *</label>'+bS('ef-km',[{v:'',l:'— wybierz —'},...KATS],e.km||'')+'</div><div><label class="fl">Kategoria maks *</label>'+bS('ef-kx',[{v:'',l:'— wybierz —'},...KATS],e.kx||'')+'</div></div>';
+  b+='<div class="sh">Parametry organizacyjne</div>';
+  b+='<div class="fr2"><div><label class="fl">Czas (min) *</label><input class="fi" id="ef-cz" type="number" value="'+(e.cz||'')+'" placeholder="np. 20"/></div><div><label class="fl">Przestrzeń</label><input class="fi" id="ef-p" value="'+(e.p||'')+'" placeholder="np. 30×20m"/></div></div>';
+  b+='<div class="fr"><label class="fl">Sprzęt</label><input class="fi" id="ef-sp" value="'+(e.sp||'')+'" placeholder="np. pachołki, piłki, bramki"/></div>';
+  b+='<div class="sh">Treść merytoryczna</div>';
+  b+='<div class="fr"><label class="fl">Opis *</label><textarea class="fta" id="ef-o" placeholder="Ogólny opis i cel treningowy...">'+(e.o||'')+'</textarea></div>';
+  b+='<div class="fr"><label class="fl">Zasady</label><textarea class="fta" id="ef-z" placeholder="Reguły wykonania, warunki gry...">'+(e.z||'')+'</textarea></div>';
+  b+='<div class="fr"><label class="fl">Punktacja</label><input class="fi" id="ef-pk" value="'+(e.pk||'')+'" placeholder="np. 1 pkt za każde 5 podań z rzędu"/></div>';
+  b+='<div class="fr"><label class="fl">Wskazówki (punkty nauczania)</label><textarea class="fta" id="ef-w" placeholder="• Trzymaj głowę podniesioną&#10;• Szybkie podania jednym dotykiem">'+(e.w||'')+'</textarea></div>';
+  b+='<div class="fr"><label class="fl">Utrudnienia / Ułatwienia</label><textarea class="fta" id="ef-u" placeholder="Utrudnienie: ogranicz do 1 dotyku&#10;Ułatwienie: dodaj 1 zawodnika neutralnego">'+(e.u||'')+'</textarea></div>';
+  b+='<div class="fr"><label class="fl">Feedback — pytania trenera</label><textarea class="fta" id="ef-fb" placeholder="Co było najtrudniejsze?&#10;Kiedy decydowałeś o podaniu?">'+(e.fb||'')+'</textarea></div>';
+  document.getElementById('mo-ex-b').innerHTML=b;
+  var fl=!isNew?'<button class="btn dan sm" onclick="delE('+EI+')">Usuń ćwiczenie</button>':'<span></span>';
+  var fr='<div style="display:flex;gap:8px;">'+(!isNew?'<button class="btn sm" onclick="oVE('+EI+')">Anuluj</button>':'<button class="btn sm" onclick="cM(\'mo-ex\')">Anuluj</button>')+'<button class="btn pri sm" onclick="sE('+(isNew?'true':'false')+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 8l4 4 6-6"/></svg>Zapisz ćwiczenie</button></div>';
+  document.getElementById('mo-ex-f').innerHTML=fl+fr;
+}
+
+function rEV(e,idx){
+  var c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041'},ic2=IC[e.i]||null;
+  document.getElementById('mo-ex-t').textContent=e.n;
+  document.getElementById('ex-eb').innerHTML='<button class="btn sm" onclick="oEE('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>';
+  var b='';
+  if(e.img)b+='<img src="'+e.img+'" style="width:100%;max-height:180px;object-fit:cover;border-radius:var(--r2);margin-bottom:14px;">';
+  b+='<div class="vf"><div class="vl">Faza / Temat / Koncept</div><div class="vbr">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.t+'</span>':'')+(e.k?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.k+'</span>':'')+'</div></div>';
+  b+='<div class="v2"><div class="vf"><div class="vl">Intensywność</div>'+(ic2?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'<div class="vv m">Nie podano</div>')+'</div><div class="vf"><div class="vl">Kategorie wiekowe</div><div class="vv">'+(e.km||'—')+(e.kx&&e.kx!==e.km?' – '+e.kx:'')+'</div></div></div>';
+  b+='<div class="v3"><div class="vf"><div class="vl">Czas</div><div class="vv">'+(e.cz?e.cz+' min':'—')+'</div></div><div class="vf"><div class="vl">Przestrzeń</div><div class="vv '+(e.p?'':'m')+'">'+(e.p||'Nie podano')+'</div></div><div class="vf"><div class="vl">Sprzęt</div><div class="vv '+(e.sp?'':'m')+'">'+(e.sp||'Nie podano')+'</div></div></div>';
+  var labs={o:'Opis',z:'Zasady',pk:'Punktacja',w:'Wskazówki',u:'Utrudnienia / Ułatwienia',fb:'Feedback'};
+  Object.keys(labs).forEach(k=>{if(e[k])b+='<div class="vf"><div class="vl">'+labs[k]+'</div><div class="vv">'+e[k].replace(/\n/g,'<br>')+'</div></div>';});
+  document.getElementById('mo-ex-b').innerHTML=b;
+  document.getElementById('mo-ex-f').innerHTML='<button class="btn dan sm" onclick="delE('+idx+')">Usuń ćwiczenie</button><div style="display:flex;gap:8px;"><button class="btn sm" onclick="cM(\'mo-ex\')">Zamknij</button><button class="btn pri sm" onclick="oEE('+idx+')">Edytuj</button></div>';
+}
+
+function MFC(){var fa=document.getElementById('ef-f').value;var ts=document.getElementById('ef-t'),ks=document.getElementById('ef-k');ts.innerHTML='<option value="">'+(fa?'— wybierz —':'— wybierz fazę —')+'</option>';ts.disabled=!fa;ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=true;if(fa)GT(fa).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});}
+function MTC(){var fa=document.getElementById('ef-f').value,tm=document.getElementById('ef-t').value;var ks=document.getElementById('ef-k');ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=!tm;if(tm)GK(fa,tm).forEach(k=>{var o=document.createElement('option');o.textContent=k;ks.appendChild(o);});}
+function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();uD();}
+function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();uD();ST('"'+n+'" usunięte');}
+function HFS(e){
+  var f=e.target.files[0];
+  if(!f)return;
+  processImgFile(f);
+  e.target.value='';
+}
+function handleImgDrop(event){
+  event.preventDefault();
+  var f=event.dataTransfer.files[0];
+  if(!f)return;
+  if(!f.type.startsWith('image/')){ST('Prześlij plik graficzny (JPG, PNG, WEBP)');return;}
+  processImgFile(f);
+}
+function processImgFile(f){
+  if(f.size>5*1024*1024){ST('Plik za duży — maks. 5 MB');return;}
+  var r=new FileReader();
+  r.onload=function(ev){
+    IMG=ev.target.result;
+    IMN=f.name;
+    // Odśwież strefę w formularzu jeśli jest otwarta
+    var dz=document.getElementById('ef-drop-zone');
+    var prev=document.getElementById('ef-img-preview');
+    if(dz){
+      // Zastąp strefę podglądem
+      dz.outerHTML='<div style="position:relative;margin-bottom:8px;">'
+        +'<img src="'+IMG+'" id="ef-img-preview" style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--r2);display:block;">'
+        +'<button onclick="clearImg()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">✕ Usuń zdjęcie</button>'
+        +'<div style="font-size:10px;color:var(--txt2);margin-top:4px;">📎 '+f.name+'</div>'
+        +'</div>';
+    } else if(prev){
+      prev.src=IMG;
+    }
+    ST('✓ Zdjęcie wczytane: '+f.name);
+  };
+  r.readAsDataURL(f);
+}
+function clearImg(){
+  IMG=null;IMN=null;
+  // Przywróć strefę drag&drop
+  var container=document.querySelector('#ef-img-preview')&&document.querySelector('#ef-img-preview').parentElement;
+  if(container){
+    container.outerHTML='<div id="ef-drop-zone" style="border:2px dashed var(--brd);border-radius:var(--r2);padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;background:var(--sur2);" onclick="document.getElementById(\'fi-inp\').click()" ondragover="event.preventDefault();this.style.borderColor=\'var(--g)\'" ondragleave="this.style.borderColor=\'var(--brd)\'" ondrop="handleImgDrop(event)">'
+      +'<svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--txt3);fill:none;stroke-width:1.5;margin-bottom:8px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+      +'<div style="font-size:13px;font-weight:500;color:var(--txt2);margin-bottom:4px;">Kliknij lub przeciągnij zdjęcie</div>'
+      +'<div style="font-size:11px;color:var(--txt3);">JPG, PNG, WEBP · maks. 5 MB</div>'
+      +'</div>';
+  }
+  ST('Zdjęcie usunięte');
+}
+function onKF(){var f=document.getElementById('k-faza').value;var ts=document.getElementById('k-temat');ts.innerHTML='<option value="">— wybierz —</option>';if(f)GT(f).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});}
+
+function onKTeam(){
+  var team=(document.getElementById('k-team')||{}).value||'';
+  // Aktualizuj listę trenerów na podstawie wybranej drużyny
+  var t=TEAMS.find(t=>t.name===team);
+  var c1sel=document.getElementById('k-coach');
+  var c2sel=document.getElementById('k-coach2');
+  if(c1sel){
+    c1sel.innerHTML='<option value="">— wybierz —</option>';
+    COACHES.forEach(c=>{var o=document.createElement('option');o.value=c.name;o.textContent=c.name+' ('+c.role+')';c1sel.appendChild(o);});
+    if(t&&t.coach){var coach=COACHES.find(c=>c.id===t.coach);if(coach)c1sel.value=coach.name;}
+  }
+  if(c2sel){
+    c2sel.innerHTML='<option value="">— brak —</option>';
+    COACHES.forEach(c=>{var o=document.createElement('option');o.value=c.name;o.textContent=c.name+' ('+c.role+')';c2sel.appendChild(o);});
+    if(t&&t.coach2){var coach2=COACHES.find(c=>c.id===t.coach2);if(coach2)c2sel.value=coach2.name;}
+  }
+  // Odśwież mikrocykle
+  onKTeamMikro();
+}
+
+function onKTeamMikro(){
+  var sel=document.getElementById('k-mikro');
+  if(!sel)return;
+  var prev=sel.value;
+  sel.innerHTML='<option value="">— brak powiązania —</option>';
+  // Pobierz mikrocykle z CYC
+  var micros=CYC.filter(c=>c.type==='micro').sort((a,b)=>a.start>b.start?1:-1);
+  micros.forEach(c=>{
+    var o=document.createElement('option');
+    o.value=c.name;
+    o.textContent=c.name+(c.start?' · '+fdShort(c.start).slice(0,5)+'–'+fdShort(c.end).slice(0,5):'');
+    if(c.name===prev)o.selected=true;
+    sel.appendChild(o);
+  });
+  if(prev)onKMikro();
+}
+
+function onKMikro(){
+  var val=document.getElementById('k-mikro').value;
+  var infoDiv=document.getElementById('k-mikro-info');
+  var autoBtn=document.getElementById('k-goals-auto-btn');
+  if(!val){
+    document.getElementById('k-mezo').value='—';
+    if(infoDiv)infoDiv.style.display='none';
+    if(autoBtn)autoBtn.style.display='none';
+    return;
+  }
+  // Znajdź mikrocykl
+  var micro=CYC.find(c=>c.type==='micro'&&c.name===val);
+  if(!micro){document.getElementById('k-mezo').value='—';if(infoDiv)infoDiv.style.display='none';if(autoBtn)autoBtn.style.display='none';return;}
+  // Znajdź mezocykl który zawiera ten mikrocykl
+  var meso=CYC.find(c=>c.type==='meso'&&c.start<=micro.start&&c.end>=micro.start);
+  document.getElementById('k-mezo').value=meso?meso.name:'—';
+  if(infoDiv){
+    var info='<strong>'+val+'</strong>';
+    if(micro.start)info+=' · '+fdShort(micro.start)+' – '+fdShort(micro.end);
+    if(meso)info+=' · mezocykl: <strong>'+meso.name+'</strong>';
+    if(micro.desc)info+='<br>'+micro.desc;
+    if(micro.koncepty&&micro.koncepty.length)info+='<br>Koncepty: <strong>'+micro.koncepty.join(', ')+'</strong>';
+    infoDiv.innerHTML=info;
+    infoDiv.style.display='block';
+  }
+  if(autoBtn)autoBtn.style.display=(micro.koncepty&&micro.koncepty.length)?'inline-flex':'none';
+}
+
+function autoFillGoals(){
+  var val=document.getElementById('k-mikro').value;
+  var micro=CYC.find(c=>c.type==='micro'&&c.name===val);
+  // Zbierz szczegóły z konceptów mikrocyklu
+  var lines=[];
+  if(micro&&micro.koncepty&&micro.koncepty.length){
+    micro.koncepty.forEach(function(k){
+      var s=getAllSzczegoly(k);
+      if(s.length){lines.push('── '+k+' ──');s.forEach(function(d){lines.push('• '+d);});}
+    });
+  }
+  if(!lines.length){
+    // fallback – opis i koncepty jako punkty
+    if(micro&&micro.desc)lines.push('• '+micro.desc);
+    if(micro&&micro.koncepty)micro.koncepty.forEach(function(k){lines.push('• '+k);});
+  }
+  if(!lines.length){ST('Brak konceptów ze szczegółami w mikrocyklu');return;}
+  document.getElementById('k-goals').value=lines.join('\n');
+  ST('Cele uzupełnione z mikrocyklu '+val+' ('+lines.filter(l=>l.startsWith('•')).length+' szczegółów)');
+}
+
+function startK(){
+  editKonspIdx=null;
+  PHS={warm:[],main:[],cool:[]};
+  document.getElementById('k-title').value='';
+  document.getElementById('kr-t').textContent='Nowy konspekt';
+  document.getElementById('k-goal').value='';
+  document.getElementById('k-goals').value='';
+  // Wypełnij listę drużyn
+  var tsel=document.getElementById('k-team');
+  if(tsel){
+    tsel.innerHTML='<option value="">— wybierz —</option>';
+    TEAMS.filter(t=>t.season===currentSeason).forEach(t=>{var o=document.createElement('option');o.value=t.name;o.textContent=t.name;tsel.appendChild(o);});
+  }
+  // Wypełnij listy trenerów
+  ['k-coach','k-coach2'].forEach((id,i)=>{
+    var s=document.getElementById(id);if(!s)return;
+    s.innerHTML=(i===0?'<option value="">— wybierz —</option>':'<option value="">— brak —</option>');
+    COACHES.forEach(c=>{var o=document.createElement('option');o.value=c.name;o.textContent=c.name+' ('+c.role+')';s.appendChild(o);});
+    if(i===0&&COACHES.length)s.value=COACHES[0].name;
+  });
+  // Wypełnij listę mikrocykli
+  onKTeamMikro();
+  // Reset data
+  var today=new Date().toISOString().slice(0,10);
+  if(document.getElementById('k-date'))document.getElementById('k-date').value=today;
+  if(document.getElementById('k-mikro-info'))document.getElementById('k-mikro-info').style.display='none';
+  if(document.getElementById('k-goals-auto-btn'))document.getElementById('k-goals-auto-btn').style.display='none';
+  ['warm','main','cool'].forEach(ph=>rPH(ph));
+  gKS(1);SP('kreator');
+}
+function gKS(n){[1,2,3,4].forEach(i=>{var b=document.getElementById('ksp-'+i),s=document.getElementById('ks-'+i);b.classList.toggle('vis',i===n);s.classList.remove('act','dn');if(i===n)s.classList.add('act');else if(i<n)s.classList.add('dn');});document.getElementById('kr-s').textContent='Krok '+n+' z 4';rT();if(n===4)rTS();}
+
+function rT(){var total=0,seg={warm:0,main:0,cool:0};['warm','main','cool'].forEach(ph=>{PHS[ph].forEach(ex=>{var t=parseInt(ex.time)||0;total+=t;seg[ph]+=t;});var el=document.getElementById('pd-'+ph);if(el)el.textContent=seg[ph]+' min';});var el=document.getElementById('kt-total');if(el)el.textContent=total+' min';var bar=document.getElementById('kt-bar');if(bar&&total){bar.innerHTML='<div class="ts" style="width:'+(seg.warm/total*100).toFixed(0)+'%;background:var(--am);"></div><div class="ts" style="width:'+(seg.main/total*100).toFixed(0)+'%;background:var(--g);"></div><div class="ts" style="width:'+(seg.cool/total*100).toFixed(0)+'%;background:var(--pu);"></div>';}var leg=document.getElementById('kt-bar-legend');if(leg&&total)leg.textContent=seg.warm+' / '+seg.main+' / '+seg.cool+' min';}
+
+function rTS(){var total=0,seg={warm:0,main:0,cool:0};['warm','main','cool'].forEach(ph=>PHS[ph].forEach(ex=>{var t=parseInt(ex.time)||0;total+=t;seg[ph]+=t;}));var planned=parseInt(document.getElementById('k-dur').value)||90,diff=total-planned;var el=document.getElementById('t-sum');if(!el)return;el.innerHTML='<div class="sr"><div class="srl">Rozgrzewka</div><div class="srv">'+seg.warm+' min ('+(total?Math.round(seg.warm/total*100):0)+'%)</div></div><div class="sr"><div class="srl">Część główna</div><div class="srv">'+seg.main+' min ('+(total?Math.round(seg.main/total*100):0)+'%)</div></div><div class="sr"><div class="srl">Zakończenie</div><div class="srv">'+seg.cool+' min ('+(total?Math.round(seg.cool/total*100):0)+'%)</div></div><div class="sr"><div class="srl" style="font-weight:600;">Łącznie</div><div class="srv" style="font-weight:600;">'+total+' min</div></div><div class="sr"><div class="srl">Zaplanowany czas</div><div class="srv" style="color:'+(Math.abs(diff)>5?'var(--red)':'var(--g)')+'">'+planned+' min '+(diff>0?'(+'+diff+' min nadwyżki)':diff<0?'('+Math.abs(diff)+' min brakuje)':'✓ zgodnie z planem')+'</div></div>';}
+
+function rPH(ph){var list=document.getElementById('el-'+ph);if(!list)return;if(!PHS[ph].length){list.innerHTML='';rT();return;}list.innerHTML=PHS[ph].map((ex,i)=>'<div class="exi"><div class="exih"><div class="exin">'+(i+1)+'</div><div class="exiname">'+ex.name+'</div>'+(ex.fromDB?'<span class="exifdb">z bazy</span>':'')+'<div class="exiacts">'+(i>0?'<button class="exia" onclick="mvE(\''+ph+'\','+i+',-1)" title="W górę"><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>':'')+(i<PHS[ph].length-1?'<button class="exia" onclick="mvE(\''+ph+'\','+i+',1)" title="W dół"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></button>':'')+'<button class="exia" onclick="rmE(\''+ph+'\','+i+')" title="Usuń" style="color:var(--red);"><svg viewBox="0 0 16 16"><path d="M1 1l10 10M11 1L1 11"/></svg></button></div></div><div class="exim"><span style="font-size:11px;color:var(--txt2);">Czas:</span><input class="eximi" type="number" value="'+ex.time+'" min="1" max="90" onchange="PHS[\''+ph+'\']['+i+'].time=parseInt(this.value)||0;rT()"/> min'+(ex.faza?'<span class="bdg" style="background:'+(CC[ex.faza]||{bg:'#F1EFE8'}).bg+';color:'+(CC[ex.faza]||{tc:'#6B6860'}).tc+';">'+ex.faza+'</span>':'')+'</div><textarea class="exinta" placeholder="Uwagi trenera do tego ćwiczenia..." onchange="PHS[\''+ph+'\']['+i+'].notes=this.value">'+( ex.notes||'')+'</textarea></div>').join('');rT();}
+function mvE(ph,i,d){var a=PHS[ph],ni=i+d;if(ni<0||ni>=a.length)return;var t=a[i];a[i]=a[ni];a[ni]=t;rPH(ph);}
+function rmE(ph,i){PHS[ph].splice(i,1);rPH(ph);}
+function addME(ph){var inp=document.getElementById('aei-'+ph);var name=(inp.value||'').trim();if(!name)return;PHS[ph].push({name,time:15,fromDB:false,desc:'',notes:'',faza:'',intens:''});inp.value='';document.getElementById('dbr-'+ph).classList.remove('op');rPH(ph);}
+function sDB(ph){var q=(document.getElementById('aei-'+ph).value||'').toLowerCase();var res=document.getElementById('dbr-'+ph);if(!q){res.classList.remove('op');return;}var matches=EXS.filter(e=>e.n.toLowerCase().includes(q)||(e.t||'').toLowerCase().includes(q)).slice(0,5);if(!matches.length){res.classList.remove('op');return;}res.innerHTML=matches.map(e=>'<div class="dbri" onclick="pkE(\''+ph+'\',\''+e.n.replace(/'/g,"\\'")+'\')">'+'<div style="flex:1;"><div style="font-weight:500;">'+e.n+'</div><div style="font-size:10px;color:var(--txt2);">'+( e.f||'')+(e.t?' · '+e.t:'')+'</div></div><div class="dbrm">'+e.cz+' min</div></div>').join('');res.classList.add('op');}
+function pkE(ph,name){var ex=EXS.find(e=>e.n===name);if(!ex)return;PHS[ph].push({name:ex.n,time:ex.cz||15,fromDB:true,desc:ex.o||'',notes:'',faza:ex.f||'',intens:ex.i||''});document.getElementById('aei-'+ph).value='';document.getElementById('dbr-'+ph).classList.remove('op');rPH(ph);ST('"'+ex.n+'" dodano do '+PNC[ph]);}
+function oDB(ph){dbTP=ph;document.getElementById('mo-dbs').value='';rDL();oM('mo-db');}
+function sDF(el,f){dbFP=f;document.querySelectorAll('#db-frow .db-fc').forEach(x=>x.className='db-fc');el.classList.add('ac');rDL();}
+function rDL(){var q=(document.getElementById('mo-dbs').value||'').toLowerCase();var matches=EXS.filter(e=>(!q||e.n.toLowerCase().includes(q)||(e.o||'').toLowerCase().includes(q))&&(!dbFP||e.f===dbFP));document.getElementById('mo-dbl').innerHTML=matches.length?matches.map(e=>{var col=CC[e.f]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--brd);border-radius:var(--r2);cursor:pointer;margin-bottom:6px;transition:border-color .12s;" onclick="pkEM(\''+e.n.replace(/'/g,"\\'")+'\')" onmouseover="this.style.borderColor=\'var(--g)\'" onmouseout="this.style.borderColor=\'var(--brd)\'">'+'<div style="flex:1;"><div style="font-size:13px;font-weight:500;margin-bottom:3px;">'+e.n+'</div><div style="display:flex;gap:4px;margin-bottom:4px;">'+(e.f?'<span class="bdg" style="background:'+col.bg+';color:'+col.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+'</div>'+(e.o?'<div style="font-size:11px;color:var(--txt2);">'+e.o.slice(0,80)+(e.o.length>80?'...':'')+'</div>':'')+'</div><div style="text-align:right;flex-shrink:0;"><div style="font-size:13px;font-weight:600;">'+e.cz+' min</div>'+(e.i?'<div style="font-size:10px;color:var(--txt2);">'+e.i+'</div>':'')+'</div></div>';}).join(''):'<div style="text-align:center;padding:30px;font-size:12px;color:var(--txt2);">Brak ćwiczeń'+(EXS.length?' spełniających kryteria':' w bazie')+'.</div>';}
+function pkEM(name){pkE(dbTP,name);cM('mo-db');}
+function sR(r){sRat=r;document.querySelectorAll('#r-btns .btn').forEach(b=>{var rv=parseInt(b.dataset.r);b.className=rv<=r?'btn pri':'btn';});}
+function saveK(){
+  var title=document.getElementById('k-title').value||'Konspekt bez tytułu';
+  var team=(document.getElementById('k-team')||{}).value||'';
+  var date=(document.getElementById('k-date')||{}).value||'';
+  var coach=(document.getElementById('k-coach')||{}).value||'';
+  var coach2=(document.getElementById('k-coach2')||{}).value||'';
+  var mikro=(document.getElementById('k-mikro')||{}).value||'';
+  var mezo=(document.getElementById('k-mezo')||{}).value||'';
+  var faza=(document.getElementById('k-faza')||{}).value||'';
+  var temat=(document.getElementById('k-temat')||{}).value||'';
+  var goal=(document.getElementById('k-goal')||{}).value||'';
+  var goals=(document.getElementById('k-goals')||{}).value||'';
+  var place=(document.getElementById('k-place')||{}).value||'';
+  var dur=parseInt((document.getElementById('k-dur')||{}).value)||90;
+  var total=0;
+  ['warm','main','cool'].forEach(ph=>PHS[ph].forEach(e=>total+=parseInt(e.time)||0));
+  var c=CC[faza]||{bg:'#E1F5EE',tc:'#085041'};
+  KONSP.unshift({title,team,date,coach,coach2,mikro,mezo,faza,temat,goal,goals,place,dur,total,phases:JSON.parse(JSON.stringify(PHS)),c,rating:null,notes:'',savedAt:new Date().toISOString()});
+  ST('"'+title+'" zapisany!');
+  setTimeout(()=>SP('konsp'),500);
+}
+
+function rKL(){
+  var body=document.getElementById('k-list');
+  document.getElementById('k-lbl').textContent=KONSP.length+' konspektów · sezon '+currentSeason;
+  if(!KONSP.length){
+    body.innerHTML='<div class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">Brak konspektów</div><div style="font-size:12px;color:var(--txt2);">Kliknij "+ Nowy konspekt" aby stworzyć pierwszy.</div></div>';
+    return;
+  }
+  body.innerHTML=KONSP.map((k,i)=>{
+    var c=k.c||{bg:'#E1F5EE',tc:'#085041'};
+    var total=['warm','main','cool'].reduce((s,ph)=>s+(k.phases[ph]||[]).reduce((ss,e)=>ss+(parseInt(e.time)||0),0),0);
+    var hasRating=k.rating!==null&&k.rating!==undefined&&k.rating!==0;
+    var stars='';if(hasRating)for(var s2=1;s2<=5;s2++)stars+=(s2<=k.rating?'★':'☆');
+    var ratingHtml=hasRating
+      ?'<span style="color:var(--am);font-size:12px;" title="Ocena sesji: '+k.rating+'/5">'+stars+'</span>'
+      :'<span style="font-size:10px;color:var(--txt3);font-style:italic;">brak oceny</span>';
+    var coachInfo='';
+    if(k.coach)coachInfo+=k.coach;
+    if(k.coach2)coachInfo+=(coachInfo?' & ':'')+k.coach2;
+    var exCount=['warm','main','cool'].reduce((s,ph)=>s+(k.phases[ph]||[]).length,0);
+    return '<div class="kc" style="cursor:pointer;" onclick="oViewKonsp('+i+')">'
+      +'<div class="kci" style="background:'+c.bg+';color:'+c.tc+'"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/></svg></div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div class="kcn">'+k.title+'</div>'
+      +'<div class="kcm">'
+      +'<span>'+(k.team||'—')+'</span>'
+      +'<span>'+fd(k.date)+'</span>'
+      +'<span>'+total+' min</span>'
+      +'<span>'+exCount+' ćw.</span>'
+      +(k.mikro?'<span style="color:var(--g);">'+k.mikro+'</span>':'')
+      +(coachInfo?'<span style="color:var(--txt3);">'+coachInfo+'</span>':'')
+      +'</div>'
+      +(k.faza||k.temat?'<div style="display:flex;gap:4px;margin-top:5px;">'+(k.faza?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+k.faza+'</span>':'')+(k.temat?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+k.temat+'</span>':'')+'</div>':'')
+      +(k.notes?'<div style="font-size:11px;color:var(--txt2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📝 '+k.notes+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;" onclick="event.stopPropagation()">'
+      +'<div style="display:flex;gap:5px;">'
+      +'<button class="btn sm" onclick="oPostSession('+i+')" title="Notatki i ocena po treningu" style="'+(hasRating?'':'border-color:var(--am);color:var(--am);')+'"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 8l4 4 6-6"/></svg>Po treningu</button>'
+      +'<button class="btn sm" onclick="dlPDFFor('+i+')" title="Pobierz PDF"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/></svg>PDF</button>'
+      +'<button class="btn sm" onclick="oEditKonsp('+i+')" title="Edytuj konspekt"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg></button>'
+      +'<button class="btn sm dan" onclick="delK('+i+')" title="Usuń"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>'
+      +'</div>'
+      +ratingHtml
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+function delK(i){if(!confirm('Usunąć "'+KONSP[i].title+'"?'))return;var n=KONSP[i].title;KONSP.splice(i,1);rKL();uD();ST('"'+n+'" usunięty');}
+
+// ─── WIDOK KONSPEKTU ───────────────────────────────────────────
+var viewKonspIdx=null;
+
+function oViewKonsp(i){
+  viewKonspIdx=i;
+  var k=KONSP[i];
+  var c=k.c||{bg:'#E1F5EE',tc:'#085041'};
+  var mo=document.getElementById('mo-view-konsp');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-view-konsp';
+    mo.innerHTML='<div class="mbox wide" style="max-height:90vh;width:680px;"><div class="mh"><div class="mt2" id="mvk-ttl"></div><div style="display:flex;gap:6px;" id="mvk-btns"></div></div><div class="mbody" id="mvk-body"></div><div class="mfs" id="mvk-foot"></div></div>';
+    mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+  var total=['warm','main','cool'].reduce((s,ph)=>s+(k.phases[ph]||[]).reduce((ss,e)=>ss+(parseInt(e.time)||0),0),0);
+  var hasRating=k.rating!==null&&k.rating!==undefined&&k.rating!==0;
+  var stars='';if(hasRating)for(var s=1;s<=5;s++)stars+=(s<=k.rating?'★':'☆');
+
+  document.getElementById('mvk-ttl').innerHTML='<div style="font-size:14px;font-weight:600;">'+k.title+'</div>';
+  document.getElementById('mvk-btns').innerHTML=
+    '<button class="btn sm" onclick="oPostSession('+i+')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 8l4 4 6-6"/></svg>Po treningu</button>'
+    +'<button class="btn sm" onclick="cM(\'mo-view-konsp\');dlPDFFor('+i+')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/></svg>PDF</button>'
+    +'<button class="btn sm pri" onclick="cM(\'mo-view-konsp\');oEditKonsp('+i+')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>'
+    +'<button class="mc2" onclick="cM(\'mo-view-konsp\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>';
+
+  var html='';
+  // Meta info
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">';
+  html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:8px 10px;"><div style="font-size:9px;color:var(--txt3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">Drużyna</div><div style="font-size:13px;font-weight:500;">'+(k.team||'—')+'</div></div>';
+  html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:8px 10px;"><div style="font-size:9px;color:var(--txt3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">Data</div><div style="font-size:13px;font-weight:500;">'+fd(k.date)+'</div></div>';
+  html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:8px 10px;"><div style="font-size:9px;color:var(--txt3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">Czas</div><div style="font-size:13px;font-weight:500;">'+(k.dur||total||90)+' min</div></div>';
+  html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:8px 10px;"><div style="font-size:9px;color:var(--txt3);font-weight:600;text-transform:uppercase;margin-bottom:3px;">Miejsce</div><div style="font-size:13px;font-weight:500;">'+(k.place||'—')+'</div></div>';
+  html+='</div>';
+  // Trenerzy + mikrocykl
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">';
+  html+='<div class="vf" style="margin:0;"><div class="vl">I Trener</div><div class="vv">'+(k.coach||'—')+'</div></div>';
+  html+='<div class="vf" style="margin:0;"><div class="vl">II Trener</div><div class="vv '+(k.coach2?'':'m')+'">'+(k.coach2||'—')+'</div></div>';
+  html+='<div class="vf" style="margin:0;"><div class="vl">Mikrocykl</div><div class="vv '+(k.mikro?'':'m')+'">'+(k.mikro||'—')+(k.mezo?' · '+k.mezo:'')+'</div></div>';
+  html+='</div>';
+  // Faza / temat / cel
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
+  html+='<div class="vf" style="margin:0;"><div class="vl">Faza / Temat</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;">'+(k.faza?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+k.faza+'</span>':'')+(k.temat?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+k.temat+'</span>':'')+'</div></div>';
+  if(hasRating)html+='<div class="vf" style="margin:0;"><div class="vl">Ocena sesji</div><div style="font-size:16px;color:var(--am);">'+stars+'</div></div>';
+  html+='</div>';
+  if(k.goal)html+='<div style="background:var(--lg);border-radius:var(--r2);padding:9px 12px;margin-bottom:10px;"><div style="font-size:9px;font-weight:600;color:var(--dg);text-transform:uppercase;margin-bottom:2px;">Cel główny</div><div style="font-size:13px;color:var(--dg);">'+k.goal+'</div></div>';
+  if(k.goals)html+='<div class="vf"><div class="vl">Cele szczegółowe</div><div class="vv" style="font-size:12px;">'+k.goals.replace(/\n/g,'<br>')+'</div></div>';
+
+  // Ćwiczenia per faza
+  var phaseNames={warm:'Rozgrzewka',main:'Część główna',cool:'Zakończenie'};
+  var phaseColors={warm:'var(--am)',main:'var(--g)',cool:'var(--pu)'};
+  ['warm','main','cool'].forEach(ph=>{
+    var exs=k.phases[ph]||[];
+    if(!exs.length)return;
+    var phTime=exs.reduce((s,e)=>s+(parseInt(e.time)||0),0);
+    html+='<div style="margin-bottom:10px;">';
+    html+='<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;"><div style="width:8px;height:8px;border-radius:50%;background:'+phaseColors[ph]+';flex-shrink:0;"></div><div style="font-size:11px;font-weight:600;">'+phaseNames[ph]+'</div><div style="font-size:10px;color:var(--txt2);">'+phTime+' min · '+exs.length+' ćw.</div></div>';
+    exs.forEach((ex,ei)=>{
+      html+='<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--sur2);border-radius:var(--r2);margin-bottom:4px;">';
+      html+='<div style="width:20px;height:20px;border-radius:50%;background:'+phaseColors[ph]+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0;">'+(ei+1)+'</div>';
+      html+='<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;">'+ex.name+'</div>';
+      if(ex.desc)html+='<div style="font-size:11px;color:var(--txt2);margin-top:2px;line-height:1.5;">'+ex.desc+'</div>';
+      if(ex.notes)html+='<div style="font-size:11px;color:var(--txt2);margin-top:3px;font-style:italic;">📝 '+ex.notes+'</div>';
+      html+='</div>';
+      html+='<div style="font-size:12px;font-weight:600;color:var(--txt2);flex-shrink:0;">'+(ex.time||'—')+' min</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+
+  if(k.notes)html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 12px;margin-top:6px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;margin-bottom:4px;">Notatki potreningowe</div><div style="font-size:12px;line-height:1.6;">'+k.notes.replace(/\n/g,'<br>')+'</div></div>';
+
+  document.getElementById('mvk-body').innerHTML=html;
+  document.getElementById('mvk-foot').innerHTML=
+    '<button class="btn dan sm" onclick="delK('+i+');cM(\'mo-view-konsp\')">Usuń konspekt</button>'
+    +'<button class="btn" onclick="cM(\'mo-view-konsp\')">Zamknij</button>';
+  oM('mo-view-konsp');
+}
+
+// ─── EDYCJA KONSPEKTU ──────────────────────────────────────────
+var editKonspIdx=null;
+
+function oEditKonsp(i){
+  editKonspIdx=i;
+  var k=KONSP[i];
+  // Załaduj dane do kreatora
+  PHS=JSON.parse(JSON.stringify(k.phases||{warm:[],main:[],cool:[]}));
+  // Inicjalizuj kreator
+  var tsel=document.getElementById('k-team');
+  if(tsel){tsel.innerHTML='<option value="">— wybierz —</option>';TEAMS.filter(t=>t.season===currentSeason).forEach(t=>{var o=document.createElement('option');o.value=t.name;o.textContent=t.name;tsel.appendChild(o);});tsel.value=k.team||'';}
+  ['k-coach','k-coach2'].forEach((id,ci)=>{var s=document.getElementById(id);if(!s)return;s.innerHTML=(ci===0?'<option value="">— wybierz —</option>':'<option value="">— brak —</option>');COACHES.forEach(c=>{var o=document.createElement('option');o.value=c.name;o.textContent=c.name+' ('+c.role+')';s.appendChild(o);});});
+  // Wypełnij pola
+  var fields={
+    'k-title':k.title||'','k-date':k.date||'','k-dur':k.dur||90,
+    'k-place':k.place||'','k-coach':k.coach||'','k-coach2':k.coach2||'',
+    'k-mezo':k.mezo||'—','k-faza':k.faza||'','k-goal':k.goal||'','k-goals':k.goals||''
+  };
+  Object.entries(fields).forEach(([id,val])=>{var el=document.getElementById(id);if(el)el.value=val;});
+  document.getElementById('kr-t').textContent=k.title||'Edycja konspektu';
+  // Mikrocykl
+  onKTeamMikro();
+  var mikrSel=document.getElementById('k-mikro');if(mikrSel)mikrSel.value=k.mikro||'';
+  onKMikro();
+  // Temat
+  var fazaEl=document.getElementById('k-faza');
+  if(fazaEl&&k.faza){onKF();var tEl=document.getElementById('k-temat');if(tEl)tEl.value=k.temat||'';}
+  // Renderuj fazy
+  ['warm','main','cool'].forEach(ph=>rPH(ph));
+  gKS(1);
+  SP('kreator');
+  ST('Edytujesz: "'+k.title+'"');
+}
+
+// Nadpisz saveK żeby obsługiwał tryb edycji
+var _origSaveK2=saveK;
+saveK=function(){
+  if(editKonspIdx!==null){
+    // Aktualizuj istniejący
+    var i=editKonspIdx;editKonspIdx=null;
+    var title=document.getElementById('k-title').value||'Konspekt bez tytułu';
+    var faza=(document.getElementById('k-faza')||{}).value||'';
+    var prev=KONSP[i];
+    KONSP[i]=Object.assign({},prev,{
+      title,
+      team:(document.getElementById('k-team')||{}).value||'',
+      date:(document.getElementById('k-date')||{}).value||'',
+      coach:(document.getElementById('k-coach')||{}).value||'',
+      coach2:(document.getElementById('k-coach2')||{}).value||'',
+      mikro:(document.getElementById('k-mikro')||{}).value||'',
+      mezo:(document.getElementById('k-mezo')||{}).value||'',
+      faza,
+      temat:(document.getElementById('k-temat')||{}).value||'',
+      goal:(document.getElementById('k-goal')||{}).value||'',
+      goals:(document.getElementById('k-goals')||{}).value||'',
+      place:(document.getElementById('k-place')||{}).value||'',
+      dur:parseInt((document.getElementById('k-dur')||{}).value)||90,
+      phases:JSON.parse(JSON.stringify(PHS)),
+      c:CC[faza]||{bg:'#E1F5EE',tc:'#085041'},
+      updatedAt:new Date().toISOString()
+    });
+    KONSP[i].total=0;
+    ['warm','main','cool'].forEach(ph=>(KONSP[i].phases[ph]||[]).forEach(e=>KONSP[i].total+=parseInt(e.time)||0));
+    saveLS();ST('"'+title+'" zaktualizowany!');setTimeout(()=>SP('konsp'),500);
+  } else {
+    _origSaveK2();
+  }
+};
+
+// ── OCENA PO SESJI ──
+var postSessionIdx=null;
+function oPostSession(i){
+  postSessionIdx=i;
+  var k=KONSP[i];
+  var mo=document.getElementById('mo-post-session');
+  if(!mo){
+    var d=document.createElement('div');d.className='mo';d.id='mo-post-session';
+    d.innerHTML='<div class="mbox"><div class="mh"><div class="mt2" id="mo-ps-ttl">Ocena po treningu</div><button class="mc2" onclick="cM(\'mo-post-session\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-ps-body"></div><div class="mfs"><span></span><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-post-session\')">Anuluj</button><button class="btn pri" onclick="savePostSession()">Zapisz ocenę</button></div></div></div>';
+    d.addEventListener('click',e=>{if(e.target===d)d.classList.remove('op');});
+    document.body.appendChild(d);
+  }
+  document.getElementById('mo-ps-ttl').textContent='Po treningu: '+k.title;
+  var total=['warm','main','cool'].reduce((s,ph)=>s+(k.phases[ph]||[]).reduce((ss,e)=>ss+(parseInt(e.time)||0),0),0);
+  var r=k.rating||0;
+  var html='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--txt2);">'
+    +(k.team?'<strong>'+k.team+'</strong> · ':'')+(k.date?fd(k.date)+' · ':'')+total+' min'+(k.mikro?' · Mikrocykl: '+k.mikro:'')+'</div>';
+  html+='<div class="fr"><label class="fl">Notatki potreningowe</label><textarea class="fta" id="ps-notes" style="min-height:90px;" placeholder="Co zadziałało dobrze?&#10;Co warto poprawić?&#10;Uwagi do poszczególnych zawodników...">'+(k.notes||'')+'</textarea></div>';
+  html+='<div class="fr"><label class="fl">Ocena sesji (1–5)</label>';
+  html+='<div style="display:flex;gap:8px;margin-top:4px;" id="ps-r-btns">';
+  for(var s=1;s<=5;s++){
+    html+='<button class="btn'+(s<=r?' pri':'')+'" onclick="setPSRating('+s+')" data-r="'+s+'" style="flex:1;font-size:14px;padding:8px 0;">'+(s===5?'5 ★':String(s))+'</button>';
+  }
+  html+='</div><input type="hidden" id="ps-rating" value="'+(r||0)+'"/>';
+  html+='<div style="font-size:10px;color:var(--txt3);margin-top:5px;">1 = słabo · 3 = przeciętnie · 5 = bardzo dobrze</div></div>';
+  document.getElementById('mo-ps-body').innerHTML=html;
+  oM('mo-post-session');
+}
+function setPSRating(r){
+  document.getElementById('ps-rating').value=r;
+  document.querySelectorAll('#ps-r-btns .btn').forEach(b=>{var rv=parseInt(b.dataset.r);b.className=rv<=r?'btn pri':'btn';b.style.flex='1';b.style.fontSize='14px';b.style.padding='8px 0';});
+}
+function savePostSession(){
+  if(postSessionIdx===null)return;
+  var rating=parseInt(document.getElementById('ps-rating').value)||null;
+  var notes=(document.getElementById('ps-notes')||{}).value||'';
+  KONSP[postSessionIdx].rating=rating;
+  KONSP[postSessionIdx].notes=notes;
+  cM('mo-post-session');
+  saveLS();rKL();
+  ST('Ocena sesji zapisana');
+}
+
+// ═══════════════ PDF ═══════════════
+
+// Główna funkcja zbierająca dane i generująca PDF
+function dlPDF(){
+  var kd={
+    title:(document.getElementById('k-title')||{}).value||'Konspekt',
+    team:(document.getElementById('k-team')||{}).value||'',
+    date:(document.getElementById('k-date')||{}).value||'',
+    coach:(document.getElementById('k-coach')||{}).value||'',
+    coach2:(document.getElementById('k-coach2')||{}).value||'',
+    place:(document.getElementById('k-place')||{}).value||'',
+    dur:parseInt((document.getElementById('k-dur')||{}).value)||90,
+    faza:(document.getElementById('k-faza')||{}).value||'',
+    temat:(document.getElementById('k-temat')||{}).value||'',
+    goal:(document.getElementById('k-goal')||{}).value||'',
+    goals:(document.getElementById('k-goals')||{}).value||'',
+    mikro:(document.getElementById('k-mikro')||{}).value||'',
+    mezo:(document.getElementById('k-mezo')||{}).value||'',
+    phases:JSON.parse(JSON.stringify(PHS||{warm:[],main:[],cool:[]})),
+    c:CC[(document.getElementById('k-faza')||{}).value]||{bg:'#E1F5EE',tc:'#085041'},
+    rating:null,notes:''
+  };
+  kd.total=0;
+  ['warm','main','cool'].forEach(function(ph){(kd.phases[ph]||[]).forEach(function(e){kd.total+=parseInt(e.time)||0;});});
+  triggerPDF(kd);
+}
+
+function dlPDFFor(i){
+  var k=null;
+  if(typeof i==='number'&&i>=0&&i<KONSP.length){k=KONSP[i];}
+  else if(typeof i==='string'){k=KONSP.find(function(x){return x.savedAt===i||(x.title===i);});}
+  if(!k){ST('Nie znaleziono konspektu');return;}
+  var kd=JSON.parse(JSON.stringify(k));
+  kd.phases=kd.phases||{};
+  ['warm','main','cool'].forEach(function(ph){kd.phases[ph]=kd.phases[ph]||[];});
+  kd.total=0;
+  ['warm','main','cool'].forEach(function(ph){(kd.phases[ph]||[]).forEach(function(e){kd.total+=parseInt(e.time)||0;});});
+  triggerPDF(kd);
+}
+
+function triggerPDF(kd){
+  if(typeof window.jspdf==='undefined'||!window.jspdf.jsPDF){
+    ST('Biblioteka PDF nie jest załadowana. Odśwież stronę (F5).');
+    return;
+  }
+  try{
+    var doc=buildPDF(kd);
+    var fname='konspekt_'+(kd.team||'iskra').replace(/\s+/g,'_')+'_'+(kd.date||'brak-daty')+'.pdf';
+    doc.save(fname);
+    ST('✓ PDF pobrany: '+kd.title);
+  }catch(err){
+    console.error('PDF error:',err);
+    ST('Błąd PDF: '+err.message);
+  }
+}
+
+function buildPDF(k){
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  var W=297,H=210,ML=10,MR=10,MT=10,MB=10;
+  var CW=W-ML-MR;
+
+  // Kolory
+  var G=[29,158,117],DG=[8,80,65],LG=[225,245,238];
+  var LGRAY=[245,244,241],DARK=[26,26,24],GRAY=[120,118,112];
+  var BRD=[210,206,196],WHITE=[255,255,255];
+  var AM=[239,159,39],PU=[127,119,221];
+  var PC={warm:AM,main:G,cool:PU};
+
+  // Pomocnicze
+  function rect(x,y,w,h,fill,stroke,lw){
+    if(w<=0||h<=0)return;
+    doc.setFillColor(fill[0],fill[1],fill[2]);
+    doc.rect(x,y,w,h,'F');
+    if(stroke){doc.setDrawColor(stroke[0],stroke[1],stroke[2]);doc.setLineWidth(lw||0.25);doc.rect(x,y,w,h,'S');}
+  }
+  function cell(x,y,w,h,label,lines,bg){
+    if(w<=0||h<=0)return;
+    rect(x,y,w,h,bg||LGRAY,BRD,0.25);
+    doc.setFontSize(5);doc.setFont('helvetica','normal');doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
+    doc.text(String(label||''),x+1.5,y+3.2);
+    doc.setFontSize(7);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+    var cy=y+6.5;
+    (lines||[]).forEach(function(l){
+      if(!l||cy>y+h-1)return;
+      var s=String(l);
+      // Obcinaj jeśli za długi
+      while(doc.getTextWidth(s)>w-3&&s.length>3)s=s.slice(0,-2)+'…';
+      doc.text(s,x+1.5,cy);
+      cy+=3.8;
+    });
+  }
+  function splitText(txt,maxW){
+    if(!txt)return['—'];
+    var words=String(txt).replace(/\n/g,' ').split(' ');
+    var lines=[],cur='';
+    words.forEach(function(w){
+      var test=cur?cur+' '+w:w;
+      if(doc.getTextWidth(test)*1.15<maxW){cur=test;}
+      else{if(cur)lines.push(cur);cur=w;}
+    });
+    if(cur)lines.push(cur);
+    return lines.length?lines:['—'];
+  }
+
+  // Dane
+  var phases=k.phases||{warm:[],main:[],cool:[]};
+  var allEx=[];
+  ['warm','main','cool'].forEach(function(ph){
+    (phases[ph]||[]).forEach(function(e){allEx.push(Object.assign({},e,{phase:ph}));});
+  });
+  if(!allEx.length)allEx=[{name:'Brak ćwiczeń',time:0,phase:'main',desc:'',notes:'',sp:'',pk:'',w:'',u:''}];
+
+  var n=allEx.length;
+  var cols=n<=1?1:n<=4?2:3;
+  var rows=Math.ceil(n/cols);
+
+  // ── NAGŁÓWEK ──
+  rect(ML,MT,CW,10,G);
+  doc.setFontSize(11);doc.setFont('helvetica','bold');
+  doc.setTextColor(255,255,255);
+  doc.text(String(k.title||'Konspekt treningowy').slice(0,60),ML+4,MT+7);
+  doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+  doc.text('MKS Iskra Pszczyna · '+new Date().toLocaleDateString('pl-PL'),W-MR-3,MT+7,{align:'right'});
+
+  var y=MT+11;
+
+  // ── META 1: Data, Drużyna, I Trener, II Trener, Czas, Miejsce ──
+  var m1=[
+    ['DATA',   (k.date||'').split('-').reverse().join('.'), CW*0.10],
+    ['DRUŻYNA', k.team||'—',                               CW*0.16],
+    ['I TRENER',k.coach||'—',                              CW*0.18],
+    ['II TRENER',k.coach2||'—',                            CW*0.18],
+    ['CZAS',   (k.dur||90)+' min',                         CW*0.09],
+    ['MIEJSCE', k.place||'—',                              CW*0.29],
+  ];
+  var cx=ML;
+  m1.forEach(function(m){cell(cx,y,m[2],7,m[0],[String(m[1]).slice(0,32)]);cx+=m[2];});
+  y+=7.5;
+
+  // ── META 2: Mikrocykl, Mezocykl, Faza, Temat ──
+  var m2=[
+    ['MIKROCYKL', k.mikro||'—',  CW*0.12],
+    ['MEZOCYKL',  k.mezo||'—',   CW*0.22],
+    ['FAZA',      k.faza||'—',   CW*0.14],
+    ['TEMAT',     k.temat||'—',  CW*0.52],
+  ];
+  cx=ML;
+  m2.forEach(function(m){cell(cx,y,m[2],6.5,m[0],[String(m[1]).slice(0,55)]);cx+=m[2];});
+  y+=7;
+
+  // ── CEL GŁÓWNY ──
+  rect(ML,y,CW,7,DG);
+  doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('CEL: '+String(k.goal||'—').slice(0,115),ML+3,y+4.8);
+  y+=7.5;
+
+  // ── CELE SZCZEGÓŁOWE ──
+  if(k.goals&&k.goals.trim()){
+    var gLines=[];
+    k.goals.split('\n').forEach(function(l){if(l.trim())gLines.push(l.trim().slice(0,110));});
+    gLines=gLines.slice(0,4);
+    var gh=Math.max(6,gLines.length*3.6+4);
+    rect(ML,y,CW,gh,LGRAY,BRD,0.25);
+    doc.setFontSize(4.5);doc.setFont('helvetica','normal');doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
+    doc.text('CELE SZCZEGÓŁOWE',ML+1.5,y+3);
+    doc.setFontSize(6.5);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+    gLines.forEach(function(l,i){doc.text(l,ML+1.5,y+6+i*3.6);});
+    y+=gh+0.8;
+  }
+
+  // ── SIATKA ĆWICZEŃ ──
+  var avail=H-y-MB;
+  var cw=(CW-(cols-1)*1.5)/cols;
+  var ch=Math.max(30,(avail-(rows-1)*1.5)/rows);
+
+  allEx.forEach(function(ex,idx){
+    var col=idx%cols, row=Math.floor(idx/cols);
+    var ex_x=ML+col*(cw+1.5);
+    var ex_y=y+row*(ch+1.5);
+    var pc=PC[ex.phase]||G;
+
+    // Tło karty
+    rect(ex_x,ex_y,cw,ch,[250,250,248],BRD,0.3);
+
+    // Pasek górny (faza + nazwa)
+    var TH=Math.min(10,Math.max(8,ch*0.18));
+    rect(ex_x,ex_y,cw,TH,pc);
+    // Ciemny blok z numerem
+    var NW=Math.min(18,cw*0.18);
+    rect(ex_x,ex_y,NW,TH,[0,0,0,50]);
+    doc.setFontSize(4);doc.setFont('helvetica','normal');doc.setTextColor(255,255,255);
+    var phLbl={warm:'Rozgrzewka',main:'Część główna',cool:'Zakończenie'}[ex.phase]||'';
+    doc.text(phLbl,ex_x+1.2,ex_y+3.2);
+    doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text(String(idx+1),ex_x+NW*0.5,ex_y+TH-2,{align:'center'});
+    // Nazwa ćwiczenia
+    var nmText=String(ex.name||'');
+    var nmX=ex_x+NW+1.5;
+    var nmMaxW=(cw-NW-10)*2.83;
+    doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+    while(doc.getTextWidth(nmText)>nmMaxW&&nmText.length>3)nmText=nmText.slice(0,-2)+'…';
+    doc.text(nmText,nmX,ex_y+TH-2.5);
+    // Czas
+    doc.setFontSize(6);doc.setFont('helvetica','normal');
+    doc.text(String(ex.time||0)+' min',ex_x+cw-1.5,ex_y+TH-2.5,{align:'right'});
+
+    // Body
+    var bY=ex_y+TH;
+    var bH=ch-TH;
+    // Podział: lewa 56% | prawa 44%
+    var LW=cw*0.56, RW=cw*0.44-0.5, RX=ex_x+LW+0.5;
+    var lh=Math.max(3.2,Math.min(4,bH*0.09));
+
+    // — Lewa kolumna —
+    var sectors=[
+      ['OPIS',       ex.desc||ex.name||'',  bH*0.35],
+      ['ZASADY',     ex.notes||'',          bH*0.28],
+      ['UTRUDNIENIA / UŁATWIENIA', ex.u||'', bH*0.22],
+    ];
+    var remaining_h=bH-sectors.reduce(function(s,x){return s+x[2];},0)-1;
+    if(remaining_h>4)sectors.push(['FEEDBACK / WSKAZÓWKI',ex.w||'',remaining_h]);
+
+    var lY=bY;
+    sectors.forEach(function(s){
+      var sh=s[2],stxt=s[1],label=s[0];
+      if(sh<=0)return;
+      var maxLines=Math.max(1,Math.floor((sh-4)/lh));
+      // Podziel tekst na linie
+      doc.setFontSize(6.5);
+      var sLines=stxt?splitText(stxt,LW-3).slice(0,maxLines):['—'];
+      cell(ex_x,lY,LW,sh,label,sLines,label==='FEEDBACK / WSKAZÓWKI'?[232,245,238]:null);
+      lY+=sh+0.4;
+    });
+
+    // — Prawa kolumna —
+    var rY=bY;
+    // Sprzęt
+    var spH=Math.min(18,bH*0.28);
+    doc.setFontSize(6.5);
+    var spLines=ex.sp?splitText(ex.sp,RW-3).slice(0,3):['—'];
+    cell(RX,rY,RW,spH,'SPRZĘT',spLines);rY+=spH+0.4;
+    // Punktacja
+    var pkH=Math.min(16,bH*0.24);
+    var pkLines=ex.pk?splitText(ex.pk,RW-3).slice(0,2):['—'];
+    cell(RX,rY,RW,pkH,'PUNKTACJA',pkLines);rY+=pkH+0.4;
+    // Grafika / boisko
+    var ghLeft=ex_y+ch-rY-0.5;
+    if(ghLeft>12){
+      // Jeśli ćwiczenie ma zdjęcie — wstaw je
+      if(ex.img){
+        try{
+          var fmt=ex.img.indexOf('jpeg')>-1||ex.img.indexOf('jpg')>-1?'JPEG':'PNG';
+          rect(RX,rY,RW,ghLeft,[245,250,247],BRD,0.25);
+          doc.addImage(ex.img,fmt,RX+0.5,rY+0.5,RW-1,ghLeft-1);
+        }catch(imgErr){
+          // Jeśli błąd obrazka — rysuj boisko
+          rysujBoisko(doc,RX,rY,RW,ghLeft,BRD,WHITE,GRAY);
+        }
+      } else {
+        rysujBoisko(doc,RX,rY,RW,ghLeft,BRD,WHITE,GRAY);
+      }
+    }
+  });
+
+  // ── STOPKA ──
+  doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
+  doc.text('PFG Planner · MKS Iskra Pszczyna · wygenerowano '+new Date().toLocaleDateString('pl-PL'),ML,H-3);
+  if(k.rating){
+    var stars='';for(var s2=1;s2<=5;s2++)stars+=(s2<=k.rating?'★':'☆');
+    doc.text('Ocena sesji: '+stars,W-MR,H-3,{align:'right'});
+  }
+
+  return doc;
+}
+
+// Rysowanie boiska
+function rysujBoisko(doc,bx,by,bw,bh,BRD,WHITE,GRAY){
+  if(bw<8||bh<8)return;
+  doc.setFillColor(210,235,220);doc.rect(bx,by,bw,bh,'F');
+  doc.setDrawColor(BRD[0],BRD[1],BRD[2]);doc.setLineWidth(0.25);doc.rect(bx,by,bw,bh,'S');
+  doc.setDrawColor(WHITE[0],WHITE[1],WHITE[2]);doc.setLineWidth(0.6);
+  doc.rect(bx,by,bw,bh,'S');
+  doc.line(bx+bw/2,by,bx+bw/2,by+bh);
+  var r=Math.min(bw,bh)*0.15;
+  doc.circle(bx+bw/2,by+bh/2,r,'S');
+  var pkw=bw*0.18,pkh=bh*0.42,pky=by+(bh-pkh)/2;
+  doc.setFillColor(185,220,200);
+  doc.rect(bx,pky,pkw,pkh,'F');doc.rect(bx+bw-pkw,pky,pkw,pkh,'F');
+  doc.setDrawColor(WHITE[0],WHITE[1],WHITE[2]);
+  doc.rect(bx,pky,pkw,pkh,'S');doc.rect(bx+bw-pkw,pky,pkw,pkh,'S');
+  doc.setFontSize(4);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
+  doc.text('diagram',bx+bw/2,by+bh-2,{align:'center'});
+}
+
+
+// ═══════════════ LOCALSTORAGE ═══════════════
+var LS_KEY='pfg_iskra_pszczyna_v1';
+function saveLS(){try{localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,currentSeason}));}catch(e){console.warn('localStorage unavailable');}}
+function loadLS(){try{var d=localStorage.getItem(LS_KEY);if(d){var p=JSON.parse(d);EXS=p.EXS||[];CYC=p.CYC||[];KONSP=p.KONSP||[];TEAMS=p.TEAMS||getDefaultTeams();COACHES=p.COACHES||getDefaultCoaches();PLAYERS=p.PLAYERS||[];TRAININGS=p.TRAININGS||[];currentSeason=p.currentSeason||'2025/26';}}catch(e){console.warn('loadLS error',e);}}
+
+// ═══════════════ DRUŻYNY & TRENERZY ═══════════════
+var TEAMS=[];var COACHES=[];var editTeamIdx=null;var editCoachIdx=null;
+var currentSeason='2025/26';
+
+var TEAM_COLORS=['#1D9E75','#378ADD','#7F77DD','#D85A30','#BA7517','#E24B4A','#639922','#7F77DD','#185FA5','#993C1D'];
+var SEASONS=['2022/23','2023/24','2024/25','2025/26','2026/27','2027/28'];
+var AGE_CATS=['Skrzat U6/U7','Żak U8/U9','Orlik U10/U11','Młodzik U12/U13','Trampkarz U14/U15','Junior U16/U17','Junior U18/U19','Senior'];
+
+function getDefaultTeams(){return [
+  {id:'t1',name:'U10 Iskra',color:'#1D9E75',category:'Orlik U10/U11',players:14,season:'2025/26',coach:'t-coach1',coach2:'',notes:''},
+  {id:'t2',name:'U12 Iskra',color:'#378ADD',category:'Młodzik U12/U13',players:16,season:'2025/26',coach:'t-coach2',coach2:'',notes:''},
+  {id:'t3',name:'U14 Iskra',color:'#7F77DD',category:'Trampkarz U14/U15',players:18,season:'2025/26',coach:'t-coach1',coach2:'t-coach2',notes:''},
+  {id:'t4',name:'U16 Iskra',color:'#D85A30',category:'Junior U16/U17',players:20,season:'2025/26',coach:'t-coach2',coach2:'',notes:''},
+  {id:'t5',name:'Senior I',color:'#BA7517',category:'Senior',players:22,season:'2025/26',coach:'t-coach1',coach2:'',notes:''},
+];}
+function getDefaultCoaches(){return [
+  {id:'t-coach1',name:'Marek Kowalski',role:'Trener główny',phone:'',email:'',since:'2023/24'},
+  {id:'t-coach2',name:'Anna Nowak',role:'Trener asystent',phone:'',email:'',since:'2024/25'},
+];}
+
+function genId(){return 't-'+Date.now();}
+
+function rTeams(){
+  var body=document.getElementById('t-body');
+  var seasons=[...new Set(TEAMS.map(t=>t.season))].sort().reverse();
+  var allSeasons=SEASONS;
+
+  var html='';
+
+  // Sezon selector + przyciski
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">';
+  html+='<div style="display:flex;align-items:center;gap:10px;">';
+  html+='<div style="font-size:13px;font-weight:600;color:var(--txt2);">Sezon:</div>';
+  html+='<select class="fsel" id="season-sel" onchange="currentSeason=this.value;saveLS();rTeams();" style="width:auto;">';
+  allSeasons.forEach(s=>html+='<option value="'+s+'"'+(s===currentSeason?' selected':'')+'>'+s+'</option>');
+  html+='</select>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:8px;">';
+  html+='<button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button>';
+  html+='<button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button>';
+  html+='</div>';
+  html+='</div>';
+
+  // DRUŻYNY aktualnego sezonu
+  var seasonTeams=TEAMS.filter(t=>t.season===currentSeason);
+  html+='<div style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Drużyny · '+currentSeason+'</div>';
+
+  if(!seasonTeams.length){
+    html+='<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:32px;text-align:center;margin-bottom:16px;">';
+    html+='<div style="font-size:13px;color:var(--txt2);">Brak drużyn w sezonie '+currentSeason+'.</div>';
+    html+='<div style="font-size:11px;color:var(--txt3);margin-top:4px;">Kliknij "Dodaj drużynę" lub skopiuj z poprzedniego sezonu.</div>';
+    // Kopiuj z poprzedniego
+    var prevSeason=SEASONS[SEASONS.indexOf(currentSeason)-1];
+    var prevTeams=TEAMS.filter(t=>t.season===prevSeason);
+    if(prevTeams.length) html+='<button class="btn sm" style="margin-top:12px;" onclick="copySeasonTeams(\''+prevSeason+'\')">Kopiuj drużyny z '+prevSeason+' →</button>';
+    html+='</div>';
+  } else {
+    html+='<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">';
+    seasonTeams.forEach(t=>{
+      var idx=TEAMS.indexOf(t);
+      var coach=COACHES.find(c=>c.id===t.coach);
+      var coach2=COACHES.find(c=>c.id===t.coach2);
+      var ini=t.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      html+='<div class="tc" style="cursor:default;">';
+      html+='<div class="tav" style="background:'+t.color+';">'+ini+'</div>';
+      html+='<div style="flex:1;">';
+      html+='<div style="font-size:14px;font-weight:600;">'+t.name+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);margin-top:2px;">'+t.category+' · '+t.players+' zawodników · sezon '+t.season+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);margin-top:1px;">';
+      if(coach) html+='<span>I trener: <b>'+coach.name+'</b></span>';
+      if(coach2) html+='<span style="margin-left:10px;">II trener: <b>'+coach2.name+'</b></span>';
+      html+='</div>';
+      if(t.notes) html+='<div style="font-size:11px;color:var(--txt3);margin-top:2px;font-style:italic;">'+t.notes+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
+      html+='<button class="btn sm" onclick="oEditTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>';
+      html+='<button class="btn sm dan" onclick="delTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
+      html+='</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  // TRENERZY
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+  html+='<div style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;">Trenerzy klubu</div>';
+  html+='</div>';
+  if(!COACHES.length){
+    html+='<div class="card" style="text-align:center;padding:24px;"><div style="font-size:12px;color:var(--txt2);">Brak trenerów. Dodaj pierwszego trenera.</div></div>';
+  } else {
+    html+='<div style="display:flex;flex-direction:column;gap:8px;">';
+    COACHES.forEach((c,idx)=>{
+      var ini=c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      var myTeams=TEAMS.filter(t=>t.season===currentSeason&&(t.coach===c.id||t.coach2===c.id)).map(t=>t.name);
+      html+='<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px;">';
+      html+='<div style="width:36px;height:36px;border-radius:50%;background:var(--lg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--dg);flex-shrink:0;">'+ini+'</div>';
+      html+='<div style="flex:1;">';
+      html+='<div style="font-size:13px;font-weight:600;">'+c.name+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);">'+c.role+(c.since?' · od sezonu '+c.since:'')+'</div>';
+      if(myTeams.length) html+='<div style="font-size:11px;color:var(--g);margin-top:2px;">Drużyny: '+myTeams.join(', ')+'</div>';
+      if(c.phone||c.email) html+='<div style="font-size:11px;color:var(--txt3);">'+(c.phone||'')+(c.phone&&c.email?' · ':'')+( c.email||'')+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
+      html+='<button class="btn sm" onclick="oEditCoach('+idx+')">Edytuj</button>';
+      html+='<button class="btn sm dan" onclick="delCoach('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
+      html+='</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  // Historia sezonów
+  var histSeasons=[...new Set(TEAMS.map(t=>t.season))].filter(s=>s!==currentSeason).sort().reverse();
+  if(histSeasons.length){
+    html+='<div style="margin-top:20px;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Historia sezonów</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:6px;">';
+    histSeasons.forEach(s=>{
+      var sts=TEAMS.filter(t=>t.season===s);
+      html+='<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:12px;">';
+      html+='<div style="flex:1;"><div style="font-size:13px;font-weight:600;">Sezon '+s+'</div><div style="font-size:11px;color:var(--txt2);">'+sts.length+' drużyn: '+sts.map(t=>t.name).join(', ')+'</div></div>';
+      html+='<button class="btn sm" onclick="currentSeason=\''+s+'\';document.getElementById(\'season-sel\').value=\''+s+'\';rTeams();">Pokaż</button>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  body.innerHTML=html;
+  // Aktualizuj listę drużyn w kreatorze konspektów
+  updTeamSelect();
+}
+
+function updTeamSelect(){
+  var sel=document.getElementById('k-team');if(!sel)return;
+  var prev=sel.value;
+  sel.innerHTML='<option value="">— wybierz —</option>';
+  TEAMS.filter(t=>t.season===currentSeason).forEach(t=>{
+    var o=document.createElement('option');o.value=t.name;o.textContent=t.name;if(t.name===prev)o.selected=true;sel.appendChild(o);
+  });
+}
+
+function updCoachSelect(selId,currentVal){
+  var sel=document.getElementById(selId);if(!sel)return;
+  sel.innerHTML='<option value="">— brak —</option>';
+  COACHES.forEach(c=>{var o=document.createElement('option');o.value=c.id;o.textContent=c.name+' ('+c.role+')';if(c.id===currentVal)o.selected=true;sel.appendChild(o);});
+}
+
+function copySeasonTeams(fromSeason){
+  var src=TEAMS.filter(t=>t.season===fromSeason);
+  src.forEach(t=>{TEAMS.push({...t,id:genId(),season:currentSeason});});
+  saveLS();rTeams();ST('Skopiowano '+src.length+' drużyn do sezonu '+currentSeason);}
+
+// Modal drużyny
+function oAddTeam(){editTeamIdx=null;openTeamModal({id:genId(),name:'',color:TEAM_COLORS[TEAMS.length%TEAM_COLORS.length],category:'',players:16,season:currentSeason,coach:'',coach2:'',notes:''});}
+function oEditTeam(idx){editTeamIdx=idx;openTeamModal(TEAMS[idx]);}
+function openTeamModal(t){
+  var html='';
+  html+='<div class="fr"><label class="fl">Nazwa drużyny *</label><input class="fi" id="tm-name" value="'+( t.name||'')+'" placeholder="np. U14 Iskra A"/></div>';
+  html+='<div class="fr2">';
+  html+='<div><label class="fl">Kategoria wiekowa *</label><select class="fsel" id="tm-cat">';
+  AGE_CATS.forEach(a=>html+='<option value="'+a+'"'+(a===t.category?' selected':'')+'>'+a+'</option>');
+  html+='</select></div>';
+  html+='<div><label class="fl">Sezon *</label><select class="fsel" id="tm-season">';
+  SEASONS.forEach(s=>html+='<option value="'+s+'"'+(s===t.season?' selected':'')+'>'+s+'</option>');
+  html+='</select></div>';
+  html+='</div>';
+  html+='<div class="fr2">';
+  html+='<div><label class="fl">Liczba zawodników</label><input class="fi" id="tm-players" type="number" value="'+(t.players||16)+'" min="5" max="40"/></div>';
+  html+='<div><label class="fl">Kolor drużyny</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;">';
+  TEAM_COLORS.forEach(c=>html+='<div onclick="selTeamColor(\''+c+'\')" data-col="'+c+'" style="width:24px;height:24px;border-radius:50%;background:'+c+';cursor:pointer;border:2px solid '+(c===t.color?'var(--txt)':'transparent')+';transition:border-color .12s;"></div>');
+  html+='</div><input type="hidden" id="tm-color" value="'+(t.color||TEAM_COLORS[0])+'"/></div>';
+  html+='</div>';
+  html+='<div class="fr2">';
+  html+='<div><label class="fl">I Trener</label><select class="fsel" id="tm-coach"><option value="">— brak —</option>';
+  COACHES.forEach(c=>html+='<option value="'+c.id+'"'+(c.id===t.coach?' selected':'')+'>'+c.name+'</option>');
+  html+='</select></div>';
+  html+='<div><label class="fl">II Trener</label><select class="fsel" id="tm-coach2"><option value="">— brak —</option>';
+  COACHES.forEach(c=>html+='<option value="'+c.id+'"'+(c.id===t.coach2?' selected':'')+'>'+c.name+'</option>');
+  html+='</select></div>';
+  html+='</div>';
+  html+='<div class="fr"><label class="fl">Notatki</label><textarea class="fta" id="tm-notes" style="min-height:52px;" placeholder="Uwagi do drużyny, cele sezonu...">'+(t.notes||'')+'</textarea></div>';
+  document.getElementById('mo-team-body').innerHTML=html;
+  document.getElementById('mo-team-ttl').textContent=editTeamIdx===null?'Nowa drużyna':'Edytuj: '+(t.name||'drużyna');
+  document.getElementById('mo-team-del').style.display=editTeamIdx===null?'none':'inline-flex';
+  oM('mo-team');
+}
+function selTeamColor(c){document.getElementById('tm-color').value=c;document.querySelectorAll('[data-col]').forEach(el=>el.style.borderColor=el.dataset.col===c?'var(--txt)':'transparent');}
+function saveTeam(){
+  var name=document.getElementById('tm-name').value.trim();if(!name){ST('Podaj nazwę drużyny');return;}
+  var t={id:editTeamIdx===null?genId():TEAMS[editTeamIdx].id,name,category:document.getElementById('tm-cat').value,season:document.getElementById('tm-season').value,players:parseInt(document.getElementById('tm-players').value)||16,color:document.getElementById('tm-color').value,coach:document.getElementById('tm-coach').value,coach2:document.getElementById('tm-coach2').value,notes:document.getElementById('tm-notes').value};
+  if(editTeamIdx===null)TEAMS.push(t);else TEAMS[editTeamIdx]=t;
+  cM('mo-team');saveLS();rTeams();uD();ST('"'+name+'" '+(editTeamIdx===null?'dodana':'zaktualizowana'));
+}
+function delTeam(idx){if(!confirm('Usunąć drużynę "'+TEAMS[idx].name+'"?'))return;var n=TEAMS[idx].name;TEAMS.splice(idx,1);saveLS();rTeams();uD();ST('"'+n+'" usunięta');}
+function delTeamModal(){if(editTeamIdx===null)return;if(!confirm('Usunąć "'+TEAMS[editTeamIdx].name+'"?'))return;delTeam(editTeamIdx);cM('mo-team');}
+
+// Modal trenera
+function oAddCoach(){editCoachIdx=null;openCoachModal({id:genId(),name:'',role:'Trener asystent',phone:'',email:'',since:currentSeason});}
+function oEditCoach(idx){editCoachIdx=idx;openCoachModal(COACHES[idx]);}
+function openCoachModal(c){
+  var html='';
+  html+='<div class="fr"><label class="fl">Imię i nazwisko *</label><input class="fi" id="co-name" value="'+(c.name||'')+'" placeholder="np. Jan Kowalski"/></div>';
+  html+='<div class="fr2">';
+  html+='<div><label class="fl">Rola</label><select class="fsel" id="co-role">';
+  ['Trener główny','Trener asystent','Trener bramkarzy','Trener fizyczny','Dyrektor sportowy','Obserwator'].forEach(r=>html+='<option value="'+r+'"'+(r===c.role?' selected':'')+'>'+r+'</option>');
+  html+='</select></div>';
+  html+='<div><label class="fl">W klubie od</label><select class="fsel" id="co-since">';
+  SEASONS.forEach(s=>html+='<option value="'+s+'"'+(s===c.since?' selected':'')+'>'+s+'</option>');
+  html+='</select></div>';
+  html+='</div>';
+  html+='<div class="fr2"><div><label class="fl">Telefon</label><input class="fi" id="co-phone" value="'+(c.phone||'')+'" placeholder="+48 123 456 789"/></div><div><label class="fl">Email</label><input class="fi" id="co-email" value="'+(c.email||'')+'" placeholder="trener@iskra.pl"/></div></div>';
+  document.getElementById('mo-coach-body').innerHTML=html;
+  document.getElementById('mo-coach-ttl').textContent=editCoachIdx===null?'Nowy trener':'Edytuj: '+(c.name||'trener');
+  document.getElementById('mo-coach-del').style.display=editCoachIdx===null?'none':'inline-flex';
+  oM('mo-coach');
+}
+function saveCoach(){
+  var name=document.getElementById('co-name').value.trim();if(!name){ST('Podaj imię i nazwisko');return;}
+  var c={id:editCoachIdx===null?genId():COACHES[editCoachIdx].id,name,role:document.getElementById('co-role').value,since:document.getElementById('co-since').value,phone:document.getElementById('co-phone').value,email:document.getElementById('co-email').value};
+  if(editCoachIdx===null)COACHES.push(c);else COACHES[editCoachIdx]=c;
+  cM('mo-coach');saveLS();rTeams();ST('"'+name+'" '+(editCoachIdx===null?'dodany':'zaktualizowany'));
+}
+function delCoach(idx){if(!confirm('Usunąć trenera "'+COACHES[idx].name+'"?'))return;var n=COACHES[idx].name;COACHES.splice(idx,1);saveLS();rTeams();ST('"'+n+'" usunięty');}
+function delCoachModal(){if(editCoachIdx===null)return;if(!confirm('Usunąć "'+COACHES[editCoachIdx].name+'"?'))return;delCoach(editCoachIdx);cM('mo-coach');}
+
+// Zapis danych przy każdej zmianie
+var _origSaveK=saveK;
+saveK=function(){_origSaveK();saveLS();};
+var _origSC=sC;
+sC=function(){_origSC();saveLS();};
+var _origSE=sE;
+sE=function(isNew){_origSE(isNew);saveLS();};
+var _origUC=uC;
+uC=function(){_origUC();saveLS();};
+
+// ═══════════════ IOZ ═══════════════
+var GRADE_CFG={
+  A:{bg:'#E1F5EE',tc:'#085041',bc:'#5DCAA5',label:'Bezpieczny',desc:'Zawodnik spełnia wymagania — brak zagrożeń'},
+  B:{bg:'#FAEEDA',tc:'#633806',bc:'#E5A03B',label:'Zagrożony',desc:'Zawodnik wymaga poprawy — pod obserwacją'},
+  C:{bg:'#FAECE7',tc:'#712B13',bc:'#D85A30',label:'Opuszcza drużynę',desc:'Zawodnik nie spełnia wymagań — kończy współpracę'}
+};
+
+function calcAge(dob){if(!dob)return null;var d=new Date(dob),now=new Date();var age=now.getFullYear()-d.getFullYear();var m=now.getMonth()-d.getMonth();if(m<0||(m===0&&now.getDate()<d.getDate()))age--;return age;}
+function playerInitials(name){if(!name)return'??';var p=name.trim().split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase();}
+function playerColor(id){var cols=['#1D9E75','#378ADD','#7F77DD','#D85A30','#BA7517','#E24B4A','#639922'];var h=0;for(var i=0;i<(id||'').length;i++)h=(h*31+id.charCodeAt(i))&0xffffffff;return cols[Math.abs(h)%cols.length];}
+function lastGrade(p){if(!p.oceny||!p.oceny.length)return null;return p.oceny[p.oceny.length-1].grade;}
+function lastAnthro(p){if(!p.anthro||!p.anthro.length)return null;return p.anthro[p.anthro.length-1];}
+function fdShort(ds){if(!ds)return'';var p=ds.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+
+function rIOZ(){
+  var teamSel=document.getElementById('ioz-ff-team');
+  if(teamSel){
+    var prevT=teamSel.value;
+    teamSel.innerHTML='<option value="">Wszystkie drużyny</option>';
+    TEAMS.filter(t=>t.season===currentSeason).forEach(t=>{var o=document.createElement('option');o.value=t.name;o.textContent=t.name;if(t.name===prevT)o.selected=true;teamSel.appendChild(o);});
+  }
+  var q=((document.getElementById('ioz-search')||{}).value||'').toLowerCase();
+  var fTeam=(document.getElementById('ioz-ff-team')||{}).value||'';
+  var fGrade=(document.getElementById('ioz-ff-grade')||{}).value||'';
+
+  var filtered=PLAYERS.filter(p=>{
+    if(q&&!(p.name||'').toLowerCase().includes(q))return false;
+    if(fTeam&&p.team!==fTeam)return false;
+    if(fGrade){var lg=lastGrade(p);if(lg!==fGrade)return false;}
+    return true;
+  });
+
+  var lbl=document.getElementById('ioz-sub');
+  if(lbl)lbl.textContent=PLAYERS.length+' zawodników'+(filtered.length!==PLAYERS.length?' ('+filtered.length+' wyników)':'');
+
+  var grid=document.getElementById('ioz-grid');
+  if(!grid)return;
+
+  if(!filtered.length){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1;"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(PLAYERS.length?'Brak wyników':'Brak zawodników')+'</div><div style="font-size:12px;color:var(--txt2);">'+(PLAYERS.length?'Zmień filtry.':'Kliknij "+ Dodaj zawodnika" aby dodać pierwszego.')+'</div></div>';
+    return;
+  }
+
+  grid.innerHTML=filtered.map(p=>{
+    var idx=PLAYERS.indexOf(p);
+    var grade=lastGrade(p);
+    var gc=grade?GRADE_CFG[grade]:null;
+    var age=calcAge(p.dob);
+    var col=playerColor(p.id||p.name);
+    var ini=playerInitials(p.name);
+    var lastA=lastAnthro(p);
+    var lastOcena=p.oceny&&p.oceny.length?p.oceny[p.oceny.length-1]:null;
+    var hasHealth=p.healthNotes&&p.healthNotes.trim();
+
+    return '<div class="ioz-card" onclick="oViewPlayer('+idx+')">'
+      +'<div class="ioz-card-top">'
+      +'<div class="ioz-card-head">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<div class="ioz-av" style="background:'+col+';">'+ini+'</div>'
+      +'<div>'
+      +'<div class="ioz-name">'+p.name+(hasHealth?' <span title="Notatki zdrowotne" style="font-size:12px;">🏥</span>':'')+'</div>'
+      +'<div class="ioz-team">'+(p.team||'Brak drużyny')+(age?' · '+age+' lat':'')+(p.position?' · '+p.position:'')+'</div>'
+      +'</div>'
+      +'</div>'
+      +'<div class="ioz-grade '+(grade||'none')+'">'+(grade||'—')+'</div>'
+      +'</div>'
+      +(gc?'<div style="font-size:10px;font-weight:500;color:'+gc.tc+';background:'+gc.bg+';padding:3px 8px;border-radius:20px;display:inline-block;margin-bottom:6px;">'+gc.label+'</div>':'')
+      +'</div>'
+      +'<div class="ioz-stats">'
+      +'<div class="ioz-stat"><div class="ioz-stat-lbl">Wzrost</div><div class="ioz-stat-val">'+(lastA&&lastA.height?lastA.height+' cm':'—')+'</div></div>'
+      +'<div class="ioz-stat"><div class="ioz-stat-lbl">Waga</div><div class="ioz-stat-val">'+(lastA&&lastA.weight?lastA.weight+' kg':'—')+'</div></div>'
+      +'<div class="ioz-stat"><div class="ioz-stat-lbl">PHV</div><div class="ioz-stat-val">'+(lastA&&lastA.phv?lastA.phv:'—')+'</div></div>'
+      +'</div>'
+      +(lastOcena?'<div class="ioz-bottom"><div class="ioz-ocena-preview">'+(lastOcena.strengths||lastOcena.weaknesses||'Brak treści oceny')+'</div></div>':'')
+      +'</div>';
+  }).join('');
+}
+
+// ── FORMULARZ ZAWODNIKA (dane podstawowe + notatki zdrowotne) ──
+function oAddPlayer(){editPlayerIdx=null;renderPlayerForm({});oM('mo-player');}
+function oEditPlayer(idx){editPlayerIdx=idx;renderPlayerForm(PLAYERS[idx]);oM('mo-player');}
+
+function renderPlayerForm(p){
+  document.getElementById('mo-player-ttl').textContent=editPlayerIdx===null?'Nowy zawodnik':'Edytuj: '+(p.name||'zawodnik');
+  document.getElementById('mo-player-eb').innerHTML='';
+  var teamOpts='<option value="">— brak —</option>';
+  TEAMS.filter(t=>t.season===currentSeason).forEach(t=>{teamOpts+='<option value="'+t.name+'"'+(t.name===p.team?' selected':'')+'>'+t.name+'</option>';});
+
+  var html='<div class="sh">Dane podstawowe</div>';
+  html+='<div class="fr2"><div><label class="fl">Imię i nazwisko *</label><input class="fi" id="pl-name" value="'+(p.name||'')+'" placeholder="np. Jan Kowalski"/></div><div><label class="fl">Data urodzenia *</label><input class="fi" id="pl-dob" type="date" value="'+(p.dob||'')+'"/></div></div>';
+  html+='<div class="fr2"><div><label class="fl">Drużyna</label><select class="fsel" id="pl-team">'+teamOpts+'</select></div><div><label class="fl">Pozycja</label><input class="fi" id="pl-pos" value="'+(p.position||'')+'" placeholder="np. Środkowy pomocnik"/></div></div>';
+  html+='<div class="sh">Notatki zdrowotne</div>';
+  html+='<div class="fr"><textarea class="fta" id="pl-health" style="min-height:80px;" placeholder="Np. alergie, przebyte kontuzje, ograniczenia zdrowotne, leki, zalecenia lekarskie...">'+(p.healthNotes||'')+'</textarea></div>';
+
+  document.getElementById('mo-player-body').innerHTML=html;
+  var fl=editPlayerIdx!==null?'<button class="btn dan sm" onclick="delPlayerConfirm('+editPlayerIdx+')">Usuń zawodnika</button>':'<span></span>';
+  document.getElementById('mo-player-foot').innerHTML=fl+'<div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-player\')">Anuluj</button><button class="btn pri" onclick="savePlayer()">Zapisz zawodnika</button></div>';
+}
+
+function savePlayer(){
+  var name=(document.getElementById('pl-name')||{}).value||'';
+  if(!name.trim()){ST('Podaj imię i nazwisko');return;}
+  var isNew=editPlayerIdx===null;
+  var prev=isNew?{}:PLAYERS[editPlayerIdx];
+  var p={
+    id:isNew?genId():prev.id,
+    name:name.trim(),
+    dob:(document.getElementById('pl-dob')||{}).value||'',
+    team:(document.getElementById('pl-team')||{}).value||'',
+    position:(document.getElementById('pl-pos')||{}).value||'',
+    healthNotes:(document.getElementById('pl-health')||{}).value||'',
+    anthro:isNew?[]:([...(prev.anthro||[])]),
+    oceny:isNew?[]:([...(prev.oceny||[])])
+  };
+  if(isNew)PLAYERS.push(p);else PLAYERS[editPlayerIdx]=p;
+  cM('mo-player');saveLS();rIOZ();
+  ST('"'+p.name+'" '+(isNew?'dodany':'zaktualizowany'));
+}
+
+function delPlayerConfirm(idx){
+  if(!confirm('Usunąć zawodnika "'+PLAYERS[idx].name+'"? Wszystkie dane zostaną utracone.'))return;
+  var n=PLAYERS[idx].name;
+  PLAYERS.splice(idx,1);
+  cM('mo-player');saveLS();rIOZ();
+  ST('"'+n+'" usunięty');
+}
+
+// ── WIDOK ZAWODNIKA ──
+function oViewPlayer(idx){viewPlayerIdx=idx;renderPlayerView(idx);oM('mo-player');}
+
+function renderPlayerView(idx){
+  var p=PLAYERS[idx];
+  var grade=lastGrade(p);
+  var gc=grade?GRADE_CFG[grade]:null;
+  var age=calcAge(p.dob);
+  var col=playerColor(p.id||p.name);
+  var ini=playerInitials(p.name);
+
+  document.getElementById('mo-player-ttl').innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;min-width:0;">'
+    +'<div style="width:34px;height:34px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">'+ini+'</div>'
+    +'<div style="min-width:0;"><div style="font-size:14px;font-weight:600;">'+p.name+'</div>'+(p.team?'<div style="font-size:11px;color:var(--txt2);">'+p.team+(p.position?' · '+p.position:'')+'</div>':'')+'</div>'
+    +(gc?'<div class="ioz-grade '+grade+'" style="margin-left:auto;flex-shrink:0;">'+grade+'</div>':'')
+    +'</div>';
+
+  document.getElementById('mo-player-eb').innerHTML=
+    '<button class="btn sm" onclick="oEditPlayer('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>'
+    +'<button class="btn sm" onclick="oAddAnthro('+idx+')" style="margin-left:4px;"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Pomiar</button>'
+    +'<button class="btn sm pri" onclick="oAddOcena('+idx+')" style="margin-left:4px;"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 8l4 4 6-6"/></svg>Ocena</button>';
+
+  var html='';
+
+  // ── Sekcja 1: Dane podstawowe ──
+  html+='<div class="sh" style="margin-top:0;">Dane podstawowe</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">';
+  html+='<div class="vf" style="margin-bottom:0;"><div class="vl">Wiek</div><div class="vv">'+(age!==null?age+' lat':'—')+'</div></div>';
+  html+='<div class="vf" style="margin-bottom:0;"><div class="vl">Data urodzenia</div><div class="vv">'+(p.dob?fdShort(p.dob):'—')+'</div></div>';
+  html+='<div class="vf" style="margin-bottom:0;"><div class="vl">Pozycja</div><div class="vv '+(p.position?'':'m')+'">'+(p.position||'—')+'</div></div>';
+  html+='<div class="vf" style="margin-bottom:0;"><div class="vl">Drużyna</div><div class="vv '+(p.team?'':'m')+'">'+(p.team||'—')+'</div></div>';
+  html+='</div>';
+
+  // ── Sekcja 2: Notatki zdrowotne ──
+  if(p.healthNotes&&p.healthNotes.trim()){
+    html+='<div style="background:#FFF8F0;border:1px solid #F0C97A;border-radius:var(--r2);padding:10px 12px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;">';
+    html+='<span style="font-size:18px;line-height:1;">🏥</span>';
+    html+='<div><div style="font-size:10px;font-weight:600;color:#8A5F00;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Notatki zdrowotne</div>';
+    html+='<div style="font-size:12px;color:var(--txt);line-height:1.6;">'+p.healthNotes.replace(/\n/g,'<br>')+'</div></div>';
+    html+='</div>';
+  }
+
+  // ── Sekcja 3: Dane antropometryczne ──
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+  html+='<div class="sh" style="margin:0;border:none;padding:0;">Dane antropometryczne</div>';
+  html+='<button class="btn sm" onclick="oAddAnthro('+idx+')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj pomiar</button>';
+  html+='</div>';
+
+  if(!p.anthro||!p.anthro.length){
+    html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:14px;text-align:center;margin-bottom:14px;">';
+    html+='<div style="font-size:12px;color:var(--txt2);margin-bottom:6px;">Brak pomiarów antropometrycznych</div>';
+    html+='<button class="btn sm pri" onclick="oAddAnthro('+idx+')">+ Dodaj pierwszy pomiar</button>';
+    html+='</div>';
+  } else {
+    // Tabela pomiarów
+    html+='<div style="border:1px solid var(--brd);border-radius:var(--r2);overflow:hidden;margin-bottom:14px;">';
+    html+='<div style="display:grid;grid-template-columns:90px 1fr 1fr 1fr 1fr 60px;background:var(--sur2);border-bottom:1px solid var(--brd);">';
+    ['Data','Wzrost','Waga','D. tułowia','PHV',''].forEach(h2=>{
+      html+='<div style="padding:6px 10px;font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;">'+h2+'</div>';
+    });
+    html+='</div>';
+    var sortedA=[...p.anthro].reverse();
+    sortedA.forEach((a,si)=>{
+      var realIdx=p.anthro.length-1-si;
+      var isLatest=si===0;
+      html+='<div style="display:grid;grid-template-columns:90px 1fr 1fr 1fr 1fr 60px;border-bottom:1px solid var(--brd);background:'+(isLatest?'var(--lg)':'var(--sur')+');">';
+      html+='<div style="padding:7px 10px;font-size:11px;font-weight:'+(isLatest?'600':'400')+';color:'+(isLatest?'var(--dg)':'var(--txt2)')+';display:flex;align-items:center;">'+fdShort(a.date)+'</div>';
+      html+='<div style="padding:7px 10px;font-size:12px;font-weight:600;color:var(--txt);display:flex;align-items:center;">'+(a.height?a.height+' <span style="font-size:9px;color:var(--txt2);">cm</span>':'—')+'</div>';
+      html+='<div style="padding:7px 10px;font-size:12px;font-weight:600;color:var(--txt);display:flex;align-items:center;">'+(a.weight?a.weight+' <span style="font-size:9px;color:var(--txt2);">kg</span>':'—')+'</div>';
+      html+='<div style="padding:7px 10px;font-size:12px;font-weight:600;color:var(--txt);display:flex;align-items:center;">'+(a.trunk?a.trunk+' <span style="font-size:9px;color:var(--txt2);">cm</span>':'—')+'</div>';
+      html+='<div style="padding:7px 10px;font-size:12px;font-weight:600;display:flex;align-items:center;color:'+(a.phv?(parseFloat(a.phv)<0?'#185FA5':'#712B13'):'var(--txt)')+'">'+(a.phv||'—')+'</div>';
+      html+='<div style="padding:7px 8px;display:flex;align-items:center;justify-content:flex-end;"><button class="btn sm dan" style="padding:2px 6px;font-size:10px;" onclick="delAnthro('+idx+','+realIdx+')">×</button></div>';
+      html+='</div>';
+    });
+    html+='</div>';
+
+    // Mini wykres wzrostu jeśli >=2 pomiarów
+    if(p.anthro.length>=2){
+      var heights=p.anthro.filter(a=>a.height).map(a=>({d:a.date,v:parseFloat(a.height)})).sort((a,b)=>a.d>b.d?1:-1);
+      if(heights.length>=2){
+        var minH=Math.min(...heights.map(h=>h.v))-5;
+        var maxH=Math.max(...heights.map(h=>h.v))+5;
+        var W2=300,H2=60;
+        html+='<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r2);padding:10px 12px;margin-bottom:14px;">';
+        html+='<div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;margin-bottom:6px;">Trend wzrostu (cm)</div>';
+        html+='<svg viewBox="0 0 '+W2+' '+H2+'" style="width:100%;height:60px;">';
+        var pts=heights.map((h,i)=>{var x=i/(heights.length-1)*(W2-20)+10;var y=H2-(h.v-minH)/(maxH-minH)*(H2-10)-5;return {x,y,v:h.v,d:h.d};});
+        html+='<polyline points="'+pts.map(p2=>p2.x+','+p2.y).join(' ')+'" fill="none" stroke="var(--g)" stroke-width="1.5" stroke-linejoin="round"/>';
+        pts.forEach(p2=>{html+='<circle cx="'+p2.x+'" cy="'+p2.y+'" r="3" fill="var(--g)"/><text x="'+p2.x+'" y="'+(p2.y-6)+'" font-size="8" fill="var(--txt2)" text-anchor="middle">'+p2.v+'</text>';});
+        html+='</svg></div>';
+      }
+    }
+  }
+
+  // ── Sekcja 4: Aktualna ocena IOZ ──
+  if(gc){
+    html+='<div style="background:'+gc.bg+';border:1px solid '+gc.bc+';border-radius:var(--r2);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">';
+    html+='<div style="width:44px;height:44px;border-radius:10px;background:white;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:'+gc.tc+';">'+grade+'</div>';
+    html+='<div><div style="font-size:13px;font-weight:600;color:'+gc.tc+';">'+gc.label+'</div><div style="font-size:11px;color:'+gc.tc+';opacity:.8;">'+gc.desc+'</div></div>';
+    html+='</div>';
+  }
+
+  // ── Sekcja 5: Historia ocen ──
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+  html+='<div class="sh" style="margin:0;border:none;padding:0;">Historia ocen'+(p.oceny&&p.oceny.length?' ('+p.oceny.length+')':'')+'</div>';
+  html+='<button class="btn sm pri" onclick="oAddOcena('+idx+')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Nowa ocena</button>';
+  html+='</div>';
+
+  if(p.oceny&&p.oceny.length){
+    var sortedO=[...p.oceny].reverse();
+    sortedO.forEach((oc,i)=>{
+      var realIdx=p.oceny.length-1-i;
+      var ogc=GRADE_CFG[oc.grade]||{bg:'var(--sur2)',tc:'var(--txt2)',bc:'var(--brd)'};
+      html+='<div class="ioz-hist-item">';
+      html+='<div class="ioz-hist-grade '+oc.grade+'">'+oc.grade+'</div>';
+      html+='<div style="flex:1;min-width:0;">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">';
+      html+='<div style="display:flex;align-items:center;gap:8px;"><div style="font-size:11px;font-weight:600;color:'+ogc.tc+';">'+ogc.label+'</div><div style="font-size:10px;color:var(--txt3);">'+(oc.date?fdShort(oc.date):'')+(oc.coach?' · '+oc.coach:'')+'</div></div>';
+      html+='<button class="btn sm dan" style="padding:2px 6px;font-size:10px;" onclick="delOcena('+idx+','+realIdx+')">Usuń</button>';
+      html+='</div>';
+      if(oc.strengths)html+='<div style="margin-bottom:6px;"><div style="font-size:9px;font-weight:600;color:var(--g);text-transform:uppercase;margin-bottom:2px;">✓ Mocne strony / Szanse</div><div style="font-size:12px;line-height:1.5;">'+oc.strengths.replace(/\n/g,'<br>')+'</div></div>';
+      if(oc.weaknesses)html+='<div style="margin-bottom:6px;"><div style="font-size:9px;font-weight:600;color:var(--red);text-transform:uppercase;margin-bottom:2px;">✗ Słabe strony / Zagrożenia</div><div style="font-size:12px;line-height:1.5;">'+oc.weaknesses.replace(/\n/g,'<br>')+'</div></div>';
+      if(oc.notes)html+='<div><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;margin-bottom:2px;">Uwagi / Zalecenia</div><div style="font-size:12px;color:var(--txt2);line-height:1.5;">'+oc.notes.replace(/\n/g,'<br>')+'</div></div>';
+      html+='</div></div>';
+    });
+  } else {
+    html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:16px;text-align:center;">';
+    html+='<div style="font-size:12px;color:var(--txt2);margin-bottom:6px;">Brak ocen dla tego zawodnika</div>';
+    html+='<button class="btn sm pri" onclick="oAddOcena('+idx+')">+ Dodaj pierwszą ocenę</button>';
+    html+='</div>';
+  }
+
+  document.getElementById('mo-player-body').innerHTML=html;
+  document.getElementById('mo-player-foot').innerHTML=
+    '<button class="btn dan sm" onclick="delPlayerConfirm('+idx+')">Usuń zawodnika</button>'
+    +'<button class="btn" onclick="cM(\'mo-player\')">Zamknij</button>';
+}
+
+// ── POMIAR ANTROPOMETRYCZNY ──
+function oAddAnthro(playerIdx){
+  viewPlayerIdx=playerIdx;
+  var p=PLAYERS[playerIdx];
+  var lastA=lastAnthro(p)||{};
+  var today=new Date().toISOString().slice(0,10);
+
+  document.getElementById('mo-ocena-ttl').textContent='Nowy pomiar antropometryczny — '+p.name;
+
+  var html='';
+  html+='<div class="ioz-phv-info" style="margin-bottom:14px;">Wypełnij pola które są dostępne. PHV możesz wyliczyć metodą Mirwalda lub wpisać ręcznie. Wartość PHV &lt;0 = przed szczytem wzrostu, &gt;0 = po szczycie.</div>';
+
+  html+='<div class="fr"><label class="fl">Data pomiaru *</label><input class="fi" id="an-date" type="date" value="'+today+'"/></div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
+  html+='<div><label class="fl">Wzrost (cm)</label><input class="fi" id="an-height" type="number" step="0.1" value="'+(lastA.height||'')+'" placeholder="np. 165.5"/></div>';
+  html+='<div><label class="fl">Waga (kg)</label><input class="fi" id="an-weight" type="number" step="0.1" value="'+(lastA.weight||'')+'" placeholder="np. 55.2"/></div>';
+  html+='</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
+  html+='<div><label class="fl">Długość tułowia (cm)</label><input class="fi" id="an-trunk" type="number" step="0.1" value="'+(lastA.trunk||'')+'" placeholder="np. 48.0"/></div>';
+  html+='<div><label class="fl">PHV <span style="font-weight:400;color:var(--txt3);">(wskaźnik)</span></label><input class="fi" id="an-phv" value="'+(lastA.phv||'')+'" placeholder="np. -1.2 lub +0.5"/></div>';
+  html+='</div>';
+  html+='<div class="fr"><label class="fl">Uwagi do pomiaru</label><textarea class="fta" id="an-notes" style="min-height:52px;" placeholder="np. Pomiar po treningu, stan zdrowia..."></textarea></div>';
+
+  document.getElementById('mo-ocena-body').innerHTML=html;
+  // Zamień przyciski stopy na Zapisz pomiar
+  var mf=document.querySelector('#mo-ocena .mf');
+  if(mf)mf.innerHTML='<button class="btn" onclick="cM(\'mo-ocena\');oViewPlayer(viewPlayerIdx);">Anuluj</button><button class="btn pri" onclick="saveAnthro()">Zapisz pomiar</button>';
+
+  cM('mo-player');
+  oM('mo-ocena');
+}
+
+function saveAnthro(){
+  if(viewPlayerIdx===null)return;
+  var date=(document.getElementById('an-date')||{}).value||new Date().toISOString().slice(0,10);
+  var height=parseFloat((document.getElementById('an-height')||{}).value)||null;
+  var weight=parseFloat((document.getElementById('an-weight')||{}).value)||null;
+  var trunk=parseFloat((document.getElementById('an-trunk')||{}).value)||null;
+  var phv=((document.getElementById('an-phv')||{}).value||'').trim();
+  var notes=((document.getElementById('an-notes')||{}).value||'').trim();
+
+  if(!height&&!weight&&!trunk&&!phv){ST('Podaj co najmniej jeden pomiar');return;}
+
+  var p=PLAYERS[viewPlayerIdx];
+  if(!p.anthro)p.anthro=[];
+  p.anthro.push({date,height,weight,trunk,phv,notes});
+
+  // przywróć stopkę modalną oceny
+  var mf=document.querySelector('#mo-ocena .mf');
+  if(mf)mf.innerHTML='<button class="btn" onclick="cM(\'mo-ocena\')">Anuluj</button><button class="btn pri" onclick="saveOcena()">Zapisz ocenę</button>';
+
+  cM('mo-ocena');
+  saveLS();rIOZ();
+  renderPlayerView(viewPlayerIdx);
+  oM('mo-player');
+  ST('Pomiar zapisany ('+(p.anthro.length+' pomiarów razem').replace('(','').replace(')','')+')');}
+
+function delAnthro(playerIdx,anthroIdx){
+  if(!confirm('Usunąć ten pomiar?'))return;
+  PLAYERS[playerIdx].anthro.splice(anthroIdx,1);
+  saveLS();rIOZ();
+  renderPlayerView(playerIdx);
+  ST('Pomiar usunięty');
+}
+
+// ── OCENA IOZ ──
+function oAddOcena(playerIdx){
+  viewPlayerIdx=playerIdx;
+  var p=PLAYERS[playerIdx];
+  var lastG=lastGrade(p)||'A';
+  var coachOpts=COACHES.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join('');
+  var today=new Date().toISOString().slice(0,10);
+
+  document.getElementById('mo-ocena-ttl').textContent='Nowa ocena IOZ — '+p.name;
+
+  var html='<div class="sh" style="margin-top:0;">Ocena ogólna A–C</div>';
+  html+='<div class="ioz-grade-sel" id="ioz-grade-btns">';
+  ['A','B','C'].forEach(g=>{
+    var gc=GRADE_CFG[g];
+    html+='<div class="ioz-grade-btn '+g+(g===lastG?' sel':'')+'" onclick="selGrade(\''+g+'\')">'
+      +g+'<div class="ioz-grade-label">'+gc.label+'</div></div>';
+  });
+  html+='</div><input type="hidden" id="oc-grade" value="'+lastG+'"/>';
+  html+='<div class="fr2"><div><label class="fl">Data oceny</label><input class="fi" id="oc-date" type="date" value="'+today+'"/></div><div><label class="fl">Oceniający trener</label><select class="fsel" id="oc-coach"><option value="">— wybierz —</option>'+coachOpts+'</select></div></div>';
+  html+='<div class="sh" style="color:var(--g);">✓ Mocne strony / Szanse</div>';
+  html+='<div class="fr"><textarea class="fta" id="oc-strengths" style="min-height:80px;" placeholder="• Dobra technika przyjęcia piłki&#10;• Dynamiczny w grze 1v1&#10;• Duże zaangażowanie na treningach"></textarea></div>';
+  html+='<div class="sh" style="color:var(--red);">✗ Słabe strony / Zagrożenia</div>';
+  html+='<div class="fr"><textarea class="fta" id="oc-weaknesses" style="min-height:80px;" placeholder="• Słaba gra głową&#10;• Problemy z prawą nogą&#10;• Niska dyspozycyjność na treningach"></textarea></div>';
+  html+='<div class="fr"><label class="fl">Dodatkowe uwagi / Zalecenia</label><textarea class="fta" id="oc-notes" style="min-height:60px;" placeholder="Zalecenia do pracy własnej, priorytety na następny okres..."></textarea></div>';
+
+  // Przywróć stopkę oceny
+  var mf=document.querySelector('#mo-ocena .mf');
+  if(mf)mf.innerHTML='<button class="btn" onclick="cM(\'mo-ocena\')">Anuluj</button><button class="btn pri" onclick="saveOcena()">Zapisz ocenę</button>';
+
+  document.getElementById('mo-ocena-body').innerHTML=html;
+  cM('mo-player');
+  oM('mo-ocena');
+}
+
+function selGrade(g){
+  document.getElementById('oc-grade').value=g;
+  document.querySelectorAll('.ioz-grade-btn').forEach(b=>{b.classList.toggle('sel',b.classList.contains(g));});
+}
+
+function saveOcena(){
+  if(viewPlayerIdx===null)return;
+  var grade=(document.getElementById('oc-grade')||{}).value;
+  if(!grade){ST('Wybierz ocenę A / B / C');return;}
+  var p=PLAYERS[viewPlayerIdx];
+  var ocena={
+    grade,
+    date:(document.getElementById('oc-date')||{}).value||new Date().toISOString().slice(0,10),
+    coach:(document.getElementById('oc-coach')||{}).value||'',
+    strengths:(document.getElementById('oc-strengths')||{}).value||'',
+    weaknesses:(document.getElementById('oc-weaknesses')||{}).value||'',
+    notes:(document.getElementById('oc-notes')||{}).value||''
+  };
+  if(!p.oceny)p.oceny=[];
+  p.oceny.push(ocena);
+  cM('mo-ocena');saveLS();rIOZ();
+  renderPlayerView(viewPlayerIdx);
+  oM('mo-player');
+  ST('Ocena zapisana dla '+p.name);
+}
+
+function delOcena(playerIdx,ocenaIdx){
+  if(!confirm('Usunąć tę ocenę?'))return;
+  PLAYERS[playerIdx].oceny.splice(ocenaIdx,1);
+  saveLS();rIOZ();
+  renderPlayerView(playerIdx);
+  ST('Ocena usunięta');
+}
+
+// ═══════════════ INIT ═══════════════
+loadLS();
+if(!TEAMS.length)TEAMS=getDefaultTeams();
+if(!COACHES.length)COACHES=getDefaultCoaches();
+calYear=TODAY.getFullYear();calMonth=TODAY.getMonth();
+document.addEventListener('click',function(e){if(!e.target.closest('.aer'))document.querySelectorAll('.dbr').forEach(r=>r.classList.remove('op'));});
+sT('macro');rYL();rCal();rTeams();rIOZ();uD();
+// Autozapis co 30 sekund
+setInterval(saveLS,30000);
+</script>
+</body>
+</html>
