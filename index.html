@@ -1603,7 +1603,7 @@ function oPreviewPDF(i){
           +'</div>'
           +'<div style="display:flex;gap:7px;align-items:center;flex-shrink:0;">'
             +'<span style="font-size:11px;color:var(--txt3);">Kliknij pole w podglądzie lub edytuj po prawej</span>'
-            +'<button class="btn" onclick="cM('mo-pdf-preview')">✕ Zamknij</button>'
+            +'<button class="btn" onclick="cM(\'mo-pdf-preview\')">✕ Zamknij</button>'
             +'<button class="btn pri" onclick="savePPAndDownload()" style="gap:6px;padding:7px 14px;">'
               +'<svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M8 3v10M3 11l5 3 5-3"/></svg>'
               +'Pobierz PDF'
@@ -1615,6 +1615,7 @@ function oPreviewPDF(i){
           +'<div class="pprev-right" id="mpp-edit"></div>'
         +'</div>'
       +'</div>';
+    mo.addEventListener('click',function(e){if(e.target===mo)cM('mo-pdf-preview');});
     document.body.appendChild(mo);
   }
 
