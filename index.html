@@ -1592,6 +1592,55 @@ function buildPDF(k){
   var AM=[239,159,39],PU=[127,119,221];
   var PC={warm:AM,main:G,cool:PU};
 
+  // ── POLSKIE ZNAKI: transkrypcja dla jsPDF (helvetica nie obsługuje UTF-8) ──
+  function pl(s){
+    if(!s)return'';
+    return String(s)
+      .replace(/À/g,'A').replace(/à/g,'a')
+      .replace(/Á/g,'A').replace(/á/g,'a')
+      .replace(/Â/g,'A').replace(/â/g,'a')
+      .replace(/Ã/g,'A').replace(/ã/g,'a')
+      .replace(/Ä/g,'A').replace(/ä/g,'a')
+      .replace(/Æ/g,'AE').replace(/æ/g,'ae')
+      .replace(/Ç/g,'C').replace(/ç/g,'c')
+      .replace(/È/g,'E').replace(/è/g,'e')
+      .replace(/É/g,'E').replace(/é/g,'e')
+      .replace(/Ê/g,'E').replace(/ê/g,'e')
+      .replace(/Ë/g,'E').replace(/ë/g,'e')
+      .replace(/Ì/g,'I').replace(/ì/g,'i')
+      .replace(/Í/g,'I').replace(/í/g,'i')
+      .replace(/Î/g,'I').replace(/î/g,'i')
+      .replace(/Ï/g,'I').replace(/ï/g,'i')
+      .replace(/Ñ/g,'N').replace(/ñ/g,'n')
+      .replace(/Ò/g,'O').replace(/ò/g,'o')
+      .replace(/Ó/g,'O').replace(/ó/g,'o')
+      .replace(/Ô/g,'O').replace(/ô/g,'o')
+      .replace(/Õ/g,'O').replace(/õ/g,'o')
+      .replace(/Ö/g,'O').replace(/ö/g,'o')
+      .replace(/Ù/g,'U').replace(/ù/g,'u')
+      .replace(/Ú/g,'U').replace(/ú/g,'u')
+      .replace(/Û/g,'U').replace(/û/g,'u')
+      .replace(/Ü/g,'U').replace(/ü/g,'u')
+      .replace(/Ý/g,'Y').replace(/ý/g,'y')
+      // Polskie
+      .replace(/Ą/g,'A').replace(/ą/g,'a')  // Ą ą
+      .replace(/Ć/g,'C').replace(/ć/g,'c')  // Ć ć
+      .replace(/Ę/g,'E').replace(/ę/g,'e')  // Ę ę
+      .replace(/Ł/g,'L').replace(/ł/g,'l')  // Ł ł
+      .replace(/Ń/g,'N').replace(/ń/g,'n')  // Ń ń
+      .replace(/Ó/g,'O').replace(/ó/g,'o')  // Ó ó
+      .replace(/Ś/g,'S').replace(/ś/g,'s')  // Ś ś
+      .replace(/Ź/g,'Z').replace(/ź/g,'z')  // Ź ź
+      .replace(/Ż/g,'Z').replace(/ż/g,'z')  // Ż ż
+      // Słownik polskich słów (zachowanie sensu)
+      .replace(/Ćwiczenie/g,'Cwiczenie').replace(/ćwiczenie/g,'cwiczenie')
+      .replace(/Ćwiczeń/g,'Cwiczen').replace(/ćwiczeń/g,'cwiczen')
+      .replace(/Część/g,'Czesc').replace(/część/g,'czesc')
+      .replace(/Drużyna/g,'Druzyna').replace(/drużyna/g,'druzyna')
+      .replace(/Drużyny/g,'Druzyny').replace(/drużyny/g,'druzyny')
+      .replace(/Ćw\./g,'Cw.');
+  }
+
   // Pomocnicze
   function rect(x,y,w,h,fill,stroke,lw){
     if(w<=0||h<=0)return;
@@ -1599,25 +1648,31 @@ function buildPDF(k){
     doc.rect(x,y,w,h,'F');
     if(stroke){doc.setDrawColor(stroke[0],stroke[1],stroke[2]);doc.setLineWidth(lw||0.25);doc.rect(x,y,w,h,'S');}
   }
+  function setF(sz,bold){doc.setFontSize(sz);doc.setFont('times',bold?'bold':'normal');}
+  function setC(r,g2,b){doc.setTextColor(r,g2,b);}
+  function txt(x,y,s,align){
+    var str=pl(String(s||''));
+    if(align)doc.text(str,x,y,{align:align});
+    else doc.text(str,x,y);
+  }
   function cell(x,y,w,h,label,lines,bg){
     if(w<=0||h<=0)return;
     rect(x,y,w,h,bg||LGRAY,BRD,0.25);
-    doc.setFontSize(5);doc.setFont('helvetica','normal');doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
-    doc.text(String(label||''),x+1.5,y+3.2);
-    doc.setFontSize(7);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
+    setF(5,false);setC(GRAY[0],GRAY[1],GRAY[2]);
+    txt(x+1.5,y+3.2,label);
+    setF(7,false);setC(DARK[0],DARK[1],DARK[2]);
     var cy=y+6.5;
     (lines||[]).forEach(function(l){
       if(!l||cy>y+h-1)return;
-      var s=String(l);
-      // Obcinaj jeśli za długi
-      while(doc.getTextWidth(s)>w-3&&s.length>3)s=s.slice(0,-2)+'…';
-      doc.text(s,x+1.5,cy);
+      var s=pl(String(l));
+      while(doc.getTextWidth(s)>w-3&&s.length>3)s=s.slice(0,-2)+'...';
+      txt(x+1.5,cy,s);
       cy+=3.8;
     });
   }
-  function splitText(txt,maxW){
-    if(!txt)return['—'];
-    var words=String(txt).replace(/\n/g,' ').split(' ');
+  function splitText(txt2,maxW){
+    if(!txt2)return['—'];
+    var words=pl(String(txt2)).replace(/\n/g,' ').split(' ');
     var lines=[],cur='';
     words.forEach(function(w){
       var test=cur?cur+' '+w:w;
@@ -1628,69 +1683,104 @@ function buildPDF(k){
     return lines.length?lines:['—'];
   }
 
-  // Dane
+  // Numer sesji (indeks w KONSP)
+  var sessionNum=1;
+  if(typeof KONSP!=='undefined'){
+    var ki=KONSP.findIndex(function(x){return x.savedAt===k.savedAt||(x.title===k.title&&x.date===k.date);});
+    sessionNum=ki>=0?(KONSP.length-ki):KONSP.length;
+  }
+
+  // Dane ćwiczeń
   var phases=k.phases||{warm:[],main:[],cool:[]};
   var allEx=[];
   ['warm','main','cool'].forEach(function(ph){
     (phases[ph]||[]).forEach(function(e){allEx.push(Object.assign({},e,{phase:ph}));});
   });
-  if(!allEx.length)allEx=[{name:'Brak ćwiczeń',time:0,phase:'main',desc:'',notes:'',sp:'',pk:'',w:'',u:''}];
+  if(!allEx.length)allEx=[{name:'Brak cwiczen',time:0,phase:'main',desc:'',notes:'',sp:'',pk:'',w:'',u:''}];
 
   var n=allEx.length;
   var cols=n<=1?1:n<=4?2:3;
   var rows=Math.ceil(n/cols);
 
-  // ── NAGŁÓWEK ──
-  rect(ML,MT,CW,10,G);
-  doc.setFontSize(11);doc.setFont('helvetica','bold');
-  doc.setTextColor(255,255,255);
-  doc.text(String(k.title||'Konspekt treningowy').slice(0,60),ML+4,MT+7);
-  doc.setFontSize(6.5);doc.setFont('helvetica','normal');
-  doc.text('MKS Iskra Pszczyna · '+new Date().toLocaleDateString('pl-PL'),W-MR-3,MT+7,{align:'right'});
+  // ══════════════════════════════════════════
+  // ── NAGŁÓWEK ── wysoki panel 18mm
+  // ══════════════════════════════════════════
+  var HDR_H=18;
+  rect(ML,MT,CW,HDR_H,G);
 
-  var y=MT+11;
+  // Logo klubu — koło z inicjałami "MKS"
+  var lx=ML+4, ly=MT+HDR_H/2;
+  doc.setFillColor(255,255,255);
+  doc.circle(lx,ly,6,'F');
+  doc.setFillColor(G[0],G[1],G[2]);
+  doc.circle(lx,ly,5,'F');
+  setF(5,true);setC(255,255,255);
+  doc.text('MKS',lx,ly+1.8,{align:'center'});
 
-  // ── META 1: Data, Drużyna, I Trener, II Trener, Czas, Miejsce ──
+  // Nazwa klubu
+  setF(10,true);setC(255,255,255);
+  txt(ML+14,MT+7,'MKS Iskra Pszczyna');
+  // Faza / tytuł konspektu
+  setF(7,false);setC(LG[0],LG[1],LG[2]);
+  txt(ML+14,MT+14,pl(k.faza||'')+(k.temat?' / '+pl(k.temat):''));
+
+  // Dane po prawej w 4 kolumnach
+  var rx=ML+CW*0.42;
+  var rw=(CW-(rx-ML)-2)/4;
+
+  function hdrCell(x,label,value){
+    // Mini pole w nagłówku
+    doc.setFillColor(DG[0],DG[1],DG[2]);
+    doc.rect(x,MT+1,rw-1,HDR_H-2,'F');
+    setF(4.5,false);setC(LG[0],LG[1],LG[2]);
+    txt(x+1.5,MT+5,label);
+    setF(7.5,true);setC(255,255,255);
+    var vs=pl(String(value||'—'));
+    while(doc.getTextWidth(vs)>rw-4&&vs.length>3)vs=vs.slice(0,-2)+'...';
+    txt(x+1.5,MT+12,vs);
+  }
+
+  var dateStr=(k.date||'').split('-').reverse().join('.');
+  hdrCell(rx,          'DATA',        dateStr);
+  hdrCell(rx+rw,       'I TRENER',    k.coach||'—');
+  hdrCell(rx+rw*2,     'II TRENER',   k.coach2||'—');
+  hdrCell(rx+rw*3,     'NR SESJI',    'S'+sessionNum);
+
+  var y=MT+HDR_H+1;
+
+  // ── META: Drużyna, Czas, Miejsce, Mikrocykl, Mezocykl ──
+  var R1H=7;
   var m1=[
-    ['DATA',   (k.date||'').split('-').reverse().join('.'), CW*0.10],
-    ['DRUŻYNA', k.team||'—',                               CW*0.16],
-    ['I TRENER',k.coach||'—',                              CW*0.18],
-    ['II TRENER',k.coach2||'—',                            CW*0.18],
-    ['CZAS',   (k.dur||90)+' min',                         CW*0.09],
-    ['MIEJSCE', k.place||'—',                              CW*0.29],
+    ['DRUZYNA',  k.team||'—',         CW*0.20],
+    ['CZAS',     (k.dur||90)+' min',  CW*0.09],
+    ['MIEJSCE',  k.place||'—',        CW*0.25],
+    ['MIKROCYKL',k.mikro||'—',        CW*0.13],
+    ['MEZOCYKL', k.mezo||'—',         CW*0.33],
   ];
   var cx=ML;
-  m1.forEach(function(m){cell(cx,y,m[2],7,m[0],[String(m[1]).slice(0,32)]);cx+=m[2];});
-  y+=7.5;
-
-  // ── META 2: Mikrocykl, Mezocykl, Faza, Temat ──
-  var m2=[
-    ['MIKROCYKL', k.mikro||'—',  CW*0.12],
-    ['MEZOCYKL',  k.mezo||'—',   CW*0.22],
-    ['FAZA',      k.faza||'—',   CW*0.14],
-    ['TEMAT',     k.temat||'—',  CW*0.52],
-  ];
-  cx=ML;
-  m2.forEach(function(m){cell(cx,y,m[2],6.5,m[0],[String(m[1]).slice(0,55)]);cx+=m[2];});
-  y+=7;
+  m1.forEach(function(m){
+    cell(cx,y,m[2],R1H,m[0],[pl(String(m[1])).slice(0,32)]);
+    cx+=m[2];
+  });
+  y+=R1H+0.6;
 
   // ── CEL GŁÓWNY ──
   rect(ML,y,CW,7,DG);
-  doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-  doc.text('CEL: '+String(k.goal||'—').slice(0,115),ML+3,y+4.8);
+  setF(7,true);setC(255,255,255);
+  txt(ML+3,y+4.8,'CEL: '+pl(k.goal||'—').slice(0,115));
   y+=7.5;
 
   // ── CELE SZCZEGÓŁOWE ──
   if(k.goals&&k.goals.trim()){
     var gLines=[];
-    k.goals.split('\n').forEach(function(l){if(l.trim())gLines.push(l.trim().slice(0,110));});
+    k.goals.split('\n').forEach(function(l){if(l.trim())gLines.push(pl(l.trim()).slice(0,110));});
     gLines=gLines.slice(0,4);
     var gh=Math.max(6,gLines.length*3.6+4);
     rect(ML,y,CW,gh,LGRAY,BRD,0.25);
-    doc.setFontSize(4.5);doc.setFont('helvetica','normal');doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
-    doc.text('CELE SZCZEGÓŁOWE',ML+1.5,y+3);
-    doc.setFontSize(6.5);doc.setTextColor(DARK[0],DARK[1],DARK[2]);
-    gLines.forEach(function(l,i){doc.text(l,ML+1.5,y+6+i*3.6);});
+    setF(4.5,false);setC(GRAY[0],GRAY[1],GRAY[2]);
+    txt(ML+1.5,y+3,'CELE SZCZEGOLOWE');
+    setF(6.5,false);setC(DARK[0],DARK[1],DARK[2]);
+    gLines.forEach(function(l,i){txt(ML+1.5,y+6+i*3.6,l);});
     y+=gh+0.8;
   }
 
@@ -1705,95 +1795,81 @@ function buildPDF(k){
     var ex_y=y+row*(ch+1.5);
     var pc=PC[ex.phase]||G;
 
-    // Tło karty
     rect(ex_x,ex_y,cw,ch,[250,250,248],BRD,0.3);
 
-    // Pasek górny (faza + nazwa)
+    // Pasek fazy + nazwa
     var TH=Math.min(10,Math.max(8,ch*0.18));
     rect(ex_x,ex_y,cw,TH,pc);
-    // Ciemny blok z numerem
     var NW=Math.min(18,cw*0.18);
     rect(ex_x,ex_y,NW,TH,[0,0,0,50]);
-    doc.setFontSize(4);doc.setFont('helvetica','normal');doc.setTextColor(255,255,255);
-    var phLbl={warm:'Rozgrzewka',main:'Część główna',cool:'Zakończenie'}[ex.phase]||'';
-    doc.text(phLbl,ex_x+1.2,ex_y+3.2);
-    doc.setFontSize(9);doc.setFont('helvetica','bold');
-    doc.text(String(idx+1),ex_x+NW*0.5,ex_y+TH-2,{align:'center'});
-    // Nazwa ćwiczenia
-    var nmText=String(ex.name||'');
-    var nmX=ex_x+NW+1.5;
+    setF(4,false);setC(255,255,255);
+    var phLbl={warm:'Rozgrzewka',main:'Czesc glowna',cool:'Zakonczenie'}[ex.phase]||'';
+    txt(ex_x+1.2,ex_y+3.2,phLbl);
+    setF(9,true);
+    txt(ex_x+NW*0.5,ex_y+TH-2,String(idx+1),{align:'center'});
+    // Nazwa
+    var nmText=pl(String(ex.name||''));
     var nmMaxW=(cw-NW-10)*2.83;
-    doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
-    while(doc.getTextWidth(nmText)>nmMaxW&&nmText.length>3)nmText=nmText.slice(0,-2)+'…';
-    doc.text(nmText,nmX,ex_y+TH-2.5);
+    setF(7,true);setC(255,255,255);
+    while(doc.getTextWidth(nmText)>nmMaxW&&nmText.length>3)nmText=nmText.slice(0,-2)+'...';
+    txt(ex_x+NW+1.5,ex_y+TH-2.5,nmText);
     // Czas
-    doc.setFontSize(6);doc.setFont('helvetica','normal');
-    doc.text(String(ex.time||0)+' min',ex_x+cw-1.5,ex_y+TH-2.5,{align:'right'});
+    setF(6,false);
+    txt(ex_x+cw-1.5,ex_y+TH-2.5,String(ex.time||0)+' min',{align:'right'});
 
     // Body
-    var bY=ex_y+TH;
-    var bH=ch-TH;
-    // Podział: lewa 56% | prawa 44%
+    var bY=ex_y+TH, bH=ch-TH;
     var LW=cw*0.56, RW=cw*0.44-0.5, RX=ex_x+LW+0.5;
     var lh=Math.max(3.2,Math.min(4,bH*0.09));
 
-    // — Lewa kolumna —
     var sectors=[
-      ['OPIS',       ex.desc||ex.name||'',  bH*0.35],
-      ['ZASADY',     ex.notes||'',          bH*0.28],
-      ['UTRUDNIENIA / UŁATWIENIA', ex.u||'', bH*0.22],
+      ['OPIS',       ex.desc||ex.name||'', bH*0.35],
+      ['ZASADY',     ex.notes||'',         bH*0.28],
+      ['UTRUDNIENIA/ULATWIENIA', ex.u||'', bH*0.22],
     ];
-    var remaining_h=bH-sectors.reduce(function(s,x){return s+x[2];},0)-1;
-    if(remaining_h>4)sectors.push(['FEEDBACK / WSKAZÓWKI',ex.w||'',remaining_h]);
+    var rem_h=bH-sectors.reduce(function(s,x){return s+x[2];},0)-1;
+    if(rem_h>4)sectors.push(['FEEDBACK/WSKAZOWKI',ex.w||'',rem_h]);
 
     var lY=bY;
     sectors.forEach(function(s){
-      var sh=s[2],stxt=s[1],label=s[0];
+      var sh=s[2],stxt=s[1],lbl=s[0];
       if(sh<=0)return;
-      var maxLines=Math.max(1,Math.floor((sh-4)/lh));
-      // Podziel tekst na linie
-      doc.setFontSize(6.5);
-      var sLines=stxt?splitText(stxt,LW-3).slice(0,maxLines):['—'];
-      cell(ex_x,lY,LW,sh,label,sLines,label==='FEEDBACK / WSKAZÓWKI'?[232,245,238]:null);
+      var maxLn=Math.max(1,Math.floor((sh-4)/lh));
+      setF(6.5,false);
+      var sLines=stxt?splitText(stxt,LW-3).slice(0,maxLn):['—'];
+      cell(ex_x,lY,LW,sh,lbl,sLines,lbl==='FEEDBACK/WSKAZOWKI'?[232,245,238]:null);
       lY+=sh+0.4;
     });
 
-    // — Prawa kolumna —
+    // Prawa kolumna
     var rY=bY;
-    // Sprzęt
     var spH=Math.min(18,bH*0.28);
-    doc.setFontSize(6.5);
+    setF(6.5,false);
     var spLines=ex.sp?splitText(ex.sp,RW-3).slice(0,3):['—'];
-    cell(RX,rY,RW,spH,'SPRZĘT',spLines);rY+=spH+0.4;
-    // Punktacja
+    cell(RX,rY,RW,spH,'SPRZET',spLines);rY+=spH+0.4;
     var pkH=Math.min(16,bH*0.24);
     var pkLines=ex.pk?splitText(ex.pk,RW-3).slice(0,2):['—'];
     cell(RX,rY,RW,pkH,'PUNKTACJA',pkLines);rY+=pkH+0.4;
-    // Grafika / boisko
+
+    // Grafika / zdjęcie / boisko
     var ghLeft=ex_y+ch-rY-0.5;
     if(ghLeft>12){
-      // Jeśli ćwiczenie ma zdjęcie — wstaw je
       if(ex.img){
         try{
           var fmt=ex.img.indexOf('jpeg')>-1||ex.img.indexOf('jpg')>-1?'JPEG':'PNG';
           rect(RX,rY,RW,ghLeft,[245,250,247],BRD,0.25);
           doc.addImage(ex.img,fmt,RX+0.5,rY+0.5,RW-1,ghLeft-1);
-        }catch(imgErr){
-          // Jeśli błąd obrazka — rysuj boisko
-          rysujBoisko(doc,RX,rY,RW,ghLeft,BRD,WHITE,GRAY);
-        }
-      } else {
-        rysujBoisko(doc,RX,rY,RW,ghLeft,BRD,WHITE,GRAY);
-      }
+        }catch(imgErr){rysujBoisko(doc,RX,rY,RW,ghLeft,BRD,WHITE,GRAY);}
+      }else{rysujBoisko(doc,RX,rY,RW,ghLeft,BRD,WHITE,GRAY);}
     }
   });
 
-  // ── STOPKA ──
-  doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
-  doc.text('PFG Planner · MKS Iskra Pszczyna · wygenerowano '+new Date().toLocaleDateString('pl-PL'),ML,H-3);
+  // Stopka
+  setF(5.5,false);setC(GRAY[0],GRAY[1],GRAY[2]);
+  txt(ML,H-3,'PFG Planner · MKS Iskra Pszczyna · wygenerowano '+new Date().toLocaleDateString('pl-PL'));
   if(k.rating){
     var stars='';for(var s2=1;s2<=5;s2++)stars+=(s2<=k.rating?'★':'☆');
-    doc.text('Ocena sesji: '+stars,W-MR,H-3,{align:'right'});
+    txt(W-MR,H-3,'Ocena sesji: '+stars,{align:'right'});
   }
 
   return doc;
