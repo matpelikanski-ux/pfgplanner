@@ -1332,11 +1332,30 @@ function saveK(){
   var place=(document.getElementById('k-place')||{}).value||'';
   var dur=parseInt((document.getElementById('k-dur')||{}).value)||90;
   var total=0;
-  ['warm','main','cool'].forEach(ph=>PHS[ph].forEach(e=>total+=parseInt(e.time)||0));
+  ['warm','main','cool'].forEach(function(ph){(PHS[ph]||[]).forEach(function(e){total+=parseInt(e.time)||0;});});
   var c=CC[faza]||{bg:'#E1F5EE',tc:'#085041'};
-  KONSP.unshift({title,team,date,coach,coach2,mikro,mezo,faza,temat,goal,goals,place,dur,total,phases:JSON.parse(JSON.stringify(PHS)),c,rating:null,notes:'',savedAt:new Date().toISOString()});
-  ST('"'+title+'" zapisany!');
-  setTimeout(()=>SP('konsp'),500);
+
+  if(editKonspIdx!==null){
+    // Tryb edycji — aktualizuj istniejący konspekt
+    var i=editKonspIdx; editKonspIdx=null;
+    var prev=KONSP[i]||{};
+    KONSP[i]=Object.assign({},prev,{
+      title,team,date,coach,coach2,mikro,mezo,faza,temat,goal,goals,place,dur,total,
+      phases:JSON.parse(JSON.stringify(PHS)),c,
+      updatedAt:new Date().toISOString()
+    });
+    ST('"'+title+'" zaktualizowany!');
+  } else {
+    // Tryb nowy
+    KONSP.unshift({
+      title,team,date,coach,coach2,mikro,mezo,faza,temat,goal,goals,place,dur,total,
+      phases:JSON.parse(JSON.stringify(PHS)),c,
+      rating:null,notes:'',savedAt:new Date().toISOString()
+    });
+    ST('"'+title+'" zapisany!');
+  }
+  saveLS();
+  setTimeout(function(){SP('konsp');},500);
 }
 
 function rKL(){
@@ -1499,40 +1518,7 @@ function oEditKonsp(i){
   ST('Edytujesz: "'+k.title+'"');
 }
 
-// Nadpisz saveK żeby obsługiwał tryb edycji
-var _origSaveK2=saveK;
-saveK=function(){
-  if(editKonspIdx!==null){
-    // Aktualizuj istniejący
-    var i=editKonspIdx;editKonspIdx=null;
-    var title=document.getElementById('k-title').value||'Konspekt bez tytułu';
-    var faza=(document.getElementById('k-faza')||{}).value||'';
-    var prev=KONSP[i];
-    KONSP[i]=Object.assign({},prev,{
-      title,
-      team:(document.getElementById('k-team')||{}).value||'',
-      date:(document.getElementById('k-date')||{}).value||'',
-      coach:(document.getElementById('k-coach')||{}).value||'',
-      coach2:(document.getElementById('k-coach2')||{}).value||'',
-      mikro:(document.getElementById('k-mikro')||{}).value||'',
-      mezo:(document.getElementById('k-mezo')||{}).value||'',
-      faza,
-      temat:(document.getElementById('k-temat')||{}).value||'',
-      goal:(document.getElementById('k-goal')||{}).value||'',
-      goals:(document.getElementById('k-goals')||{}).value||'',
-      place:(document.getElementById('k-place')||{}).value||'',
-      dur:parseInt((document.getElementById('k-dur')||{}).value)||90,
-      phases:JSON.parse(JSON.stringify(PHS)),
-      c:CC[faza]||{bg:'#E1F5EE',tc:'#085041'},
-      updatedAt:new Date().toISOString()
-    });
-    KONSP[i].total=0;
-    ['warm','main','cool'].forEach(ph=>(KONSP[i].phases[ph]||[]).forEach(e=>KONSP[i].total+=parseInt(e.time)||0));
-    saveLS();ST('"'+title+'" zaktualizowany!');setTimeout(()=>SP('konsp'),500);
-  } else {
-    _origSaveK2();
-  }
-};
+// Tryb edycji obsługiwany bezpośrednio w saveK powyżej
 
 // ── OCENA PO SESJI ──
 var postSessionIdx=null;
@@ -2541,9 +2527,7 @@ function saveCoach(){
 function delCoach(idx){if(!confirm('Usunąć trenera "'+COACHES[idx].name+'"?'))return;var n=COACHES[idx].name;COACHES.splice(idx,1);saveLS();rTeams();ST('"'+n+'" usunięty');}
 function delCoachModal(){if(editCoachIdx===null)return;if(!confirm('Usunąć "'+COACHES[editCoachIdx].name+'"?'))return;delCoach(editCoachIdx);cM('mo-coach');}
 
-// Zapis danych przy każdej zmianie
-var _origSaveK=saveK;
-saveK=function(){_origSaveK();saveLS();};
+// saveK już zawiera saveLS() - dodatkowe auto-zapisy dla pozostałych funkcji
 var _origSC=sC;
 sC=function(){_origSC();saveLS();};
 var _origSE=sE;
