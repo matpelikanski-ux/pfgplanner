@@ -1641,19 +1641,19 @@ function renderPPPreview(){
   h+='<div class="a4-hdr">'
     +'<div class="a4-logo">MKS</div>'
     +'<div class="a4-club">'
-      +'<div class="a4-club-name a4-editable" onclick="ppFocus('team')" title="Kliknij aby edytować">'+e(k.team||'MKS Iskra Pszczyna')+'</div>'
+      +'<div class="a4-club-name a4-editable" onclick="ppFocus(\'team\')" title="Kliknij aby edytować">'+e(k.team||'MKS Iskra Pszczyna')+'</div>'
       +'<div class="a4-club-sub">'+e(k.faza||'')+(k.temat?' / '+e(k.temat):'')+'</div>'
     +'</div>'
     +'<div class="a4-hdr-cells">'
-      +'<div class="a4-hdr-cell a4-editable" onclick="ppFocus('date')" title="Edytuj datę">'
+      +'<div class="a4-hdr-cell a4-editable" onclick="ppFocus(\'date\')" title="Edytuj datę">'
         +'<div class="a4-hdr-cell-lbl">DATA</div>'
         +'<div class="a4-hdr-cell-val">'+e(dateStr||'—')+'</div>'
       +'</div>'
-      +'<div class="a4-hdr-cell a4-editable" onclick="ppFocus('coach')" title="Edytuj I Trenera">'
+      +'<div class="a4-hdr-cell a4-editable" onclick="ppFocus(\'coach\')" title="Edytuj I Trenera">'
         +'<div class="a4-hdr-cell-lbl">I TRENER</div>'
         +'<div class="a4-hdr-cell-val">'+e(k.coach||'—')+'</div>'
       +'</div>'
-      +'<div class="a4-hdr-cell a4-editable" onclick="ppFocus('coach2')" title="Edytuj II Trenera">'
+      +'<div class="a4-hdr-cell a4-editable" onclick="ppFocus(\'coach2\')" title="Edytuj II Trenera">'
         +'<div class="a4-hdr-cell-lbl">II TRENER</div>'
         +'<div class="a4-hdr-cell-val">'+e(k.coach2||'—')+'</div>'
       +'</div>'
@@ -1666,7 +1666,7 @@ function renderPPPreview(){
 
   // ── Meta ──
   h+='<div class="a4-meta">'
-    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus('team')" style="flex:1.8;">'
+    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus(\'team\')" style="flex:1.8;">'
       +'<div class="a4-meta-lbl">DRUZYNA</div>'
       +'<div class="a4-meta-val">'+e(k.team||'—')+'</div>'
     +'</div>'
@@ -1674,32 +1674,32 @@ function renderPPPreview(){
       +'<div class="a4-meta-lbl">CZAS</div>'
       +'<div class="a4-meta-val">'+e(String(k.dur||90))+' min</div>'
     +'</div>'
-    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus('place')">'
+    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus(\'place\')">'
       +'<div class="a4-meta-lbl">MIEJSCE</div>'
       +'<div class="a4-meta-val">'+e(k.place||'—')+'</div>'
     +'</div>'
-    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus('mikro')">'
+    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus(\'mikro\')">'
       +'<div class="a4-meta-lbl">MIKROCYKL</div>'
       +'<div class="a4-meta-val">'+e(k.mikro||'—')+'</div>'
     +'</div>'
-    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus('mezo')" style="flex:2;">'
+    +'<div class="a4-meta-cell a4-editable" onclick="ppFocus(\'mezo\')" style="flex:2;">'
       +'<div class="a4-meta-lbl">MEZOCYKL</div>'
       +'<div class="a4-meta-val">'+e(k.mezo||'—')+'</div>'
     +'</div>'
   +'</div>';
 
   // ── Cel główny ──
-  h+='<div class="a4-goal a4-editable" onclick="ppFocus('goal')" title="Kliknij aby edytować cel">'
+  h+='<div class="a4-goal a4-editable" onclick="ppFocus(\'goal\')" title="Kliknij aby edytować cel">'
     +'CEL: '+e(k.goal||'— kliknij aby wpisać cel treningu —')
   +'</div>';
 
   // ── Cele szczegółowe ──
   if(k.goals&&k.goals.trim()){
-    h+='<div class="a4-goals a4-editable" onclick="ppFocus('goals')" title="Edytuj cele szczegółowe">'
+    h+='<div class="a4-goals a4-editable" onclick="ppFocus(\'goals\')" title="Edytuj cele szczegółowe">'
       +e(k.goals)
     +'</div>';
   }else{
-    h+='<div class="a4-goals a4-editable" onclick="ppFocus('goals')" style="color:#bbb;font-style:italic;">'
+    h+='<div class="a4-goals a4-editable" onclick="ppFocus(\'goals\')" style="color:#bbb;font-style:italic;">'
       +'kliknij aby dodać cele szczegółowe...'
     +'</div>';
   }
@@ -1719,7 +1719,7 @@ function renderPPPreview(){
         +'<div class="a4-ex-num">'+( idx+1)+'</div>'
         +'<div class="a4-ex-info">'
           +'<div class="a4-ex-phase-lbl">'+PN[ex._ph]+'</div>'
-          +'<div class="a4-ex-name a4-editable" onclick="ppFocusEx('+idx+','name')" title="Edytuj nazwę ćwiczenia">'+e(ex.name||'')+'</div>'
+          +'<div class="a4-ex-name a4-editable" onclick="ppFocusEx('+idx+',\'name\')" title="Edytuj nazwę ćwiczenia">'+e(ex.name||'')+'</div>'
         +'</div>'
         +'<div class="a4-ex-time">'+e(String(ex.time||0))+' min</div>'
       +'</div>'
@@ -1727,19 +1727,19 @@ function renderPPPreview(){
       +'<div class="a4-ex-body">'
         +'<div class="a4-ex-left">'
           +'<div class="a4-field"><div class="a4-field-lbl">OPIS</div>'
-            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+','desc')" title="Edytuj opis">'+e(ex.desc||'—')+'</div></div>'
+            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+',\'desc\')" title="Edytuj opis">'+e(ex.desc||'—')+'</div></div>'
           +'<div class="a4-field"><div class="a4-field-lbl">ZASADY</div>'
-            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+','notes')" title="Edytuj zasady">'+e(ex.notes||'—')+'</div></div>'
+            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+',\'notes\')" title="Edytuj zasady">'+e(ex.notes||'—')+'</div></div>'
           +'<div class="a4-field"><div class="a4-field-lbl">UTRUDNIENIA / ULATWIENIA</div>'
-            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+','u')" title="Edytuj utrudnienia">'+e(ex.u||'—')+'</div></div>'
+            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+',\'u\')" title="Edytuj utrudnienia">'+e(ex.u||'—')+'</div></div>'
           +'<div class="a4-field" style="background:#f0f8f5;"><div class="a4-field-lbl">FEEDBACK / WSKAZOWKI</div>'
-            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+','w')" title="Edytuj wskazówki">'+e(ex.w||'—')+'</div></div>'
+            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+',\'w\')" title="Edytuj wskazówki">'+e(ex.w||'—')+'</div></div>'
         +'</div>'
         +'<div class="a4-ex-right">'
           +'<div class="a4-field"><div class="a4-field-lbl">SPRZET</div>'
-            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+','sp')" title="Edytuj sprzęt">'+e(ex.sp||'—')+'</div></div>'
+            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+',\'sp\')" title="Edytuj sprzęt">'+e(ex.sp||'—')+'</div></div>'
           +'<div class="a4-field"><div class="a4-field-lbl">PUNKTACJA</div>'
-            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+','pk')" title="Edytuj punktację">'+e(ex.pk||'—')+'</div></div>'
+            +'<div class="a4-field-val a4-editable" onclick="ppFocusEx('+idx+',\'pk\')" title="Edytuj punktację">'+e(ex.pk||'—')+'</div></div>'
           +'<div class="a4-pitch">'
             +(ex.img?'<img src="'+ex.img+'" style="width:100%;height:auto;display:block;" alt="">':ppMiniPitch())
           +'</div>'
