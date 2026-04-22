@@ -1110,8 +1110,7 @@ function rEF(e,isNew){
   b+='<div class="fr"><label class="fl">Feedback — pytania trenera</label><textarea class="fta" id="ef-fb" placeholder="Co było najtrudniejsze?&#10;Kiedy decydowałeś o podaniu?">'+(e.fb||'')+'</textarea></div>';
   document.getElementById('mo-ex-b').innerHTML=b;
   var fl=!isNew?'<button class="btn dan sm" onclick="delE('+EI+')">Usuń ćwiczenie</button>':'<span></span>';
-  var saveBtn=isNew?'true':'false';
-  var fr='<div style="display:flex;gap:8px;">'+(!isNew?'<button class="btn sm" onclick="oVE('+EI+')">Anuluj</button>':'<button class="btn sm" onclick="cM(\'mo-ex\')">Anuluj</button>')+'<button class="btn pri sm" onclick="sE('+saveBtn+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 8l4 4 6-6"/></svg>Zapisz ćwiczenie</button></div>';
+  var fr='<div style="display:flex;gap:8px;">'+(!isNew?'<button class="btn sm" onclick="oVE('+EI+')">Anuluj</button>':'<button class="btn sm" onclick="cM(\'mo-ex\')">Anuluj</button>')+'<button class="btn pri sm" onclick="sE('+(isNew?'true':'false')+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 8l4 4 6-6"/></svg>Zapisz ćwiczenie</button></div>';
   document.getElementById('mo-ex-f').innerHTML=fl+fr;
 }
 
@@ -1796,9 +1795,9 @@ function renderPPEdit(){
     h+='<div class="pe-field">'
       +'<label class="pe-lbl" for="pe-'+f[0]+'">'+f[1]+'</label>';
     if(f[2]==='ta'){
-      h+='<textarea class="pe-ta" id="pe-'+f[0]+'" rows="3" oninput="ppUpd(\'+f[0]+\',this.value)">'+e(k[f[0]]||'')+'</textarea>';
+      h+='<textarea class="pe-ta" id="pe-'+f[0]+'" rows="3" oninput="ppUpd(''+f[0]+'',this.value)">'+e(k[f[0]]||'')+'</textarea>';
     }else{
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(\'+f[0]+\',this.value)">';
+      h+='<input class="pe-inp" id="pe-'+f[0]+'" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(''+f[0]+'',this.value)">';
     }
     h+='</div>';
   });
@@ -1821,11 +1820,11 @@ function renderPPEdit(){
     h+='<div class="pe-field">'
       +'<label class="pe-lbl" for="pe-'+f[0]+'">'+f[1]+'</label>';
     if(f[2]==='date'){
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" type="date" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(\'+f[0]+\',this.value)">';
+      h+='<input class="pe-inp" id="pe-'+f[0]+'" type="date" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(''+f[0]+'',this.value)">';
     }else if(f[2]==='num'){
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" type="number" value="'+e(String(k[f[0]]||90))+'" oninput="ppUpd(\'+f[0]+\',this.value)" min="10" max="240">';
+      h+='<input class="pe-inp" id="pe-'+f[0]+'" type="number" value="'+e(String(k[f[0]]||90))+'" oninput="ppUpd(''+f[0]+'',this.value)" min="10" max="240">';
     }else{
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(\'+f[0]+\',this.value)">';
+      h+='<input class="pe-inp" id="pe-'+f[0]+'" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(''+f[0]+'',this.value)">';
     }
     h+='</div>';
   });
@@ -1857,11 +1856,11 @@ function renderPPEdit(){
           +'<label class="pe-lbl" for="pe-ex-'+idx+'-'+f[0]+'">'+f[1]+'</label>';
         var val=ex[f[0]]||'';
         if(f[2]==='ta'){
-          h+='<textarea class="pe-ta" id="pe-ex-'+idx+'-'+f[0]+'" rows="2" oninput="ppUpdEx('+idx+',\'+f[0]+\',this.value)">'+e(String(val))+'</textarea>';
+          h+='<textarea class="pe-ta" id="pe-ex-'+idx+'-'+f[0]+'" rows="2" oninput="ppUpdEx('+idx+',''+f[0]+'',this.value)">'+e(String(val))+'</textarea>';
         }else if(f[2]==='num'){
-          h+='<input class="pe-inp" id="pe-ex-'+idx+'-'+f[0]+'" type="number" value="'+e(String(val))+'" oninput="ppUpdEx('+idx+',\'+f[0]+\',this.value)" min="1" max="120">';
+          h+='<input class="pe-inp" id="pe-ex-'+idx+'-'+f[0]+'" type="number" value="'+e(String(val))+'" oninput="ppUpdEx('+idx+',''+f[0]+'',this.value)" min="1" max="120">';
         }else{
-          h+='<input class="pe-inp" id="pe-ex-'+idx+'-'+f[0]+'" value="'+e(String(val))+'" oninput="ppUpdEx('+idx+',\'+f[0]+\',this.value)">';
+          h+='<input class="pe-inp" id="pe-ex-'+idx+'-'+f[0]+'" value="'+e(String(val))+'" oninput="ppUpdEx('+idx+',''+f[0]+'',this.value)">';
         }
         h+='</div>';
       });
