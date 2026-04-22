@@ -2210,7 +2210,7 @@ function buildPDF(k){
     var phLbl={warm:'Rozgrzewka',main:'Czesc glowna',cool:'Zakonczenie'}[ex.phase]||'';
     txt(ex_x+1.2,ex_y+3.2,phLbl);
     setF(9,true);
-    txt(ex_x+NW*0.5,ex_y+TH-2,String(idx+1),{align:'center'});
+    txt(ex_x+NW*0.5,ex_y+TH-2,String(idx+1),'center');
     // Nazwa
     var nmText=pl(String(ex.name||''));
     var nmMaxW=(cw-NW-10)*2.83;
@@ -2219,7 +2219,7 @@ function buildPDF(k){
     txt(ex_x+NW+1.5,ex_y+TH-2.5,nmText);
     // Czas
     setF(6,false);
-    txt(ex_x+cw-1.5,ex_y+TH-2.5,String(ex.time||0)+' min',{align:'right'});
+    txt(ex_x+cw-1.5,ex_y+TH-2.5,String(ex.time||0)+' min','right');
 
     // Body
     var bY=ex_y+TH, bH=ch-TH;
@@ -2273,7 +2273,7 @@ function buildPDF(k){
   txt(ML,H-3,'PFG Planner · MKS Iskra Pszczyna · wygenerowano '+new Date().toLocaleDateString('pl-PL'));
   if(k.rating){
     var stars='';for(var s2=1;s2<=5;s2++)stars+=(s2<=k.rating?'★':'☆');
-    txt(W-MR,H-3,'Ocena sesji: '+stars,{align:'right'});
+    txt(W-MR,H-3,'Ocena sesji: '+stars,'right');
   }
 
   return doc;
