@@ -1310,9 +1310,9 @@ function rTS(){var total=0,seg={warm:0,main:0,cool:0};['warm','main','cool'].for
 function rPH(ph){var list=document.getElementById('el-'+ph);if(!list)return;if(!PHS[ph].length){list.innerHTML='';rT();return;}list.innerHTML=PHS[ph].map((ex,i)=>'<div class="exi"><div class="exih"><div class="exin">'+(i+1)+'</div><div class="exiname">'+ex.name+'</div>'+(ex.fromDB?'<span class="exifdb">z bazy</span>':'')+'<div class="exiacts">'+(i>0?'<button class="exia" onclick="mvE(\''+ph+'\','+i+',-1)" title="W górę"><svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4"/></svg></button>':'')+(i<PHS[ph].length-1?'<button class="exia" onclick="mvE(\''+ph+'\','+i+',1)" title="W dół"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></button>':'')+'<button class="exia" onclick="rmE(\''+ph+'\','+i+')" title="Usuń" style="color:var(--red);"><svg viewBox="0 0 16 16"><path d="M1 1l10 10M11 1L1 11"/></svg></button></div></div><div class="exim"><span style="font-size:11px;color:var(--txt2);">Czas:</span><input class="eximi" type="number" value="'+ex.time+'" min="1" max="90" onchange="PHS[\''+ph+'\']['+i+'].time=parseInt(this.value)||0;rT()"/> min'+(ex.faza?'<span class="bdg" style="background:'+(CC[ex.faza]||{bg:'#F1EFE8'}).bg+';color:'+(CC[ex.faza]||{tc:'#6B6860'}).tc+';">'+ex.faza+'</span>':'')+'</div><textarea class="exinta" placeholder="Uwagi trenera do tego ćwiczenia..." onchange="PHS[\''+ph+'\']['+i+'].notes=this.value">'+( ex.notes||'')+'</textarea></div>').join('');rT();}
 function mvE(ph,i,d){var a=PHS[ph],ni=i+d;if(ni<0||ni>=a.length)return;var t=a[i];a[i]=a[ni];a[ni]=t;rPH(ph);}
 function rmE(ph,i){PHS[ph].splice(i,1);rPH(ph);}
-function addME(ph){var inp=document.getElementById('aei-'+ph);var name=(inp.value||'').trim();if(!name)return;PHS[ph].push({name,time:15,fromDB:false,desc:'',notes:'',faza:'',intens:''});inp.value='';document.getElementById('dbr-'+ph).classList.remove('op');rPH(ph);}
+function addME(ph){var inp=document.getElementById('aei-'+ph);var name=(inp.value||'').trim();if(!name)return;PHS[ph].push({name,time:15,fromDB:false,desc:'',notes:'',sp:'',pk:'',u:'',w:'',img:null,faza:'',intens:''});inp.value='';document.getElementById('dbr-'+ph).classList.remove('op');rPH(ph);}
 function sDB(ph){var q=(document.getElementById('aei-'+ph).value||'').toLowerCase();var res=document.getElementById('dbr-'+ph);if(!q){res.classList.remove('op');return;}var matches=EXS.filter(e=>e.n.toLowerCase().includes(q)||(e.t||'').toLowerCase().includes(q)).slice(0,5);if(!matches.length){res.classList.remove('op');return;}res.innerHTML=matches.map(e=>'<div class="dbri" onclick="pkE(\''+ph+'\',\''+e.n.replace(/'/g,"\\'")+'\')">'+'<div style="flex:1;"><div style="font-weight:500;">'+e.n+'</div><div style="font-size:10px;color:var(--txt2);">'+( e.f||'')+(e.t?' · '+e.t:'')+'</div></div><div class="dbrm">'+e.cz+' min</div></div>').join('');res.classList.add('op');}
-function pkE(ph,name){var ex=EXS.find(e=>e.n===name);if(!ex)return;PHS[ph].push({name:ex.n,time:ex.cz||15,fromDB:true,desc:ex.o||'',notes:'',faza:ex.f||'',intens:ex.i||''});document.getElementById('aei-'+ph).value='';document.getElementById('dbr-'+ph).classList.remove('op');rPH(ph);ST('"'+ex.n+'" dodano do '+PNC[ph]);}
+function pkE(ph,name){var ex=EXS.find(e=>e.n===name);if(!ex)return;PHS[ph].push({name:ex.n,time:ex.cz||15,fromDB:true,desc:ex.o||'',notes:ex.z||'',sp:ex.sp||'',pk:ex.pk||'',u:ex.u||'',w:ex.w||'',img:ex.img||null,imn:ex.imn||null,faza:ex.f||'',temat:ex.t||'',koncept:ex.k||'',intens:ex.i||''});document.getElementById('aei-'+ph).value='';document.getElementById('dbr-'+ph).classList.remove('op');rPH(ph);ST('"'+ex.n+'" dodano do '+PNC[ph]);}
 function oDB(ph){dbTP=ph;document.getElementById('mo-dbs').value='';rDL();oM('mo-db');}
 function sDF(el,f){dbFP=f;document.querySelectorAll('#db-frow .db-fc').forEach(x=>x.className='db-fc');el.classList.add('ac');rDL();}
 function rDL(){var q=(document.getElementById('mo-dbs').value||'').toLowerCase();var matches=EXS.filter(e=>(!q||e.n.toLowerCase().includes(q)||(e.o||'').toLowerCase().includes(q))&&(!dbFP||e.f===dbFP));document.getElementById('mo-dbl').innerHTML=matches.length?matches.map(e=>{var col=CC[e.f]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--brd);border-radius:var(--r2);cursor:pointer;margin-bottom:6px;transition:border-color .12s;" onclick="pkEM(\''+e.n.replace(/'/g,"\\'")+'\')" onmouseover="this.style.borderColor=\'var(--g)\'" onmouseout="this.style.borderColor=\'var(--brd)\'">'+'<div style="flex:1;"><div style="font-size:13px;font-weight:500;margin-bottom:3px;">'+e.n+'</div><div style="display:flex;gap:4px;margin-bottom:4px;">'+(e.f?'<span class="bdg" style="background:'+col.bg+';color:'+col.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+'</div>'+(e.o?'<div style="font-size:11px;color:var(--txt2);">'+e.o.slice(0,80)+(e.o.length>80?'...':'')+'</div>':'')+'</div><div style="text-align:right;flex-shrink:0;"><div style="font-size:13px;font-weight:600;">'+e.cz+' min</div>'+(e.i?'<div style="font-size:10px;color:var(--txt2);">'+e.i+'</div>':'')+'</div></div>';}).join(''):'<div style="text-align:center;padding:30px;font-size:12px;color:var(--txt2);">Brak ćwiczeń'+(EXS.length?' spełniających kryteria':' w bazie')+'.</div>';}
@@ -1585,15 +1585,19 @@ function oPreviewPDF(i){
         +'<div class="mh" style="flex-shrink:0;padding:10px 16px;">'
           +'<div style="display:flex;align-items:center;gap:10px;">'
             +'<svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:#1D9E75;fill:none;stroke-width:1.8;flex-shrink:0;"><path d="M2 4h12v10H2z"/><path d="M5 4V2h6v2"/><path d="M5 8h6M5 11h4"/></svg>'
-            +'<div id="mpp-title" style="font-size:14px;font-weight:600;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>'
+            +'<div id="mpp-title" style="font-size:14px;font-weight:600;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>'
             +'<span style="font-size:10px;background:var(--lg);color:var(--dg);padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;">Podgląd przed wydrukiem</span>'
+            +'<span id="mpp-save-status" style="font-size:10px;color:var(--txt3);transition:color .3s;"></span>'
           +'</div>'
           +'<div style="display:flex;gap:7px;align-items:center;flex-shrink:0;">'
-            +'<span style="font-size:11px;color:var(--txt3);">Kliknij pole w podglądzie lub edytuj po prawej</span>'
             +'<button class="btn" onclick="cM(\'mo-pdf-preview\')">✕ Zamknij</button>'
+            +'<button class="btn" onclick="savePPOnly()" style="gap:6px;">'
+              +'<svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M3 5h10v8H3zM6 5V3h4v2"/></svg>'
+              +'Zapisz zmiany'
+            +'</button>'
             +'<button class="btn pri" onclick="savePPAndDownload()" style="gap:6px;padding:7px 14px;">'
               +'<svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M8 3v10M3 11l5 3 5-3"/></svg>'
-              +'Pobierz PDF'
+              +'Zapisz i pobierz PDF'
             +'</button>'
           +'</div>'
         +'</div>'
@@ -1878,6 +1882,7 @@ function renderPPEdit(){
 function ppUpd(field,val){
   previewData[field]=(field==='dur')?parseInt(val)||90:val;
   renderPPPreview();
+  ppAutoSave();
 }
 
 function ppUpdEx(idx,field,val){
@@ -1889,6 +1894,7 @@ function ppUpdEx(idx,field,val){
     allEx[idx][field]=(field==='time')?parseInt(val)||0:val;
   }
   renderPPPreview();
+  ppAutoSave();
 }
 
 // ── FOCUS (kliknięcie w podgląd → scroll do pola edycji) ─────────
@@ -1911,20 +1917,45 @@ function ppFocusEx(idx,field){
 }
 
 // ── ZAPISZ I POBIERZ ─────────────────────────────────────────────
+// ── ZAPIS TYLKO (bez PDF) ────────────────────────────────────────
+function savePPOnly(){
+  if(previewKonspIdx<0||previewKonspIdx>=KONSP.length)return;
+  var prev=KONSP[previewKonspIdx];
+  previewData.rating=prev.rating;
+  previewData.notes=prev.notes;
+  previewData.savedAt=prev.savedAt;
+  previewData.c=CC[previewData.faza]||prev.c||{bg:'#E1F5EE',tc:'#085041'};
+  previewData.total=0;
+  ['warm','main','cool'].forEach(function(ph){
+    (previewData.phases[ph]||[]).forEach(function(e){previewData.total+=parseInt(e.time)||0;});
+  });
+  KONSP[previewKonspIdx]=JSON.parse(JSON.stringify(previewData));
+  saveLS();rKL();
+  ppShowStatus('✓ Zapisano');
+}
+
+function ppShowStatus(msg,isErr){
+  var el=document.getElementById('mpp-save-status');
+  if(!el)return;
+  el.textContent=msg;
+  el.style.color=isErr?'var(--red)':'var(--g)';
+  clearTimeout(el._t);
+  el._t=setTimeout(function(){el.textContent='';},2500);
+}
+
+// Auto-zapis po każdej zmianie w polach edycji (z debounce 800ms)
+var ppAutoSaveTimer=null;
+function ppAutoSave(){
+  clearTimeout(ppAutoSaveTimer);
+  var el=document.getElementById('mpp-save-status');
+  if(el)el.textContent='• niezapisane';
+  ppAutoSaveTimer=setTimeout(function(){
+    savePPOnly();
+  },800);
+}
+
 function savePPAndDownload(){
-  if(previewKonspIdx>=0&&previewKonspIdx<KONSP.length){
-    var prev=KONSP[previewKonspIdx];
-    previewData.rating=prev.rating;
-    previewData.notes=prev.notes;
-    previewData.savedAt=prev.savedAt;
-    previewData.c=CC[previewData.faza]||prev.c||{bg:'#E1F5EE',tc:'#085041'};
-    previewData.total=0;
-    ['warm','main','cool'].forEach(function(ph){
-      (previewData.phases[ph]||[]).forEach(function(e){previewData.total+=parseInt(e.time)||0;});
-    });
-    KONSP[previewKonspIdx]=JSON.parse(JSON.stringify(previewData));
-    saveLS();rKL();
-  }
+  savePPOnly();
   cM('mo-pdf-preview');
   setTimeout(function(){dlPDFFor(previewKonspIdx);},200);
   ST('✓ Zmiany zapisane · generowanie PDF...');
