@@ -1780,92 +1780,80 @@ function renderPPEdit(){
   var k=previewData;
   var PC={warm:'#EF9F27',main:'#1D9E75',cool:'#7F77DD'};
   var PN={warm:'Rozgrzewka',main:'Część główna',cool:'Zakończenie'};
-
   var allEx=[];
   ['warm','main','cool'].forEach(function(ph){
-    (k.phases[ph]||[]).forEach(function(e){allEx.push(Object.assign({},e,{_ph:ph}));});
+    (k.phases[ph]||[]).forEach(function(ex){allEx.push(Object.assign({},ex,{_ph:ph}));});
   });
-
   var e=escH;
   var h='';
 
-  // Sekcja: Informacje ogólne
+  // ── Informacje ogólne ──
   h+='<div class="pe-sec">Informacje ogólne</div>';
-  var meta=[
-    ['title','Tytuł konspektu','inp'],
-    ['goal','Cel główny treningu','inp'],
-    ['goals','Cele szczegółowe','ta'],
-  ];
-  meta.forEach(function(f){
-    h+='<div class="pe-field">'
-      +'<label class="pe-lbl" for="pe-'+f[0]+'">'+f[1]+'</label>';
+  [['title','Tytuł konspektu','inp'],
+   ['goal','Cel główny treningu','inp'],
+   ['goals','Cele szczegółowe','ta']
+  ].forEach(function(f){
+    var val=e(k[f[0]]||'');
+    h+='<div class="pe-field"><label class="pe-lbl">'+f[1]+'</label>';
     if(f[2]==='ta'){
-      h+='<textarea class="pe-ta" id="pe-'+f[0]+'" rows="3" oninput="ppUpd(\'+f[0]+\',this.value)">'+e(k[f[0]]||'')+'</textarea>';
+      h+='<textarea class="pe-ta" data-field="'+f[0]+'" rows="3">'+val+'</textarea>';
     }else{
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(\'+f[0]+\',this.value)">';
+      h+='<input class="pe-inp" data-field="'+f[0]+'" value="'+val+'">';
     }
     h+='</div>';
   });
 
-  // Sekcja: Dane treningu
+  // ── Dane treningu ──
   h+='<div class="pe-sec">Dane treningu</div>';
-  var trainData=[
-    ['team','Drużyna','inp'],
-    ['date','Data','date'],
-    ['coach','I Trener','inp'],
-    ['coach2','II Trener','inp'],
-    ['place','Miejsce','inp'],
-    ['dur','Czas (min)','num'],
-    ['mikro','Mikrocykl','inp'],
-    ['mezo','Mezocykl','inp'],
-    ['faza','Faza','inp'],
-    ['temat','Temat','inp'],
-  ];
-  trainData.forEach(function(f){
-    h+='<div class="pe-field">'
-      +'<label class="pe-lbl" for="pe-'+f[0]+'">'+f[1]+'</label>';
+  [['team','Drużyna','inp'],
+   ['date','Data','date'],
+   ['coach','I Trener','inp'],
+   ['coach2','II Trener','inp'],
+   ['place','Miejsce','inp'],
+   ['dur','Czas (min)','num'],
+   ['mikro','Mikrocykl','inp'],
+   ['mezo','Mezocykl','inp'],
+   ['faza','Faza','inp'],
+   ['temat','Temat','inp']
+  ].forEach(function(f){
+    var val=f[0]==='dur'?String(k[f[0]]||90):e(k[f[0]]||'');
+    h+='<div class="pe-field"><label class="pe-lbl">'+f[1]+'</label>';
     if(f[2]==='date'){
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" type="date" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(\'+f[0]+\',this.value)">';
+      h+='<input class="pe-inp" type="date" data-field="'+f[0]+'" value="'+val+'">';
     }else if(f[2]==='num'){
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" type="number" value="'+e(String(k[f[0]]||90))+'" oninput="ppUpd(\'+f[0]+\',this.value)" min="10" max="240">';
+      h+='<input class="pe-inp" type="number" data-field="'+f[0]+'" value="'+val+'" min="10" max="240">';
     }else{
-      h+='<input class="pe-inp" id="pe-'+f[0]+'" value="'+e(k[f[0]]||'')+'" oninput="ppUpd(\'+f[0]+\',this.value)">';
+      h+='<input class="pe-inp" data-field="'+f[0]+'" value="'+val+'">';
     }
     h+='</div>';
   });
 
-  // Sekcja: Ćwiczenia
+  // ── Ćwiczenia ──
   if(allEx.length){
     h+='<div class="pe-sec">Ćwiczenia ('+allEx.length+')</div>';
     allEx.forEach(function(ex,idx){
       var pc=PC[ex._ph]||'#1D9E75';
-      h+='<div class="pe-ex" id="pe-ex-block-'+idx+'">'
-        +'<div class="pe-ex-hdr">'
-          +'<div class="pe-ex-num" style="background:'+pc+';">'+( idx+1)+'</div>'
-          +'<span>'+e(ex.name||'Ćwiczenie '+(idx+1))+'</span>'
-          +'<span style="font-size:10px;color:var(--txt3);margin-left:auto;">'+PN[ex._ph]+'</span>'
-        +'</div>';
-
-      var exFields=[
-        ['name','Nazwa ćwiczenia','inp'],
-        ['desc','Opis','ta'],
-        ['notes','Zasady','ta'],
-        ['u','Utrudnienia / Ułatwienia','ta'],
-        ['w','Wskazówki / Feedback','ta'],
-        ['sp','Sprzęt','inp'],
-        ['pk','Punktacja','inp'],
-        ['time','Czas (min)','num'],
-      ];
-      exFields.forEach(function(f){
-        h+='<div class="pe-field">'
-          +'<label class="pe-lbl" for="pe-ex-'+idx+'-'+f[0]+'">'+f[1]+'</label>';
-        var val=ex[f[0]]||'';
+      h+='<div class="pe-ex">'
+        +'<div class="pe-ex-hdr"><div class="pe-ex-num" style="background:'+pc+';">'+(idx+1)+'</div>'
+        +'<span>'+e(ex.name||'Ćwiczenie '+(idx+1))+'</span>'
+        +'<span style="font-size:10px;color:var(--txt3);margin-left:auto;">'+PN[ex._ph]+'</span></div>';
+      [['name','Nazwa ćwiczenia','inp'],
+       ['desc','Opis','ta'],
+       ['notes','Zasady','ta'],
+       ['u','Utrudnienia / Ułatwienia','ta'],
+       ['w','Wskazówki / Feedback','ta'],
+       ['sp','Sprzęt','inp'],
+       ['pk','Punktacja','inp'],
+       ['time','Czas (min)','num']
+      ].forEach(function(f){
+        var val=e(String(ex[f[0]]||''));
+        h+='<div class="pe-field"><label class="pe-lbl">'+f[1]+'</label>';
         if(f[2]==='ta'){
-          h+='<textarea class="pe-ta" id="pe-ex-'+idx+'-'+f[0]+'" rows="2" oninput="ppUpdEx('+idx+',\'+f[0]+\',this.value)">'+e(String(val))+'</textarea>';
+          h+='<textarea class="pe-ta" data-exidx="'+idx+'" data-field="'+f[0]+'" rows="2">'+val+'</textarea>';
         }else if(f[2]==='num'){
-          h+='<input class="pe-inp" id="pe-ex-'+idx+'-'+f[0]+'" type="number" value="'+e(String(val))+'" oninput="ppUpdEx('+idx+',\'+f[0]+\',this.value)" min="1" max="120">';
+          h+='<input class="pe-inp" type="number" data-exidx="'+idx+'" data-field="'+f[0]+'" value="'+val+'" min="1" max="120">';
         }else{
-          h+='<input class="pe-inp" id="pe-ex-'+idx+'-'+f[0]+'" value="'+e(String(val))+'" oninput="ppUpdEx('+idx+',\'+f[0]+\',this.value)">';
+          h+='<input class="pe-inp" data-exidx="'+idx+'" data-field="'+f[0]+'" value="'+val+'">';
         }
         h+='</div>';
       });
@@ -1875,7 +1863,22 @@ function renderPPEdit(){
     h+='<div style="padding:16px;text-align:center;font-size:12px;color:var(--txt2);">Brak ćwiczeń w tym konspekcie.</div>';
   }
 
-  document.getElementById('mpp-edit').innerHTML=h;
+  var panel=document.getElementById('mpp-edit');
+  panel.innerHTML=h;
+
+  // ── Jeden event listener na cały panel ──
+  panel.addEventListener('input',function(ev){
+    var el=ev.target;
+    var field=el.getAttribute('data-field');
+    var exidx=el.getAttribute('data-exidx');
+    if(!field)return;
+    var val=el.value;
+    if(exidx!==null){
+      ppUpdEx(parseInt(exidx),field,val);
+    }else{
+      ppUpd(field,val);
+    }
+  });
 }
 
 // ── AKTUALIZACJA ─────────────────────────────────────────────────
