@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>PFG Planner — MKS Iskra Pszczyna</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 :root{--g:#1D9E75;--dg:#085041;--lg:#E1F5EE;--pu:#7F77DD;--am:#EF9F27;--bl:#378ADD;--bg:#F7F6F3;--sur:#fff;--sur2:#F1EFE8;--brd:#E0DDD6;--txt:#1a1918;--txt2:#6B6860;--txt3:#A8A49E;--red:#D85A30;--lred:#FAECE7;--r:9px;--r2:6px;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-size:13px;}
@@ -243,6 +244,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .fin-actual-val{color:var(--txt);}
 .fin-month-head{background:#3C3489;color:#fff;font-size:9px;font-weight:700;text-align:center;padding:4px 6px;}
 .fin-sticky{position:sticky;left:0;background:inherit;z-index:2;}
+/* Składki */
+.sk2-table{border-collapse:collapse;font-size:11px;min-width:max-content;}
+.sk2-table th{background:#2D2D2D;color:#fff;padding:6px 8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;border:1px solid #444;white-space:nowrap;position:sticky;top:0;z-index:5;text-align:center;}
+.sk2-table th.sk2-name-col{position:sticky;left:0;z-index:6;min-width:180px;text-align:left;background:#1a1a1a;}
+.sk2-table td{border:1px solid var(--brd);padding:0;vertical-align:middle;}
+.sk2-table td.sk2-name-cell{position:sticky;left:0;background:var(--sur);z-index:4;padding:6px 10px;white-space:nowrap;font-size:12px;font-weight:500;border-right:2px solid var(--brd);}
+.sk2-cell{width:82px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;font-weight:600;transition:filter .1s;}
+.sk2-cell:hover{filter:brightness(.92);}
+.sk2-paid{background:#E6F7F2;color:#065F46;}
+.sk2-unpaid{background:#FFF1F2;color:#be123c;}
+.sk2-free{background:#EDE9FE;color:#5B21B6;}
+.sk2-empty{background:var(--sur2);color:var(--txt3);font-weight:400;}
+.sk2-partial{background:#FEF3C7;color:#92400E;}
+.sk2-sum-paid{background:#D1FAE5;color:#065F46;font-weight:700;}
+.sk2-sum-owed{background:#FFE4E6;color:#be123c;font-weight:700;}
+.sk2-def-card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.sk2-def-card:hover{border-color:var(--g);}
 .sk-row{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s;}
 .sk-row:hover{border-color:var(--pu);}
 .sk-priority-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700;}
@@ -263,6 +281,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .gm-card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:0;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
 .gm-card:hover{border-color:var(--pu);box-shadow:0 2px 12px rgba(0,0,0,.08);}
 .gm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+/* Media w modelu gry */
+.gm-media-thumb{position:relative;border-radius:var(--r2);overflow:hidden;background:var(--sur2);border:1px solid var(--brd);cursor:pointer;transition:border-color .15s;}
+.gm-media-thumb:hover{border-color:var(--pu);}
+.gm-media-img{width:100%;height:120px;object-fit:cover;display:block;}
+.gm-media-link{display:flex;flex-direction:column;align-items:center;justify-content:center;height:90px;gap:6px;padding:10px;}
+.gm-media-del{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;}
+.gm-media-thumb:hover .gm-media-del{opacity:1;}
+.gm-upload-zone{border:2px dashed var(--brd);border-radius:var(--r2);padding:16px;text-align:center;cursor:pointer;transition:border-color .15s;font-size:12px;color:var(--txt2);}
+.gm-upload-zone:hover{border-color:var(--pu);color:var(--pu);}
+.gm-upload-zone.drag{border-color:var(--pu);background:#EEEDFE22;}
 /* SIDEBAR */
 /* MAIN */
 /* BUTTONS */
@@ -446,6 +474,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="ni" id="ni-ioz" onclick="SP('ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M11 9l1.5 1.5M12.5 10.5L14 12"/><circle cx="12.5" cy="11.5" r="2.5" fill="none"/></svg>Karty zawodników</div>
       <div class="ni" id="ni-tests" onclick="SP('tests')"><svg viewBox="0 0 16 16"><path d="M4 2h8v12H4z"/><path d="M7 6h4M7 9h4M4 6h1M4 9h1"/><path d="M6 12.5l1 1 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Testy motoryczne</div>
       <div class="ni" id="ni-gamemodel" onclick="SP('gamemodel')"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/><path d="M4 4l8 8M12 4L4 12" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>Model gry</div>
+      <div class="ni" id="ni-import" onclick="SP('import')"><svg viewBox="0 0 16 16"><path d="M8 2v9M4 8l4 4 4-4"/><path d="M2 13h12"/></svg>Import Excel</div>
       <div class="ni" id="ni-stats" onclick="SP('stats')"><svg viewBox="0 0 16 16"><path d="M2 12V8h3v4zM6.5 12V5h3v7zM11 12V2h3v10z"/></svg>Statystyki</div>
     </div>
   </div>
@@ -457,6 +486,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="ni" id="ni-dir-coaches" onclick="SP('dir-coaches')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M13 7l2 2-4 4-2-2"/></svg>Karty trenerów</div>
       <div class="ni" id="ni-dir-academy" onclick="SP('dir-academy')"><svg viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8v4c0 1 2.7 2 6 2s6-1 6-2V8"/><path d="M14 5v4"/></svg>Akademia</div>
       <div class="ni" id="ni-dir-skauting" onclick="SP('dir-skauting')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4"/><path d="M10 10l4 4"/><path d="M6 3v6M3 6h6"/></svg>Skauting</div>
+      <div class="ni" id="ni-dir-skladki" onclick="SP('dir-skladki')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><path d="M4 10h2M8 10h4"/><circle cx="5" cy="5.5" r=".8" fill="currentColor" stroke="none"/></svg>Składki</div>
       <div class="ni" id="ni-dir-finanse" onclick="SP('dir-finanse')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><circle cx="5" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M8 9h4M8 11h3"/></svg>Finanse</div>
       <div class="ni" id="ni-dir-gamemodel" onclick="SP('dir-gamemodel')"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/><path d="M4 4l8 8M12 4L4 12" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>Model gry</div>
       <div class="ni" id="ni-dir-settings" onclick="SP('dir-settings')"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"/></svg>Ustawienia</div>
@@ -644,7 +674,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- DRUŻYNY -->
 <div id="pg-teams" class="pg">
-  <div class="tb"><div><div class="t1">Drużyny i trenerzy</div><div class="t2">MKS Iskra Pszczyna</div></div><div class="tb-r"><button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button><button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button></div></div>
+  <div class="tb"><div><div class="t1">Drużyny i trenerzy</div><div class="t2">MKS Iskra Pszczyna</div></div><div class="tb-r"><button class="btn" onclick="oImport('druzyny')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button><button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button><button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button></div></div>
   <div class="inner" id="t-body"></div>
 </div>
 
@@ -653,6 +683,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="tb">
     <div><div class="t1">Karty zawodników</div><div class="t2" id="ioz-sub">0 zawodników</div></div>
     <div class="tb-r">
+      <button class="btn" onclick="oImport('zawodnicy')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button>
       <button class="btn" onclick="dlIOZpdf()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 11l5 3 5-3"/></svg>Eksport PDF</button>
       <button class="btn pri" onclick="oAddPlayer()"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj zawodnika</button>
     </div>
@@ -698,6 +729,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="tb-r"><div style="font-size:11px;color:var(--txt3);background:var(--sur2);padding:4px 12px;border-radius:20px;">📖 Tylko podgląd</div></div>
   </div>
   <div class="inner" id="gm-ro-body"></div>
+</div>
+
+<!-- IMPORT EXCEL -->
+<div id="pg-import" class="pg">
+  <div class="tb">
+    <div><div class="t1">Import z Excel</div><div class="t2">Masowe dodawanie danych</div></div>
+    <div class="tb-r">
+      <a href="#" onclick="downloadImportTemplate(event)" class="btn"><svg viewBox="0 0 16 16"><path d="M8 2v9M4 8l4 4 4-4"/><path d="M2 13h12"/></svg>Pobierz szablon Excel</a>
+    </div>
+  </div>
+  <div class="inner">
+    <div style="background:var(--lg);border:1px solid #5DCAA5;border-radius:var(--r2);padding:12px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px;">
+      <svg viewBox="0 0 16 16" style="width:16px;height:16px;fill:none;stroke:var(--dg);stroke-width:1.8;flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="6"/><path d="M8 7v5M8 5.5v.5"/></svg>
+      <div style="font-size:12px;color:var(--dg);line-height:1.6;">
+        <strong>Jak zaimportować dane:</strong><br>
+        1. Pobierz szablon Excel → 2. Uzupełnij arkusze (Zawodnicy / Drużyny / Trenerzy) → 3. Wgraj plik poniżej.<br>
+        Import <strong>dodaje lub aktualizuje</strong> dane — nie usuwa istniejących. Duplikaty identyfikowane po imieniu+drużynie.
+      </div>
+    </div>
+    <!-- Strefa wgrywania -->
+    <div id="import-dropzone" style="border:2px dashed var(--brd);border-radius:var(--r);padding:40px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:18px;" onclick="document.getElementById('import-file-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--g)';this.style.background='var(--lg)'" ondragleave="this.style.borderColor='var(--brd)';this.style.background=''" ondrop="event.preventDefault();this.style.borderColor='var(--brd)';this.style.background='';handleImportDrop(event)">
+      <input type="file" id="import-file-input" accept=".xlsx" style="display:none;" onchange="handleImportFile(this)">
+      <div style="font-size:36px;margin-bottom:10px;">📊</div>
+      <div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:5px;">Przeciągnij plik Excel lub kliknij aby wybrać</div>
+      <div style="font-size:12px;color:var(--txt2);">Format: .xlsx (szablon PFG Planner)</div>
+    </div>
+    <!-- Podgląd i wyniki importu -->
+    <div id="import-preview"></div>
+  </div>
 </div>
 
 <!-- STATYSTYKI -->
@@ -753,6 +813,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div><div class="t1">Karty trenerów</div><div class="t2" id="dir-coaches-sub">0 kart</div></div>
     <div class="tb-r">
       <input class="fi" id="dir-coach-search" placeholder="Szukaj trenera..." oninput="rDirCoaches()" style="width:200px;padding:6px 10px;font-size:12px;"/>
+      <button class="btn" onclick="oImport('karty-trenerow')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button>
       <button class="btn pri" onclick="oPromoteCoach()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj kartę trenera</button>
     </div>
   </div>
@@ -769,6 +830,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
   <div id="fin-body"></div>
+</div>
+
+<!-- DIR: SKŁADKI -->
+<div id="pg-dir-skladki" class="pg">
+  <div class="tb">
+    <div><div class="t1">Składki</div><div class="t2" id="sk2-sub">Panel składkowy</div></div>
+    <div class="tb-r">
+      <select class="fsel-sm" id="sk2-view-mode" onchange="rSkladki()" style="min-width:130px;">
+        <option value="matrix">Widok tabeli</option>
+        <option value="list">Lista składek</option>
+      </select>
+      <button class="btn" onclick="oAddSkladkaDef()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Nowa składka</button>
+      <button class="btn pri" id="sk2-enter-btn" onclick="oSkladkiMatrix()" style="display:none;"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Wprowadź wpłaty</button>
+    </div>
+  </div>
+  <!-- Filtry -->
+  <div style="background:var(--sur);border-bottom:1px solid var(--brd);padding:8px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;" id="sk2-filters">
+    <select class="fsel-sm" id="sk2-f-skladka" onchange="rSkladki()" style="min-width:200px;"><option value="">Wszystkie składki</option></select>
+    <select class="fsel-sm" id="sk2-f-team" onchange="rSkladki()" style="min-width:140px;"><option value="">Wszystkie drużyny</option></select>
+    <select class="fsel-sm" id="sk2-f-status" onchange="rSkladki()" style="min-width:130px;">
+      <option value="">Wszystkie statusy</option>
+      <option value="zalegly">Zaległy</option>
+      <option value="oplacony">Opłacony</option>
+      <option value="bezplatny">Miesiąc bezskładkowy</option>
+    </select>
+    <input class="fi" id="sk2-search" placeholder="Szukaj zawodnika…" oninput="rSkladki()" style="width:180px;padding:6px 10px;font-size:12px;"/>
+    <div style="margin-left:auto;display:flex;gap:10px;font-size:11px;color:var(--txt2);" id="sk2-summary"></div>
+  </div>
+  <div id="sk2-body" style="overflow:auto;flex:1;"></div>
 </div>
 
 <!-- DIR: SKAUTING -->
@@ -3069,7 +3159,8 @@ var STORE_VISIBILITY={
   PLAYERS:'all',TRAININGS:'all',MATCHES:'all',TESTS:'all',
   currentSeason:'all',
   COACH_PROFILES:'dyrektor',GAME_MODELS:'all',
-  SCOUT_PLAYERS:'dyrektor',BUDGETS:'dyrektor'
+  SCOUT_PLAYERS:'dyrektor',BUDGETS:'dyrektor',
+  SKLADKI_DEF:'all',SKLADKI_WPL:'all'
 };
 
 // ── SAVE — zapis do Supabase + localStorage fallback ──
@@ -3077,7 +3168,7 @@ var _saveTimer=null;
 function saveLS(){
   // Zawsze zapisz lokalnie jako fallback
   try{
-    localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,currentSeason}));
+    localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason}));
   }catch(e){}
   // Debounce zapisu do Supabase (max 1 zapis co 800ms)
   if(_saveTimer)clearTimeout(_saveTimer);
@@ -3086,7 +3177,7 @@ function saveLS(){
 
 async function saveToSupabase(){
   if(!_supaReady)return;
-  var stores={EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,currentSeason};
+  var stores={EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason};
   // Filtruj wg roli — dyrektor zapisuje wszystko, trener tylko swoje
   var role=currentUser?currentUser.role:'trener';
   try{
@@ -3134,9 +3225,11 @@ async function loadFromSupabase(){
     if(byName.GAME_MODELS)GAME_MODELS=byName.GAME_MODELS.data||[];
     if(byName.SCOUT_PLAYERS)SCOUT_PLAYERS=byName.SCOUT_PLAYERS.data||[];
     if(byName.BUDGETS)BUDGETS=byName.BUDGETS.data||[];
+    if(byName.SKLADKI_DEF)SKLADKI_DEF=byName.SKLADKI_DEF.data||[];
+    if(byName.SKLADKI_WPL)SKLADKI_WPL=byName.SKLADKI_WPL.data||[];
 
     // Zapisz też lokalnie
-    try{localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,currentSeason}));}catch(e){}
+    try{localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason}));}catch(e){}
     _supaReady=true;
     showSyncStatus('ok');
     return true;
@@ -3151,7 +3244,7 @@ async function loadFromSupabase(){
 function loadFromLocal(){
   try{
     var d=localStorage.getItem(LS_KEY);
-    if(d){var p=JSON.parse(d);EXS=p.EXS||[];CYC=p.CYC||[];KONSP=p.KONSP||[];TEAMS=p.TEAMS||getDefaultTeams();COACHES=p.COACHES||getDefaultCoaches();PLAYERS=p.PLAYERS||[];TRAININGS=p.TRAININGS||[];MATCHES=p.MATCHES||[];TESTS=p.TESTS||[];currentSeason=p.currentSeason||'2025/26';COACH_PROFILES=p.COACH_PROFILES||[];GAME_MODELS=p.GAME_MODELS||[];SCOUT_PLAYERS=p.SCOUT_PLAYERS||[];BUDGETS=p.BUDGETS||[];}
+    if(d){var p=JSON.parse(d);EXS=p.EXS||[];CYC=p.CYC||[];KONSP=p.KONSP||[];TEAMS=p.TEAMS||getDefaultTeams();COACHES=p.COACHES||getDefaultCoaches();PLAYERS=p.PLAYERS||[];TRAININGS=p.TRAININGS||[];MATCHES=p.MATCHES||[];TESTS=p.TESTS||[];currentSeason=p.currentSeason||'2025/26';COACH_PROFILES=p.COACH_PROFILES||[];GAME_MODELS=p.GAME_MODELS||[];SCOUT_PLAYERS=p.SCOUT_PLAYERS||[];BUDGETS=p.BUDGETS||[];SKLADKI_DEF=p.SKLADKI_DEF||[];SKLADKI_WPL=p.SKLADKI_WPL||[];}
   }catch(e){console.warn('loadLocal error',e);}
 }
 function loadLS(){loadFromLocal();} // zachowany dla kompatybilności
@@ -3185,11 +3278,18 @@ function startRealtimeSync(){
 var _lastSyncTime=Date.now();
 
 function refreshCurrentPage(){
-  // Odśwież aktywną stronę po sync
   var active=document.querySelector('.pg.act');
   if(!active)return;
   var id=active.id;
-  var pageMap={'pg-dash':'dash','pg-plan':'plan','pg-cal':'cal','pg-ex':'ex','pg-konsp':'konsp','pg-ioz':'ioz','pg-teams':'teams','pg-stats':'stats','pg-tests':'tests','pg-gamemodel':'gamemodel','pg-dir-dash':'dir-dash','pg-dir-coaches':'dir-coaches','pg-dir-academy':'dir-academy','pg-dir-skauting':'dir-skauting','pg-dir-finanse':'dir-finanse'};
+  var pageMap={
+    'pg-dash':'dash','pg-plan':'plan','pg-cal':'cal','pg-ex':'ex',
+    'pg-konsp':'konsp','pg-ioz':'ioz','pg-teams':'teams','pg-stats':'stats',
+    'pg-tests':'tests',
+    'pg-gamemodel':'gamemodel',  // moduł trenerski — tylko podgląd
+    'pg-dir-dash':'dir-dash','pg-dir-coaches':'dir-coaches',
+    'pg-dir-academy':'dir-academy','pg-dir-skauting':'dir-skauting',
+    'pg-dir-finanse':'dir-finanse','pg-dir-gamemodel':'dir-gamemodel'
+  };
   var name=pageMap[id];
   if(name)SP(name);
 }
@@ -4548,13 +4648,6 @@ function oMatchDay(matchId){
   oM('mo-match');
 }
 
-function oProtkolFromDay(matchId){
-  var idx=MATCHES.findIndex(m=>m.id===matchId);
-  if(idx<0)return;
-  editMatchIdx=idx;
-  oProtokol();
-}
-
 
 // ═══════════════ EKSPORT KARTA ZAWODNIKA PDF ═══════════════
 function dlIOZpdf(){
@@ -4985,11 +5078,6 @@ function drawSimplePie(canvas,labels,data,colors){
 }
 
 // Aktualizuj SP żeby obsługiwał stats
-var _origSP=SP;
-SP=function(n){
-  _origSP(n);
-  if(n==='stats')rStats();
-};
 
 // Aktualizuj renderPlayerView żeby wywoływał renderAnthroCharts i renderTestCharts
 var _origRPV=renderPlayerView;
@@ -5461,7 +5549,9 @@ function checkAutoLogin(){
 var COACH_PROFILES=[]; // {id, coachId, name, dob, role, license, predispositions, preferredRole, notes, filosofia, kontrakt:{od,do}, zaswNiekaralnosc:{data,powiadom}, zaswRejestr:{data,powiadom}, oceny:[]}
 var GAME_MODELS=[]; // {id, ageCategory, sections:[{title, items:[{text}]}], notes, updatedAt}
 var SCOUT_PLAYERS=[]; // {id, name, matchId, sourceText, opponent, ourTeam, date, position, age, notes, status, priority, addedAt}
-var BUDGETS=[]; // {id, name, year, saldoStart, sections:[{id,name,type:'przychod'|'koszt',rows:[{id,name,category,vals:[{budzet,aktualny}×12]}]}]}
+var BUDGETS=[]; // {id, name, year, saldoStart, sections:[...]}
+var SKLADKI_DEF=[]; // {id, name, kwota, typ:'miesieczna'|'jednorazowa', druzyna, sezon, miesiaceBezplatne:[]}
+var SKLADKI_WPL=[]; // {id, defId, playerId, rok, miesiac, kwota, status:'oplacony'|'zalegly'|'bezplatny', datWplaty, metoda, uwagi}
 
 var COACH_RATING_SCHEMA=[
   {section:'Osobowość Trenera — Kluczowe cechy', items:[
@@ -6501,7 +6591,6 @@ function rGameModelReadonly(){
       +'<div style="font-size:12px;color:var(--txt2);">Dyrektor / koordynator klubu nie dodał jeszcze modeli gry dla kategorii wiekowych.</div></div>';
     return;
   }
-  // Grupuj i sortuj wg KATS
   var byAge={};
   GAME_MODELS.forEach((m,i)=>{var k=m.ageCategory||'Inne';if(!byAge[k])byAge[k]=[];byAge[k].push({m,i});});
   var sorted=Object.entries(byAge).sort((a,b)=>{var ia=KATS.indexOf(a[0]),ib=KATS.indexOf(b[0]);if(ia<0)ia=999;if(ib<0)ib=999;return ia-ib;});
@@ -6509,18 +6598,30 @@ function rGameModelReadonly(){
   sorted.forEach(([age,items])=>{
     items.forEach(({m,i})=>{
       html+='<div class="card" style="margin-bottom:14px;">';
+      // Nagłówek
       html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">';
       html+='<div><div style="font-size:16px;font-weight:700;">'+escH(age)+'</div>';
       if(m.subtitle)html+='<div style="font-size:12px;color:var(--txt2);margin-top:2px;">'+escH(m.subtitle)+'</div>';
       html+='</div>';
       if(m.updatedAt)html+='<div style="font-size:10px;color:var(--txt3);">Aktualizacja: '+fdShort(m.updatedAt.slice(0,10))+'</div>';
       html+='</div>';
+
+      // Galeria główna modelu
+      if(m.gallery&&m.gallery.length){
+        html+='<div style="margin-bottom:14px;">';
+        html+='<div style="font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📎 Materiały ogólne</div>';
+        html+=_gmMediaGridHTML('ro-gallery-'+i, m.gallery, true);
+        html+='</div>';
+      }
+
+      // Sekcje
       if(m.sections&&m.sections.length){
         html+='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">';
-        m.sections.forEach(sec=>{
-          if(!sec.title&&(!sec.items||!sec.items.length))return;
+        m.sections.forEach((sec,si)=>{
+          if(!sec.title&&(!sec.items||!sec.items.length)&&(!sec.media||!sec.media.length))return;
           html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:12px 14px;">';
-          html+='<div style="font-size:10px;font-weight:700;color:var(--pu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--pu);flex-shrink:0;"></div>'+escH(sec.title||'Sekcja')+'</div>';
+          html+='<div style="font-size:10px;font-weight:700;color:var(--pu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px;">';
+          html+='<div style="width:6px;height:6px;border-radius:50%;background:var(--pu);flex-shrink:0;"></div>'+escH(sec.title||'Sekcja')+'</div>';
           if(sec.items&&sec.items.length){
             sec.items.forEach(it=>{
               html+='<div style="display:flex;gap:7px;padding:4px 0;border-bottom:1px solid var(--brd);align-items:flex-start;">';
@@ -6529,10 +6630,15 @@ function rGameModelReadonly(){
               html+='</div>';
             });
           }
+          // Media sekcji
+          if(sec.media&&sec.media.length){
+            html+='<div style="margin-top:10px;">'+_gmMediaGridHTML('ro-sec-'+i+'-'+si, sec.media, true)+'</div>';
+          }
           html+='</div>';
         });
         html+='</div>';
       }
+
       if(m.notes){
         html+='<div style="margin-top:12px;background:#EEEDFE33;border-left:3px solid var(--pu);border-radius:0 var(--r2) var(--r2) 0;padding:10px 14px;">';
         html+='<div style="font-size:9px;font-weight:700;color:var(--pu);text-transform:uppercase;margin-bottom:4px;">Notatki</div>';
@@ -6609,7 +6715,7 @@ function oEditGameModel(i){editGMIdx=i;_openGMForm(GAME_MODELS[i]);oM('mo-gm-for
 function delGameModel(i){
   if(!confirm('Usunąć model gry "'+GAME_MODELS[i].ageCategory+'"?'))return;
   GAME_MODELS.splice(i,1);saveLS();rGameModel();
-  var roBody=document.getElementById('gm-ro-body');if(roBody&&roBody.innerHTML)rGameModelReadonly();
+  rGameModelReadonly();
   ST('Model usunięty');
 }
 
@@ -6617,7 +6723,7 @@ function _openGMForm(m){
   var mo=document.getElementById('mo-gm-form');
   if(!mo){
     mo=document.createElement('div');mo.className='mo';mo.id='mo-gm-form';
-    mo.innerHTML='<div class="mbox wide" style="width:760px;max-height:94vh;"><div class="mh"><div class="mt2" id="mo-gm-ttl">Nowy model gry</div><button class="mc2" onclick="cM(\'mo-gm-form\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-gm-body"></div><div class="mfs"><button class="btn dan sm" id="mo-gm-del" style="display:none;" onclick="delGMModal()">Usuń</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-gm-form\')">Anuluj</button><button class="btn pri" style="background:var(--pu);border-color:var(--pu);" onclick="saveGameModel()">Zapisz model</button></div></div></div>';
+    mo.innerHTML='<div class="mbox wide" style="width:820px;max-height:94vh;"><div class="mh"><div class="mt2" id="mo-gm-ttl">Nowy model gry</div><button class="mc2" onclick="cM(\'mo-gm-form\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-gm-body"></div><div class="mfs"><button class="btn dan sm" id="mo-gm-del" style="display:none;" onclick="delGMModal()">Usuń</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-gm-form\')">Anuluj</button><button class="btn pri" style="background:var(--pu);border-color:var(--pu);" onclick="saveGameModel()">Zapisz model</button></div></div></div>';
     mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
     document.body.appendChild(mo);
   }
@@ -6628,6 +6734,15 @@ function _openGMForm(m){
   var html='<div class="sh" style="margin-top:0;">Informacje podstawowe</div>';
   html+='<div class="fr2"><div><label class="fl">Kategoria wiekowa *</label><select class="fsel" id="gm-age"><option value="">— wybierz —</option>'+catOpts+'</select></div>';
   html+='<div><label class="fl">Podtytuł / sezon</label><input class="fi" id="gm-subtitle" value="'+escH(m.subtitle||'')+'" placeholder="np. Sezon 2025/26, Filozofia klubu"/></div></div>';
+
+  // ── Galeria główna modelu ──
+  html+='<div class="sh">Galeria modelu <span style="font-weight:400;color:var(--txt3);font-size:11px;">— grafiki, schematy, linki dla całego modelu</span></div>';
+  html+='<div id="gm-gallery-wrap">';
+  html+=_gmMediaGridHTML('gm-gallery', m.gallery||[], false);
+  html+='</div>';
+  html+=_gmAddMediaBarHTML('gm-gallery');
+
+  // ── Sekcje ──
   html+='<div class="sh">Sekcje modelu gry <span style="font-weight:400;color:var(--txt3);font-size:11px;">— każda sekcja to osobny obszar taktyczny</span></div>';
   html+='<div id="gm-sections">';
   secs.forEach((sec,si)=>{html+=_gmSectionHTML(si,sec);});
@@ -6637,26 +6752,220 @@ function _openGMForm(m){
   html+='<div class="fr"><textarea class="fta" id="gm-notes" style="min-height:60px;" placeholder="Dodatkowe uwagi, filozofia klubu, kontekst...">'+escH(m.notes||'')+'</textarea></div>';
   document.getElementById('mo-gm-body').innerHTML=html;
 }
+
+// Renderuj siatkę miniatur mediów (do edycji lub podglądu)
+function _gmMediaGridHTML(containerId, mediaArr, readOnly){
+  if(!mediaArr||!mediaArr.length)return readOnly?'':'';
+  var html='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;" id="'+containerId+'-grid">';
+  mediaArr.forEach((item,idx)=>{
+    html+='<div class="gm-media-thumb" data-idx="'+idx+'">';
+    if(item.type==='image'){
+      html+='<img class="gm-media-img" src="'+escH(item.url)+'" alt="'+escH(item.title||'')+'" onclick="gmLightbox(\''+escH(item.url)+'\',\''+escH(item.title||'')+'\')"/>';
+    } else if(item.type==='pdf'){
+      html+='<div class="gm-media-link" onclick="window.open(\''+escH(item.url)+'\',\'_blank\')">';
+      html+='<svg viewBox="0 0 16 16" style="width:28px;height:28px;fill:none;stroke:#E11D48;stroke-width:1.5;"><rect x="3" y="1" width="10" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>';
+      html+='<div style="font-size:10px;font-weight:600;color:var(--red);text-align:center;">PDF</div>';
+      html+='<div style="font-size:9px;color:var(--txt2);text-align:center;overflow:hidden;text-overflow:ellipsis;max-width:80px;">'+escH(item.title||'Dokument')+'</div>';
+      html+='</div>';
+    } else {
+      // link (YouTube, Slides, Canva, inne)
+      var isYT=item.url&&(item.url.includes('youtube')||item.url.includes('youtu.be'));
+      var icon=isYT?'▶':'🔗';
+      var iconColor=isYT?'#FF0000':'var(--pu)';
+      html+='<div class="gm-media-link" onclick="window.open(\''+escH(item.url)+'\',\'_blank\')">';
+      html+='<div style="font-size:28px;">'+icon+'</div>';
+      html+='<div style="font-size:9px;color:var(--txt2);text-align:center;overflow:hidden;text-overflow:ellipsis;max-width:80px;">'+escH(item.title||item.url)+'</div>';
+      html+='</div>';
+    }
+    if(!readOnly){
+      html+='<button class="gm-media-del" onclick="gmDelMedia(\''+containerId+'\','+idx+')" title="Usuń">×</button>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+// Pasek dodawania mediów (tylko w edycji)
+function _gmAddMediaBarHTML(targetId){
+  return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;" data-target="'+targetId+'">'
+    +'<label class="gm-upload-zone" style="flex:1;min-width:140px;" title="Dodaj obraz">'
+    +'<input type="file" accept="image/*" multiple style="display:none;" onchange="gmUploadImages(this,\''+targetId+'\')">'
+    +'<svg viewBox="0 0 16 16" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;display:block;margin:0 auto 4px;"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="5.5" cy="7" r="1.5"/><path d="M1 10l4-3 3 3 2-2 5 4"/></svg>'
+    +'<div>+ Grafika / Schemat</div><div style="font-size:10px;color:var(--txt3);">JPG, PNG, GIF</div></label>'
+    +'<label class="gm-upload-zone" style="flex:1;min-width:140px;" title="Dodaj PDF">'
+    +'<input type="file" accept=".pdf" multiple style="display:none;" onchange="gmUploadPDF(this,\''+targetId+'\')">'
+    +'<svg viewBox="0 0 16 16" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;display:block;margin:0 auto 4px;"><rect x="3" y="1" width="10" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>'
+    +'<div>+ Prezentacja / PDF</div><div style="font-size:10px;color:var(--txt3);">Plik PDF</div></label>'
+    +'<div class="gm-upload-zone" style="flex:1;min-width:140px;" onclick="gmAddLink(\''+targetId+'\')" title="Dodaj link">'
+    +'<svg viewBox="0 0 16 16" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;display:block;margin:0 auto 4px;"><path d="M6 10l-2 2a3 3 0 004.2 4.2L11 13M10 6l2-2a3 3 0 00-4.2-4.2L5 3M6 10l4-4"/></svg>'
+    +'<div>+ Link zewnętrzny</div><div style="font-size:10px;color:var(--txt3);">YouTube, Slides, Canva</div>'
+    +'</div></div>';
+}
+
+// Pobierz aktualne media z kontenera DOM
+function _getMediaFromDOM(containerId){
+  // Media są zapisywane w data atrybucie kontenera
+  var wrap=document.getElementById(containerId+'-data');
+  if(wrap)return JSON.parse(wrap.value||'[]');
+  return [];
+}
+
+// Globalny store mediów w trakcie edycji (klucz = containerId)
+var _gmMediaStore={};
+
+function _initMediaStore(containerId, initial){
+  _gmMediaStore[containerId]=JSON.parse(JSON.stringify(initial||[]));
+  // Schowaj input dla danych
+  var wrap=document.getElementById(containerId+'-data');
+  if(!wrap){
+    wrap=document.createElement('input');wrap.type='hidden';wrap.id=containerId+'-data';
+    document.getElementById('mo-gm-body').appendChild(wrap);
+  }
+  wrap.value=JSON.stringify(_gmMediaStore[containerId]);
+}
+
+function _refreshMediaGrid(containerId){
+  var items=_gmMediaStore[containerId]||[];
+  var gridWrap=document.getElementById(containerId+'-wrap')||document.getElementById('gm-gallery-wrap');
+  if(!gridWrap)return;
+  var existing=document.getElementById(containerId+'-grid');
+  var newGrid=document.createElement('div');
+  newGrid.innerHTML=_gmMediaGridHTML(containerId,items,false);
+  if(existing)existing.replaceWith(newGrid.firstChild||newGrid);
+  else gridWrap.insertAdjacentHTML('afterbegin',_gmMediaGridHTML(containerId,items,false));
+  // Aktualizuj hidden input
+  var inp=document.getElementById(containerId+'-data');
+  if(inp)inp.value=JSON.stringify(items);
+}
+
+// Upload obrazów do Supabase Storage
+async function gmUploadImages(input, containerId){
+  var files=Array.from(input.files);if(!files.length)return;
+  ST('Wgrywanie '+files.length+' pliku…');
+  var items=_gmMediaStore[containerId]||(_gmMediaStore[containerId]=[]);
+  for(var file of files){
+    var ext=file.name.split('.').pop().toLowerCase();
+    var path='game-models/'+CLUB_KEY+'/'+(Date.now()+'_'+Math.random().toString(36).slice(2))+'.'+ext;
+    try{
+      // Upload do Supabase Storage
+      var r=await fetch(SUPA_URL+'/storage/v1/object/'+path,{
+        method:'POST',
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':file.type},
+        body:file
+      });
+      if(r.ok){
+        var publicUrl=SUPA_URL+'/storage/v1/object/public/'+path;
+        items.push({type:'image',url:publicUrl,title:file.name.replace(/\.[^.]+$/,''),supaPath:path});
+      } else {
+        // Fallback: base64 lokalnie
+        var b64=await fileToBase64(file);
+        items.push({type:'image',url:b64,title:file.name.replace(/\.[^.]+$/,''),local:true});
+      }
+    }catch(e){
+      var b64=await fileToBase64(file);
+      items.push({type:'image',url:b64,title:file.name.replace(/\.[^.]+$/,''),local:true});
+    }
+  }
+  _gmMediaStore[containerId]=items;
+  _refreshMediaGrid(containerId);
+  ST('✓ Dodano '+files.length+' grafik');
+  input.value='';
+}
+
+async function gmUploadPDF(input, containerId){
+  var files=Array.from(input.files);if(!files.length)return;
+  var items=_gmMediaStore[containerId]||(_gmMediaStore[containerId]=[]);
+  ST('Wgrywanie PDF…');
+  for(var file of files){
+    var path='game-models/'+CLUB_KEY+'/'+(Date.now()+'_'+Math.random().toString(36).slice(2))+'.pdf';
+    try{
+      var r=await fetch(SUPA_URL+'/storage/v1/object/'+path,{
+        method:'POST',
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/pdf'},
+        body:file
+      });
+      var url=r.ok?SUPA_URL+'/storage/v1/object/public/'+path:null;
+      if(!url){url=URL.createObjectURL(file);}
+      items.push({type:'pdf',url,title:file.name.replace(/\.pdf$/i,''),supaPath:path});
+    }catch(e){items.push({type:'pdf',url:URL.createObjectURL(file),title:file.name.replace(/\.pdf$/i,'')});}
+  }
+  _gmMediaStore[containerId]=items;
+  _refreshMediaGrid(containerId);
+  ST('✓ Dodano PDF');
+  input.value='';
+}
+
+function gmAddLink(containerId){
+  var url=prompt('Wklej link (YouTube, Google Slides, Canva, inne):','https://');
+  if(!url||url==='https://')return;
+  var title=prompt('Nazwa linku (opcjonalnie):',url.replace(/^https?:\/\/(www\.)?/,'').slice(0,40));
+  var items=_gmMediaStore[containerId]||(_gmMediaStore[containerId]=[]);
+  items.push({type:'link',url,title:title||url});
+  _gmMediaStore[containerId]=items;
+  _refreshMediaGrid(containerId);
+}
+
+function gmDelMedia(containerId,idx){
+  var items=_gmMediaStore[containerId]||[];
+  items.splice(idx,1);
+  _gmMediaStore[containerId]=items;
+  _refreshMediaGrid(containerId);
+}
+
+function gmLightbox(url,title){
+  var lb=document.getElementById('gm-lightbox');
+  if(!lb){
+    lb=document.createElement('div');lb.id='gm-lightbox';
+    lb.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:10px;cursor:zoom-out;';
+    lb.innerHTML='<img id="gm-lb-img" style="max-width:90vw;max-height:85vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5);"/><div id="gm-lb-title" style="color:#fff;font-size:13px;opacity:.7;"></div>';
+    lb.onclick=function(){lb.style.display='none';};
+    document.body.appendChild(lb);
+  }
+  document.getElementById('gm-lb-img').src=url;
+  document.getElementById('gm-lb-title').textContent=title||'';
+  lb.style.display='flex';
+}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{var r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+
 function _gmSectionHTML(si,sec){
+  var secId='gm-sec-'+si;
+  var mediaGrid=sec.media&&sec.media.length?_gmMediaGridHTML(secId,sec.media,false):'';
+  var mediaData=JSON.stringify(sec.media||[]);
   var itemsHtml=(sec.items||[]).map((it,ii)=>'<div class="gm-item-row" style="display:flex;gap:6px;margin-bottom:4px;align-items:flex-start;">'
     +'<input class="fi gm-item-input" style="flex:1;padding:5px 8px;font-size:12px;" value="'+escH(it.text||'')+'" placeholder="Wpisz założenie lub cel..."/>'
     +'<button onclick="this.closest(\'.gm-item-row\').remove()" style="background:none;border:none;cursor:pointer;color:var(--txt3);font-size:18px;line-height:1;padding:2px 4px;">×</button>'
     +'</div>').join('');
-  return '<div class="gm-sec-block" style="background:var(--sur2);border-radius:var(--r2);padding:10px 12px;margin-bottom:10px;" data-si="'+si+'">'
+  return '<div class="gm-sec-block" style="background:var(--sur2);border-radius:var(--r2);padding:10px 12px;margin-bottom:10px;" data-si="'+si+'" id="'+secId+'-block">'
+    +'<input type="hidden" class="gm-sec-media-data" value="'+escH(mediaData)+'">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
-    +'<input class="fi gm-sec-title" style="flex:1;padding:5px 8px;font-size:12px;font-weight:600;" value="'+escH(sec.title||'')+'" placeholder="Tytuł sekcji (np. Organizacja w ataku)"/>'
+    +'<input class="fi gm-sec-title" style="flex:1;padding:5px 8px;font-size:12px;font-weight:600;" value="'+escH(sec.title||'')+'" placeholder="Tytuł sekcji"/>'
     +'<button onclick="this.closest(\'.gm-sec-block\').remove()" style="background:none;border:none;cursor:pointer;color:var(--txt3);font-size:18px;line-height:1;padding:2px 6px;">×</button>'
     +'</div>'
     +'<div class="gm-items-list">'+itemsHtml+'</div>'
     +'<button onclick="addGMItem(this)" class="btn sm" style="margin-top:4px;font-size:10px;">+ Dodaj założenie</button>'
+    // Media per sekcja
+    +'<div style="margin-top:10px;border-top:1px solid var(--brd);padding-top:8px;">'
+    +'<div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;margin-bottom:6px;">Grafiki / Linki do sekcji</div>'
+    +'<div id="'+secId+'-wrap">'+mediaGrid+'</div>'
+    +_gmAddMediaBarHTML(secId)
+    +'</div>'
     +'</div>';
 }
+
 function addGMSection(){
   var wrap=document.getElementById('gm-sections');if(!wrap)return;
   var si=wrap.querySelectorAll('.gm-sec-block').length;
-  var div=document.createElement('div');div.innerHTML=_gmSectionHTML(si,{title:'',items:[]});
-  wrap.appendChild(div.firstChild);
+  var div=document.createElement('div');div.innerHTML=_gmSectionHTML(si,{title:'',items:[],media:[]});
+  var block=div.firstChild;
+  wrap.appendChild(block);
+  // Inicjalizuj store mediów dla nowej sekcji
+  _gmMediaStore['gm-sec-'+si]=[];
 }
+
 function addGMItem(btn){
   var list=btn.previousElementSibling;
   var div=document.createElement('div');
@@ -6667,39 +6976,65 @@ function addGMItem(btn){
   list.appendChild(div.firstChild);
   list.lastChild.querySelector('input').focus();
 }
+
 function saveGameModel(){
   var age=(document.getElementById('gm-age')||{}).value||'';
   if(!age){ST('Wybierz kategorię wiekową');return;}
+  // Zbierz galerię główną
+  var gallery=_gmMediaStore['gm-gallery']||[];
   var secs=[];
-  document.querySelectorAll('.gm-sec-block').forEach(block=>{
+  document.querySelectorAll('.gm-sec-block').forEach((block,si)=>{
     var title=(block.querySelector('.gm-sec-title')||{}).value||'';
     var items=[];
     block.querySelectorAll('.gm-item-input').forEach(inp=>{if(inp.value.trim())items.push({text:inp.value.trim()});});
-    if(title||items.length)secs.push({title,items});
+    // Media sekcji z _gmMediaStore
+    var secId='gm-sec-'+si;
+    var media=_gmMediaStore[secId]||[];
+    // Fallback: odczytaj z hidden input jeśli store nie zainicjalizowany
+    if(!media.length){
+      var hiddenInp=block.querySelector('.gm-sec-media-data');
+      if(hiddenInp)try{media=JSON.parse(hiddenInp.value||'[]');}catch(e){}
+    }
+    if(title||items.length||media.length)secs.push({title,items,media});
   });
   var m={
     id:editGMIdx===null?genId():GAME_MODELS[editGMIdx].id,
     ageCategory:age,
     subtitle:(document.getElementById('gm-subtitle')||{}).value||'',
+    gallery,
     sections:secs,
     notes:(document.getElementById('gm-notes')||{}).value||'',
     updatedAt:new Date().toISOString().slice(0,10)
   };
   if(editGMIdx===null)GAME_MODELS.push(m);else GAME_MODELS[editGMIdx]=m;
   saveLS();cM('mo-gm-form');rGameModel();
-  // Odśwież podgląd trenerski jeśli strona jest załadowana
-  var roBody=document.getElementById('gm-ro-body');
-  if(roBody&&roBody.innerHTML)rGameModelReadonly();
+  _gmMediaStore={};
+  // Zawsze odśwież podgląd trenerski — dane są wspólne
+  rGameModelReadonly();
   ST('"'+age+'" '+(editGMIdx===null?'dodany':'zaktualizowany'));
 }
+
 function delGMModal(){if(editGMIdx===null)return;delGameModel(editGMIdx);editGMIdx=null;cM('mo-gm-form');}
+
+// Inicjalizuj store mediów przy otwarciu formularza
+var _origOpenGMForm=_openGMForm;
+_openGMForm=function(m){
+  _gmMediaStore={};
+  _origOpenGMForm(m);
+  // Inicjalizuj store galerii głównej
+  _gmMediaStore['gm-gallery']=JSON.parse(JSON.stringify(m.gallery||[]));
+  // Inicjalizuj store per sekcja
+  (m.sections||[]).forEach((sec,si)=>{
+    _gmMediaStore['gm-sec-'+si]=JSON.parse(JSON.stringify(sec.media||[]));
+  });
+};
 
 function oViewGameModel(i){
   var m=GAME_MODELS[i];if(!m)return;
   var mo=document.getElementById('mo-gm-view');
   if(!mo){
     mo=document.createElement('div');mo.className='mo';mo.id='mo-gm-view';
-    mo.innerHTML='<div class="mbox wide" style="width:740px;max-height:94vh;"><div class="mh"><div class="mt2" id="mo-gmv-ttl"></div><div style="display:flex;gap:6px;" id="mo-gmv-btns"></div></div><div class="mbody" id="mo-gmv-body"></div><div class="mf"><button class="btn" onclick="cM(\'mo-gm-view\')">Zamknij</button></div></div>';
+    mo.innerHTML='<div class="mbox wide" style="width:820px;max-height:94vh;"><div class="mh"><div class="mt2" id="mo-gmv-ttl"></div><div style="display:flex;gap:6px;" id="mo-gmv-btns"></div></div><div class="mbody" id="mo-gmv-body"></div><div class="mf"><button class="btn" onclick="cM(\'mo-gm-view\')">Zamknij</button></div></div>';
     mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
     document.body.appendChild(mo);
   }
@@ -6708,27 +7043,38 @@ function oViewGameModel(i){
     '<button class="btn sm" onclick="cM(\'mo-gm-view\');oEditGameModel('+i+')" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;">Edytuj</button>'
     +'<button class="mc2" onclick="cM(\'mo-gm-view\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>';
   var html='';
+  // Galeria główna
+  if(m.gallery&&m.gallery.length){
+    html+='<div style="margin-bottom:16px;">';
+    html+='<div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📎 Materiały ogólne</div>';
+    html+=_gmMediaGridHTML('gmv-gallery',m.gallery,true);
+    html+='</div>';
+  }
+  // Sekcje
   if(m.sections&&m.sections.length){
-    m.sections.forEach(sec=>{
-      if(!sec.title&&(!sec.items||!sec.items.length))return;
-      html+='<div style="margin-bottom:16px;">';
-      html+='<div style="font-size:10px;font-weight:700;color:var(--pu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">';
+    m.sections.forEach((sec,si)=>{
+      if(!sec.title&&(!sec.items||!sec.items.length)&&(!sec.media||!sec.media.length))return;
+      html+='<div style="margin-bottom:18px;background:var(--sur2);border-radius:var(--r2);padding:12px 14px;">';
+      html+='<div style="font-size:10px;font-weight:700;color:var(--pu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">';
       html+='<div style="width:8px;height:8px;border-radius:2px;background:var(--pu);flex-shrink:0;"></div>'+escH(sec.title||'Sekcja')+'</div>';
+      // Założenia
       if(sec.items&&sec.items.length){
-        html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 14px;">';
         sec.items.forEach(it=>{
           html+='<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd);align-items:flex-start;">';
           html+='<div style="width:6px;height:6px;border-radius:50%;background:var(--pu);flex-shrink:0;margin-top:6px;"></div>';
           html+='<div style="font-size:12px;line-height:1.5;">'+escH(it.text)+'</div>';
           html+='</div>';
         });
-        html+='</div>';
+      }
+      // Media sekcji
+      if(sec.media&&sec.media.length){
+        html+='<div style="margin-top:10px;">'+_gmMediaGridHTML('gmv-sec-'+si,sec.media,true)+'</div>';
       }
       html+='</div>';
     });
   }
-  if(m.notes)html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 14px;font-size:12px;color:var(--txt2);line-height:1.6;">'+escH(m.notes).replace(/\n/g,'<br>')+'</div>';
-  if(!html)html='<div style="text-align:center;padding:28px;color:var(--txt2);">Brak treści. Kliknij Edytuj aby dodać założenia.</div>';
+  if(m.notes)html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 14px;font-size:12px;color:var(--txt2);line-height:1.6;margin-top:8px;">'+escH(m.notes).replace(/\n/g,'<br>')+'</div>';
+  if(!html)html='<div style="text-align:center;padding:28px;color:var(--txt2);">Brak treści. Kliknij Edytuj aby dodać założenia i grafiki.</div>';
   document.getElementById('mo-gmv-body').innerHTML=html;
   oM('mo-gm-view');
 }
@@ -7294,13 +7640,380 @@ function saveScout(){
 }
 function delScoutModal(){if(editScoutIdx===null)return;delScout(editScoutIdx);editScoutIdx=null;cM('mo-scout');}
 
+// ═══════════════ SKŁADKI ═══════════════
+var SK2_MONTHS_LABELS=['Lip','Sie','Wrz','Paź','Lis','Gru','Sty','Lut','Mar','Kwi','Maj','Cze'];
+// Sezon zaczyna się w lipcu — generuj 12 miesięcy per sezon
+function sk2SeasonMonths(season){
+  // season = '2025/26'
+  var y1=parseInt(season.split('/')[0]);
+  var y2=y1+1;
+  return [
+    {r:y1,m:7,lbl:'Lip '+y1},{r:y1,m:8,lbl:'Sie '+y1},{r:y1,m:9,lbl:'Wrz '+y1},
+    {r:y1,m:10,lbl:'Paź '+y1},{r:y1,m:11,lbl:'Lis '+y1},{r:y1,m:12,lbl:'Gru '+y1},
+    {r:y2,m:1,lbl:'Sty '+y2},{r:y2,m:2,lbl:'Lut '+y2},{r:y2,m:3,lbl:'Mar '+y2},
+    {r:y2,m:4,lbl:'Kwi '+y2},{r:y2,m:5,lbl:'Maj '+y2},{r:y2,m:6,lbl:'Cze '+y2}
+  ];
+}
+
+function sk2GetWplata(defId,playerId,rok,miesiac){
+  return SKLADKI_WPL.find(w=>w.defId===defId&&w.playerId===playerId&&w.rok===rok&&w.miesiac===miesiac)||null;
+}
+
+function sk2SetWplata(defId,playerId,rok,miesiac,status,kwota,datWplaty,metoda,uwagi){
+  var idx=SKLADKI_WPL.findIndex(w=>w.defId===defId&&w.playerId===playerId&&w.rok===rok&&w.miesiac===miesiac);
+  var obj={id:idx>=0?SKLADKI_WPL[idx].id:genId(),defId,playerId,rok,miesiac,kwota,status,datWplaty:datWplaty||'',metoda:metoda||'',uwagi:uwagi||''};
+  if(idx>=0)SKLADKI_WPL[idx]=obj;else SKLADKI_WPL.push(obj);
+  saveLS();
+}
+
+// ── Definicje składek ──
+var editSkladkaDefIdx=null;
+
+function oAddSkladkaDef(){editSkladkaDefIdx=null;_openSkladkaDefForm({});oM('mo-skladka-def');}
+function oEditSkladkaDef(i){editSkladkaDefIdx=i;_openSkladkaDefForm(SKLADKI_DEF[i]);oM('mo-skladka-def');}
+
+function _openSkladkaDefForm(s){
+  var mo=document.getElementById('mo-skladka-def');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-skladka-def';
+    mo.innerHTML='<div class="mbox" style="width:540px;"><div class="mh"><div class="mt2" id="mo-sd-ttl">Nowa składka</div><button class="mc2" onclick="cM(\'mo-skladka-def\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-sd-body"></div><div class="mfs"><button class="btn dan sm" id="mo-sd-del" style="display:none;" onclick="delSkladkaDefModal()">Usuń</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-skladka-def\')">Anuluj</button><button class="btn pri" onclick="saveSkladkaDef()">Zapisz</button></div></div></div>';
+    mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+  document.getElementById('mo-sd-ttl').textContent=editSkladkaDefIdx===null?'Nowa składka':'Edytuj: '+( s.name||'składka');
+  document.getElementById('mo-sd-del').style.display=editSkladkaDefIdx!==null?'':'none';
+  var teamOpts='<option value="">Wszystkie drużyny</option>'+TEAMS.filter(t=>t.season===currentSeason).map(t=>'<option value="'+escH(t.name)+'"'+(t.name===s.druzyna?' selected':'')+'>'+escH(t.name)+'</option>').join('');
+  var months=sk2SeasonMonths(currentSeason);
+  var free=s.miesiaceBezplatne||[];
+  var html='<div class="sh" style="margin-top:0;">Dane składki</div>';
+  html+='<div class="fr"><label class="fl">Nazwa składki *</label><input class="fi" id="sd-name" value="'+escH(s.name||'')+'" placeholder="np. Składka członkowska akademia"/></div>';
+  html+='<div class="fr2"><div><label class="fl">Kwota bazowa (zł)</label><input class="fi" id="sd-kwota" type="number" min="0" step="0.01" value="'+(s.kwota||140)+'"/></div>';
+  html+='<div><label class="fl">Typ</label><select class="fsel" id="sd-typ"><option value="miesieczna"'+(s.typ!=='jednorazowa'?' selected':'')+'>Miesięczna</option><option value="jednorazowa"'+(s.typ==='jednorazowa'?' selected':'')+'>Jednorazowa</option></select></div></div>';
+  html+='<div class="fr2"><div><label class="fl">Drużyna</label><select class="fsel" id="sd-druzyna">'+teamOpts+'</select></div>';
+  html+='<div><label class="fl">Sezon</label><input class="fi" id="sd-sezon" value="'+escH(s.sezon||currentSeason)+'" placeholder="2025/26"/></div></div>';
+  html+='<div class="sh">Miesiące bezskładkowe <span style="font-weight:400;color:var(--txt3);">(opcjonalnie)</span></div>';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">';
+  months.forEach(m=>{
+    var key=m.r+'-'+m.m;
+    var chk=free.includes(key);
+    html+='<label style="display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:20px;border:1px solid '+(chk?'var(--pu)':'var(--brd)')+';background:'+(chk?'#EEEDFE':'var(--sur)')+';cursor:pointer;font-size:11px;">'
+      +'<input type="checkbox" class="sd-free-cb" value="'+key+'" '+(chk?'checked':'')+' style="accent-color:var(--pu);" onchange="this.closest(\'label\').style.background=this.checked?\'#EEEDFE\':\'var(--sur)\';this.closest(\'label\').style.borderColor=this.checked?\'var(--pu)\':\'var(--brd)\'">'
+      +escH(m.lbl)+'</label>';
+  });
+  html+='</div>';
+  document.getElementById('mo-sd-body').innerHTML=html;
+}
+
+function saveSkladkaDef(){
+  var name=(document.getElementById('sd-name')||{}).value||'';
+  if(!name.trim()){ST('Podaj nazwę składki');return;}
+  var free=[];
+  document.querySelectorAll('.sd-free-cb:checked').forEach(cb=>free.push(cb.value));
+  var isNew=editSkladkaDefIdx===null;
+  var prev=isNew?{id:genId()}:SKLADKI_DEF[editSkladkaDefIdx];
+  var s={...prev,
+    name:name.trim(),
+    kwota:parseFloat((document.getElementById('sd-kwota')||{}).value)||0,
+    typ:(document.getElementById('sd-typ')||{}).value||'miesieczna',
+    druzyna:(document.getElementById('sd-druzyna')||{}).value||'',
+    sezon:(document.getElementById('sd-sezon')||{}).value||currentSeason,
+    miesiaceBezplatne:free
+  };
+  if(isNew)SKLADKI_DEF.push(s);else SKLADKI_DEF[editSkladkaDefIdx]=s;
+  saveLS();cM('mo-skladka-def');rSkladki();
+  ST('"'+s.name+'" '+(isNew?'dodana':'zaktualizowana'));
+}
+
+function delSkladkaDefModal(){
+  if(editSkladkaDefIdx===null)return;
+  if(!confirm('Usunąć składkę i wszystkie powiązane wpłaty?'))return;
+  var id=SKLADKI_DEF[editSkladkaDefIdx].id;
+  SKLADKI_DEF.splice(editSkladkaDefIdx,1);
+  SKLADKI_WPL=SKLADKI_WPL.filter(w=>w.defId!==id);
+  saveLS();cM('mo-skladka-def');rSkladki();ST('Składka usunięta');
+}
+
+// ── Główny widok składek ──
+var _sk2ActiveDef=null;
+
+function rSkladki(){
+  var body=document.getElementById('sk2-body');if(!body)return;
+  var mode=(document.getElementById('sk2-view-mode')||{}).value||'matrix';
+  var enterBtn=document.getElementById('sk2-enter-btn');
+  // Filtry — wypełnij opcje
+  var defSel=document.getElementById('sk2-f-skladka');
+  var prevDef=defSel?defSel.value:'';
+  if(defSel){
+    defSel.innerHTML='<option value="">Wszystkie składki</option>'+SKLADKI_DEF.map(d=>'<option value="'+d.id+'"'+(d.id===prevDef?' selected':'')+'>'+escH(d.name)+'</option>').join('');
+  }
+  var teamSel=document.getElementById('sk2-f-team');
+  if(teamSel){
+    var teams=[...new Set(PLAYERS.map(p=>p.team).filter(Boolean))].sort();
+    var prevT=teamSel.value;
+    teamSel.innerHTML='<option value="">Wszystkie drużyny</option>'+teams.map(t=>'<option value="'+escH(t)+'"'+(t===prevT?' selected':'')+'>'+escH(t)+'</option>').join('');
+  }
+  if(mode==='list'){
+    if(enterBtn)enterBtn.style.display='none';
+    _renderSkladkiList(body);
+  } else {
+    if(enterBtn)enterBtn.style.display='';
+    _renderSkladkiMatrix(body);
+  }
+}
+
+function _renderSkladkiList(body){
+  if(!SKLADKI_DEF.length){
+    body.innerHTML='<div class="inner"><div class="empty"><div style="font-size:32px;margin-bottom:12px;">💳</div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">Brak zdefiniowanych składek</div><div style="font-size:12px;color:var(--txt2);margin-bottom:14px;">Utwórz pierwszą składkę klikając „Nowa składka".</div><button class="btn pri" onclick="oAddSkladkaDef()">+ Nowa składka</button></div></div>';
+    return;
+  }
+  var html='<div class="inner">';
+  SKLADKI_DEF.forEach((s,i)=>{
+    var players=s.druzyna?PLAYERS.filter(p=>p.team===s.druzyna):PLAYERS;
+    var months=sk2SeasonMonths(s.sezon||currentSeason);
+    var totalWpl=0,totalNalezne=0,totalZaleg=0;
+    players.forEach(p=>{
+      months.forEach(m=>{
+        var key=m.r+'-'+m.m;
+        if(s.miesiaceBezplatne&&s.miesiaceBezplatne.includes(key))return;
+        totalNalezne+=s.kwota;
+        var w=sk2GetWplata(s.id,p.id||p.name,m.r,m.m);
+        if(w&&w.status==='oplacony')totalWpl+=w.kwota||s.kwota;
+        if(w&&w.status==='zalegly')totalZaleg+=s.kwota;
+      });
+    });
+    var pct=totalNalezne?Math.round(totalWpl/totalNalezne*100):0;
+    html+='<div class="sk2-def-card">';
+    html+='<div style="flex:1;">';
+    html+='<div style="font-size:14px;font-weight:600;">'+escH(s.name)+'</div>';
+    html+='<div style="font-size:11px;color:var(--txt2);margin-top:3px;display:flex;gap:12px;">';
+    html+='<span>💰 '+s.kwota+' zł / '+(s.typ==='jednorazowa'?'jednorazowo':'mies.')+'</span>';
+    if(s.druzyna)html+='<span>👥 '+escH(s.druzyna)+'</span>';
+    html+='<span>📅 '+escH(s.sezon||currentSeason)+'</span>';
+    html+='<span>'+players.length+' zawodników</span>';
+    html+='</div>';
+    html+='<div style="margin-top:8px;display:flex;align-items:center;gap:8px;">';
+    html+='<div style="flex:1;height:6px;background:var(--brd);border-radius:3px;overflow:hidden;max-width:200px;"><div style="width:'+pct+'%;height:100%;background:var(--g);border-radius:3px;"></div></div>';
+    html+='<span style="font-size:11px;color:var(--g);font-weight:600;">'+pct+'% opłacone</span>';
+    html+='<span style="font-size:11px;color:var(--txt2);">'+Math.round(totalWpl).toLocaleString('pl-PL')+' / '+Math.round(totalNalezne).toLocaleString('pl-PL')+' zł</span>';
+    if(totalZaleg>0)html+='<span style="font-size:11px;color:var(--red);font-weight:600;">Zaległości: '+Math.round(totalZaleg).toLocaleString('pl-PL')+' zł</span>';
+    html+='</div></div>';
+    html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
+    html+='<button class="btn sm pri" onclick="sk2SelectDef(\''+s.id+'\')">📋 Tabela wpłat</button>';
+    html+='<button class="btn sm" onclick="oEditSkladkaDef('+i+')">Edytuj</button>';
+    html+='</div></div>';
+  });
+  html+='</div>';
+  body.innerHTML=html;
+}
+
+function sk2SelectDef(defId){
+  document.getElementById('sk2-f-skladka').value=defId;
+  document.getElementById('sk2-view-mode').value='matrix';
+  rSkladki();
+}
+
+function _renderSkladkiMatrix(body){
+  var q=((document.getElementById('sk2-search')||{}).value||'').toLowerCase();
+  var fTeam=(document.getElementById('sk2-f-team')||{}).value||'';
+  var fStatus=(document.getElementById('sk2-f-status')||{}).value||'';
+  var fDef=(document.getElementById('sk2-f-skladka')||{}).value||'';
+  // Wybierz składkę do pokazania
+  var defList=fDef?SKLADKI_DEF.filter(d=>d.id===fDef):SKLADKI_DEF;
+  if(!defList.length){
+    body.innerHTML='<div style="text-align:center;padding:40px;color:var(--txt2);">Brak zdefiniowanych składek.<br><button class="btn pri" style="margin-top:12px;" onclick="oAddSkladkaDef()">+ Nowa składka</button></div>';
+    return;
+  }
+  // Pokaż po jednej składce naraz (pierwsza jeśli nie wybrana)
+  var def=defList[0];
+  var months=sk2SeasonMonths(def.sezon||currentSeason);
+  // Zawodnicy
+  var players=PLAYERS.filter(p=>{
+    if(def.druzyna&&p.team!==def.druzyna)return false;
+    if(fTeam&&p.team!==fTeam)return false;
+    if(q&&!(p.name||'').toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>(a.team||'').localeCompare(b.team||'')||( a.name||'').localeCompare(b.name||''));
+  // Filtr statusu
+  if(fStatus){
+    players=players.filter(p=>{
+      return months.some(m=>{
+        var w=sk2GetWplata(def.id,p.id||p.name,m.r,m.m);
+        var key=m.r+'-'+m.m;
+        var isFree=def.miesiaceBezplatne&&def.miesiaceBezplatne.includes(key);
+        if(fStatus==='bezplatny')return isFree;
+        if(isFree)return false;
+        if(!w)return fStatus==='zalegly';
+        return w.status===fStatus;
+      });
+    });
+  }
+  // Podsumowanie
+  var sumPaid=0,sumOwed=0,sumFree=0,countPaid=0,countUnpaid=0;
+  players.forEach(p=>{
+    months.forEach(m=>{
+      var key=m.r+'-'+m.m;
+      var isFree=def.miesiaceBezplatne&&def.miesiaceBezplatne.includes(key);
+      if(isFree){sumFree++;return;}
+      var w=sk2GetWplata(def.id,p.id||p.name,m.r,m.m);
+      if(w&&w.status==='oplacony'){sumPaid+=(w.kwota||def.kwota);countPaid++;}
+      else{sumOwed+=def.kwota;countUnpaid++;}
+    });
+  });
+  var sumEl=document.getElementById('sk2-summary');
+  if(sumEl)sumEl.innerHTML='<span style="color:var(--g);font-weight:600;">✓ Opłacone: '+Math.round(sumPaid).toLocaleString('pl-PL')+' zł ('+countPaid+')</span>'
+    +'<span style="color:var(--red);font-weight:600;margin-left:12px;">✗ Zaległości: '+Math.round(sumOwed).toLocaleString('pl-PL')+' zł ('+countUnpaid+')</span>';
+
+  // Tabela
+  var html='<div style="padding:12px 18px 4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;">'
+    +escH(def.name)+' <span style="font-size:11px;font-weight:400;color:var(--txt2);">'+def.kwota+' zł / '+(def.typ==='jednorazowa'?'jednorazowo':'mies.')+(def.druzyna?' · '+def.druzyna:'')+'</span>'
+    +'</div>';
+  html+='<div style="overflow:auto;max-height:calc(100vh - 220px);">';
+  html+='<table class="sk2-table">';
+  // Nagłówek
+  html+='<thead><tr>';
+  html+='<th class="sk2-name-col">Zawodnik</th>';
+  months.forEach(m=>{
+    var key=m.r+'-'+m.m;
+    var isFree=def.miesiaceBezplatne&&def.miesiaceBezplatne.includes(key);
+    html+='<th style="'+(isFree?'background:#5B21B6;':'')+'">'+escH(m.lbl)+'</th>';
+  });
+  html+='<th style="background:#065F46;min-width:80px;">Wpłacono</th>';
+  html+='<th style="background:#9F1239;min-width:80px;">Pozostało</th>';
+  html+='</tr></thead>';
+  // Wiersze
+  html+='<tbody>';
+  var currentTeam='';
+  players.forEach((p,pi)=>{
+    var pid=p.id||p.name;
+    var teamChanged=p.team!==currentTeam;
+    if(teamChanged&&p.team){
+      currentTeam=p.team;
+      html+='<tr><td colspan="'+(months.length+3)+'" style="background:#2D2D2D;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;padding:4px 10px;letter-spacing:.06em;">'+escH(p.team)+'</td></tr>';
+    }
+    var rowPaid=0,rowOwed=0;
+    var rowBg=pi%2===0?'var(--sur)':'#FAFAF9';
+    html+='<tr style="background:'+rowBg+';">';
+    html+='<td class="sk2-name-cell" style="background:'+rowBg+';">';
+    html+='<div style="display:flex;align-items:center;gap:7px;">';
+    var col2=playerColor(pid);var ini2=playerInitials(p.name);
+    html+='<div style="width:22px;height:22px;border-radius:50%;background:'+col2+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;">'+ini2+'</div>';
+    html+=escH(p.name)+'</div></td>';
+    months.forEach(m=>{
+      var key=m.r+'-'+m.m;
+      var isFree=def.miesiaceBezplatne&&def.miesiaceBezplatne.includes(key);
+      var w=sk2GetWplata(def.id,pid,m.r,m.m);
+      var cellCls,cellTxt;
+      if(isFree){cellCls='sk2-free';cellTxt='—';}
+      else if(w&&w.status==='oplacony'){cellCls='sk2-paid';cellTxt=(w.kwota||def.kwota).toFixed(2);rowPaid+=(w.kwota||def.kwota);}
+      else if(w&&w.status==='bezplatny'){cellCls='sk2-free';cellTxt='Bezskł.';}
+      else if(w&&w.status==='czesciowy'){cellCls='sk2-partial';cellTxt=(w.kwota||'?')+' zł';rowPaid+=(w.kwota||0);rowOwed+=(def.kwota-(w.kwota||0));}
+      else{cellCls='sk2-unpaid';cellTxt='—';rowOwed+=def.kwota;}
+      html+='<td><div class="sk2-cell '+cellCls+'" onclick="oSkladkiCell(\''+def.id+'\',\''+escH(pid)+'\','+m.r+','+m.m+','+def.kwota+')">'+cellTxt+'</div></td>';
+    });
+    // Sumy
+    html+='<td style="text-align:right;padding:0 8px;background:#D1FAE5;color:#065F46;font-weight:700;">'+Math.round(rowPaid).toLocaleString('pl-PL')+'</td>';
+    var remain=rowOwed;
+    html+='<td style="text-align:right;padding:0 8px;background:'+(remain>0?'#FFE4E6':'#D1FAE5')+';color:'+(remain>0?'#be123c':'#065F46')+';font-weight:700;">'+(remain>0?remain.toLocaleString('pl-PL'):'0')+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  body.innerHTML=html;
+}
+
+// ── Modal wpłaty (kliknięcie komórki) ──
+function oSkladkiCell(defId,playerId,rok,miesiac,kwotaDef){
+  var def=SKLADKI_DEF.find(d=>d.id===defId);
+  var p=PLAYERS.find(x=>(x.id||x.name)===playerId)||{name:playerId};
+  var existing=sk2GetWplata(defId,playerId,rok,miesiac);
+  var monthNames=['','Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  var mo=document.getElementById('mo-sk2-cell');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-sk2-cell';
+    mo.innerHTML='<div class="mbox" style="width:420px;"><div class="mh"><div class="mt2" id="mo-sc-ttl">Wpłata składki</div><button class="mc2" onclick="cM(\'mo-sk2-cell\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-sc-body"></div><div class="mfs"><span id="mo-sc-fl"></span><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-sk2-cell\')">Anuluj</button><button class="btn pri" onclick="saveSk2Cell()">Zapisz</button></div></div></div>';
+    mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+  mo.dataset.defId=defId;mo.dataset.playerId=playerId;mo.dataset.rok=rok;mo.dataset.miesiac=miesiac;mo.dataset.kwotaDef=kwotaDef;
+  document.getElementById('mo-sc-ttl').textContent='Składka — '+p.name;
+  document.getElementById('mo-sc-fl').innerHTML=existing?'<button class="btn dan sm" onclick="clearSk2Cell()">Usuń wpłatę</button>':'<span></span>';
+  var curStatus=existing?existing.status:'zalegly';
+  var curKwota=existing?existing.kwota:kwotaDef;
+  var curData=existing?existing.datWplaty:new Date().toISOString().slice(0,10);
+  var curMetoda=existing?existing.metoda:'gotówka';
+  var curUwagi=existing?existing.uwagi:'';
+  var html='<div style="background:var(--sur2);border-radius:var(--r2);padding:8px 12px;margin-bottom:14px;font-size:12px;">'
+    +monthNames[miesiac]+' '+rok+' · <b>'+escH(def?def.name:'Składka')+'</b> · kwota bazowa: <b>'+(kwotaDef||0)+' zł</b></div>';
+  html+='<div class="sh" style="margin-top:0;">Status płatności</div>';
+  html+='<div style="display:flex;gap:8px;margin-bottom:14px;">';
+  [{v:'oplacony',l:'✓ Opłacono',bg:'#E6F7F2',tc:'#065F46',bc:'#5DCAA5'},
+   {v:'zalegly',l:'✗ Zaległe',bg:'#FFF1F2',tc:'#be123c',bc:'#FECDD3'},
+   {v:'bezplatny',l:'— Bezskładkowy',bg:'#EDE9FE',tc:'#5B21B6',bc:'#C4B5FD'}].forEach(s=>{
+    html+='<button id="sc-st-'+s.v+'" onclick="sk2SelStatus(\''+s.v+'\')" style="flex:1;padding:8px 4px;border-radius:var(--r2);border:2px solid '+(curStatus===s.v?s.bc:'var(--brd)')+';background:'+(curStatus===s.v?s.bg:'var(--sur)')+';color:'+(curStatus===s.v?s.tc:'var(--txt2)')+';cursor:pointer;font-size:11px;font-weight:600;">'+s.l+'</button>';
+  });
+  html+='</div><input type="hidden" id="sc-status" value="'+curStatus+'">';
+  html+='<div class="fr2"><div><label class="fl">Kwota (zł)</label><input class="fi" id="sc-kwota" type="number" step="0.01" value="'+(curKwota||kwotaDef)+'"/></div>';
+  html+='<div><label class="fl">Data wpłaty</label><input class="fi" id="sc-data" type="date" value="'+(curData||'')+'"/></div></div>';
+  html+='<div class="fr2"><div><label class="fl">Metoda płatności</label><select class="fsel" id="sc-metoda">';
+  ['gotówka','przelew','BLIK','karta','inna'].forEach(m2=>{html+='<option value="'+m2+'"'+(curMetoda===m2?' selected':'')+'>'+m2+'</option>';});
+  html+='</select></div><div><label class="fl">Uwagi</label><input class="fi" id="sc-uwagi" value="'+escH(curUwagi)+'" placeholder="opcjonalnie"/></div></div>';
+  document.getElementById('mo-sc-body').innerHTML=html;
+  oM('mo-sk2-cell');
+}
+
+function sk2SelStatus(val){
+  document.getElementById('sc-status').value=val;
+  [{v:'oplacony',bg:'#E6F7F2',tc:'#065F46',bc:'#5DCAA5'},
+   {v:'zalegly',bg:'#FFF1F2',tc:'#be123c',bc:'#FECDD3'},
+   {v:'bezplatny',bg:'#EDE9FE',tc:'#5B21B6',bc:'#C4B5FD'}].forEach(s=>{
+    var btn=document.getElementById('sc-st-'+s.v);if(!btn)return;
+    var sel=s.v===val;
+    btn.style.borderColor=sel?s.bc:'var(--brd)';
+    btn.style.background=sel?s.bg:'var(--sur)';
+    btn.style.color=sel?s.tc:'var(--txt2)';
+  });
+}
+
+function saveSk2Cell(){
+  var mo=document.getElementById('mo-sk2-cell');
+  var defId=mo.dataset.defId,playerId=mo.dataset.playerId;
+  var rok=parseInt(mo.dataset.rok),miesiac=parseInt(mo.dataset.miesiac);
+  var kwotaDef=parseFloat(mo.dataset.kwotaDef);
+  var status=(document.getElementById('sc-status')||{}).value||'oplacony';
+  var kwota=parseFloat((document.getElementById('sc-kwota')||{}).value)||kwotaDef;
+  var datWplaty=(document.getElementById('sc-data')||{}).value||'';
+  var metoda=(document.getElementById('sc-metoda')||{}).value||'gotówka';
+  var uwagi=(document.getElementById('sc-uwagi')||{}).value||'';
+  sk2SetWplata(defId,playerId,rok,miesiac,status,kwota,datWplaty,metoda,uwagi);
+  cM('mo-sk2-cell');
+  _renderSkladkiMatrix(document.getElementById('sk2-body'));
+  ST('✓ Wpłata zapisana');
+}
+
+function clearSk2Cell(){
+  var mo=document.getElementById('mo-sk2-cell');
+  var defId=mo.dataset.defId,playerId=mo.dataset.playerId;
+  var rok=parseInt(mo.dataset.rok),miesiac=parseInt(mo.dataset.miesiac);
+  var idx=SKLADKI_WPL.findIndex(w=>w.defId===defId&&w.playerId===playerId&&w.rok===rok&&w.miesiac===miesiac);
+  if(idx>=0)SKLADKI_WPL.splice(idx,1);
+  saveLS();cM('mo-sk2-cell');
+  _renderSkladkiMatrix(document.getElementById('sk2-body'));
+  ST('Wpłata usunięta');
+}
+
+function oSkladkiMatrix(){
+  document.getElementById('sk2-view-mode').value='matrix';
+  rSkladki();
+}
+
 var _origSPStats=SP;
 SP=function(n){
   _origSPStats(n);
+  if(n==='stats')rStats();
   if(n==='dir-dash')rDirDash();
   if(n==='dir-coaches')rDirCoaches();
   if(n==='dir-academy')rDirAcademy();
   if(n==='dir-skauting')rSkauting();
+  if(n==='dir-skladki')rSkladki();
   if(n==='dir-finanse')rFinanse();
   if(n==='dir-gamemodel')rGameModel();
   if(n==='dir-settings')rDirSettings();
@@ -7309,6 +8022,400 @@ SP=function(n){
     var ni=document.getElementById('ni-'+n);if(ni)ni.classList.add('active');
   }
 };
+
+// ═══════════════ IMPORT XLSX ═══════════════
+var IMPORT_TYPES={
+  'zawodnicy':{
+    label:'Karty zawodników',
+    sheet:'Zawodnicy',
+    wzor:null, // ustawiamy po załadowaniu
+    cols:{
+      'Imię i Nazwisko':    {key:'name',    req:true},
+      'Data urodzenia':     {key:'dob',     req:false},
+      'Pozycja':            {key:'position',req:false},
+      'Drużyna':            {key:'team',    req:true},
+      'Numer zawodnika':    {key:'number',  req:false},
+      'Noga dominująca':    {key:'foot',    req:false},
+      'Wzrost (cm)':        {key:'height',  req:false},
+      'Waga (kg)':          {key:'weight',  req:false},
+      'Kontakt rodzica':    {key:'contact', req:false},
+      'Uwagi zdrowotne':    {key:'healthNotes',req:false},
+      'PESEL':              {key:'pesel',   req:false},
+      'Adres zamieszkania': {key:'address', req:false},
+    }
+  },
+  'druzyny':{
+    label:'Drużyny i Trenerzy',
+    sheet:null, // wiele arkuszy
+    cols_teams:{
+      'Nazwa drużyny':    {key:'name',    req:true},
+      'Kategoria wiekowa':{key:'category',req:true},
+      'Sezon':            {key:'season',  req:true},
+      'Kolor drużyny':    {key:'color',   req:false},
+      'I Trener':         {key:'coach1',  req:false},
+      'II Trener':        {key:'coach2',  req:false},
+      'Opis/Uwagi':       {key:'notes',   req:false},
+      'Aktywna':          {key:'active',  req:false},
+    },
+    cols_coaches:{
+      'Imię i Nazwisko':  {key:'name',   req:true},
+      'Data urodzenia':   {key:'dob',    req:false},
+      'Rola/Funkcja':     {key:'role',   req:true},
+      'Email':            {key:'email',  req:false},
+      'Telefon':          {key:'phone',  req:false},
+      'Licencja UEFA':    {key:'license',req:false},
+      'Drużyna':          {key:'team',   req:false},
+      'Kontrakt od':      {key:'contractFrom',req:false},
+      'Kontrakt do':      {key:'contractTo',  req:false},
+    }
+  },
+  'karty-trenerow':{
+    label:'Karty Trenerów (Dyrektorski)',
+    sheet:'Karty Trenerów',
+    cols:{
+      'Imię i Nazwisko':        {key:'name',          req:true},
+      'Data urodzenia':         {key:'dob',           req:false},
+      'Funkcja w klubie':       {key:'role',          req:false},
+      'Preferowana rola':       {key:'preferredRole', req:false},
+      'Licencja':               {key:'license',       req:false},
+      'Predyspozycje':          {key:'predispositions',req:false},
+      'Kontrakt od':            {key:'contractFrom',  req:false},
+      'Kontrakt do':            {key:'contractTo',    req:false},
+      'Zaśw. Niekaralność':     {key:'zaswNiekalData',req:false},
+      'Zaśw. RSpS':             {key:'zaswRSPSData',  req:false},
+      'Filozofia pracy':        {key:'filosofia',     req:false},
+    }
+  }
+};
+
+function oImport(type){
+  var cfg=IMPORT_TYPES[type];if(!cfg)return;
+  var mo=document.getElementById('mo-import');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-import';
+    mo.innerHTML='<div class="mbox wide" style="width:820px;max-height:94vh;">'
+      +'<div class="mh"><div class="mt2" id="mo-imp-ttl">Import danych</div><button class="mc2" onclick="cM(\'mo-import\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
+      +'<div class="mbody" id="mo-imp-body"></div>'
+      +'<div class="mfs"><span id="mo-imp-fl"></span><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-import\')">Anuluj</button><button class="btn pri" id="mo-imp-save" style="display:none;" onclick="confirmImport()">Importuj dane</button></div></div>'
+      +'</div>';
+    mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+  document.getElementById('mo-imp-ttl').textContent='Import — '+cfg.label;
+  document.getElementById('mo-imp-save').style.display='none';
+  mo.dataset.type=type;
+  // Render upload zone
+  var html='';
+  // Pobierz wzór
+  html+='<div class="sh" style="margin-top:0;">Krok 1 — Pobierz wzór</div>';
+  html+='<div style="display:flex;gap:10px;margin-bottom:16px;">';
+  if(type==='zawodnicy')html+='<button class="btn" onclick="dlWzor(\'zawodnicy\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Pobierz wzór: Zawodnicy.xlsx</button>';
+  if(type==='druzyny')html+='<button class="btn" onclick="dlWzor(\'druzyny\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Pobierz wzór: Drużyny_Trenerzy.xlsx</button>';
+  if(type==='karty-trenerow')html+='<button class="btn" onclick="dlWzor(\'karty-trenerow\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Pobierz wzór: KartyTrenerow.xlsx</button>';
+  html+='</div>';
+  html+='<div class="sh">Krok 2 — Wgraj wypełniony plik</div>';
+  html+='<label style="display:block;border:2px dashed var(--brd);border-radius:var(--r2);padding:24px;text-align:center;cursor:pointer;transition:border-color .15s;" id="imp-drop-zone" ondragover="event.preventDefault();this.style.borderColor=\'var(--g)\'" ondragleave="this.style.borderColor=\'\'" ondrop="handleImportDrop(event)">'
+    +'<input type="file" accept=".xlsx,.xls" style="display:none;" id="imp-file-input" onchange="handleImportFile(this.files[0])">'
+    +'<svg viewBox="0 0 16 16" style="width:32px;height:32px;stroke:var(--txt3);fill:none;stroke-width:1.2;display:block;margin:0 auto 8px;"><path d="M8 11V3M4 7l4-4 4 4"/><rect x="1" y="12" width="14" height="3" rx="1"/></svg>'
+    +'<div style="font-size:13px;font-weight:500;color:var(--txt2);">Kliknij lub przeciągnij plik XLSX</div>'
+    +'<div style="font-size:11px;color:var(--txt3);margin-top:4px;">Obsługiwane formaty: .xlsx, .xls</div>'
+    +'</label>';
+  html+='<div id="imp-preview" style="margin-top:14px;"></div>';
+  document.getElementById('mo-imp-body').innerHTML=html;
+  oM('mo-import');
+}
+
+function handleImportDrop(e){
+  e.preventDefault();
+  var f=e.dataTransfer.files[0];
+  if(f)handleImportFile(f);
+}
+function handleImportFile(file){
+  if(!file)return;
+  var mo=document.getElementById('mo-import');
+  var type=mo?mo.dataset.type:'zawodnicy';
+  var zone=document.getElementById('imp-drop-zone');
+  if(zone)zone.style.borderColor='var(--g)';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=new Uint8Array(e.target.result);
+      var wb=XLSX.read(data,{type:'array',cellDates:true});
+      parseImportXLSX(wb,type);
+    }catch(err){
+      document.getElementById('imp-preview').innerHTML='<div style="color:var(--red);padding:10px;background:var(--lred);border-radius:var(--r2);">Błąd odczytu pliku: '+escH(err.message)+'</div>';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseImportXLSX(wb,type){
+  var preview=document.getElementById('imp-preview');
+  var saveBtn=document.getElementById('mo-imp-save');
+  if(type==='zawodnicy'){
+    var ws=wb.Sheets['Zawodnicy']||wb.Sheets[wb.SheetNames[0]];
+    if(!ws){preview.innerHTML='<div style="color:var(--red);">Nie znaleziono arkusza "Zawodnicy".</div>';return;}
+    var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+    var result=parsePlayersRows(rows);
+    renderImportPreview(result,'zawodnicy');
+  } else if(type==='druzyny'){
+    var wsT=wb.Sheets['Drużyny']||wb.Sheets['Druzyny'];
+    var wsC=wb.Sheets['Trenerzy'];
+    var teams=wsT?parseTeamsRows(XLSX.utils.sheet_to_json(wsT,{defval:''})):[];
+    var coaches=wsC?parseCoachesRows(XLSX.utils.sheet_to_json(wsC,{defval:''})):[];
+    renderImportPreviewDruzyny(teams,coaches);
+  } else if(type==='karty-trenerow'){
+    var wsD=wb.Sheets['Karty Trenerów']||wb.Sheets['Karty Trenerow']||wb.Sheets[wb.SheetNames[0]];
+    if(!wsD){preview.innerHTML='<div style="color:var(--red);">Nie znaleziono arkusza "Karty Trenerów".</div>';return;}
+    var rows2=XLSX.utils.sheet_to_json(wsD,{defval:''});
+    var result2=parseCoachProfilesRows(rows2);
+    renderImportPreview(result2,'karty-trenerow');
+  }
+}
+
+// Pomocnicze: normalizuj nagłówek (usuń ★, \n, zbędne spacje)
+function normHeader(h){return String(h||'').replace(/★/g,'').replace(/\n/g,' ').replace(/\*/g,'').trim();}
+function isDescRow(row){
+  // Pomiń wiersze z opisem/przykładem — jeśli pole Imię zawiera słowo "Format" lub "Pełne"
+  var name=row['Imię i Nazwisko']||row['Nazwa drużyny']||row['Imię i Nazwisko ★']||'';
+  return /^(Format|Pełne|Opis|Unikaln|przykład|np\.|Liczba)/i.test(String(name).trim());
+}
+
+function parsePlayersRows(rows){
+  var ok=[],errors=[];
+  rows.forEach((rawRow,idx)=>{
+    // Normalizuj klucze
+    var row={};
+    Object.entries(rawRow).forEach(([k,v])=>{row[normHeader(k)]=v;});
+    if(isDescRow(row))return;
+    var name=String(row['Imię i Nazwisko']||'').trim();
+    var team=String(row['Drużyna']||'').trim();
+    if(!name)return; // pusta linia
+    var errs=[];
+    if(!team)errs.push('Brak drużyny');
+    // Walidacja DOB
+    var dob='';
+    if(row['Data urodzenia']){
+      var d=row['Data urodzenia'];
+      if(d instanceof Date)dob=d.toISOString().slice(0,10);
+      else if(/^\d{4}-\d{2}-\d{2}$/.test(String(d)))dob=String(d);
+      else errs.push('Błędny format daty (wymagane RRRR-MM-DD)');
+    }
+    // Sprawdź czy drużyna istnieje
+    var teamExists=TEAMS.some(t=>t.name===team);
+    if(team&&!teamExists)errs.push('Drużyna "'+team+'" nie istnieje w systemie');
+    var p={
+      id:genId(),name,dob,team,
+      position:String(row['Pozycja']||'').trim(),
+      number:String(row['Numer zawodnika']||'').trim(),
+      foot:String(row['Noga dominująca']||'').trim(),
+      contact:String(row['Kontakt rodzica']||'').trim(),
+      healthNotes:String(row['Uwagi zdrowotne']||'').trim(),
+      pesel:String(row['PESEL']||'').trim(),
+      address:String(row['Adres zamieszkania']||'').trim(),
+      anthro:[],oceny:[],tests:[],
+    };
+    if(errs.length)errors.push({row:idx+2,name,errs,data:p});
+    else ok.push(p);
+  });
+  return {ok,errors,type:'zawodnicy'};
+}
+
+function parseTeamsRows(rows){
+  var ok=[],errors=[];
+  rows.forEach((rawRow,idx)=>{
+    var row={};Object.entries(rawRow).forEach(([k,v])=>{row[normHeader(k)]=v;});
+    var name=String(row['Nazwa drużyny']||'').trim();
+    var cat=String(row['Kategoria wiekowa']||'').trim();
+    var season=String(row['Sezon']||currentSeason).trim();
+    if(!name)return;
+    if(isDescRow({'Imię i Nazwisko':name}))return;
+    var errs=[];
+    if(!cat)errs.push('Brak kategorii wiekowej');
+    var t={id:genId(),name,category:cat,season,color:String(row['Kolor drużyny']||'#1D9E75').trim(),notes:String(row['Opis/Uwagi']||'').trim()};
+    if(errs.length)errors.push({row:idx+2,name,errs,data:t});
+    else ok.push(t);
+  });
+  return {ok,errors};
+}
+function parseCoachesRows(rows){
+  var ok=[],errors=[];
+  rows.forEach((rawRow,idx)=>{
+    var row={};Object.entries(rawRow).forEach(([k,v])=>{row[normHeader(k)]=v;});
+    var name=String(row['Imię i Nazwisko']||'').trim();
+    var role=String(row['Rola/Funkcja']||'').trim();
+    if(!name)return;
+    if(isDescRow({'Imię i Nazwisko':name}))return;
+    var errs=[];
+    if(!role)errs.push('Brak roli/funkcji');
+    var c={id:genId(),name,role,email:String(row['Email']||'').trim(),phone:String(row['Telefon']||'').trim(),license:String(row['Licencja UEFA']||'').trim()};
+    if(errs.length)errors.push({row:idx+2,name,errs,data:c});
+    else ok.push(c);
+  });
+  return {ok,errors};
+}
+function parseCoachProfilesRows(rows){
+  var ok=[],errors=[];
+  rows.forEach((rawRow,idx)=>{
+    var row={};Object.entries(rawRow).forEach(([k,v])=>{row[normHeader(k)]=v;});
+    var name=String(row['Imię i Nazwisko']||'').trim();
+    if(!name)return;
+    if(isDescRow({'Imię i Nazwisko':name}))return;
+    // Szukaj powiązanego COACHES
+    var linked=COACHES.find(c=>c.name.toLowerCase()===name.toLowerCase());
+    var preds=String(row['Predyspozycje']||'').split('|').map(s=>s.trim()).filter(Boolean);
+    var parseDate=function(v){if(!v)return '';if(v instanceof Date)return v.toISOString().slice(0,10);var s=String(v).trim();return /^\d{4}-\d{2}-\d{2}$/.test(s)?s:'';};
+    var p={
+      id:genId(),coachId:linked?linked.id:null,
+      name,dob:parseDate(row['Data urodzenia']),
+      role:String(row['Funkcja w klubie']||'').trim(),
+      preferredRole:String(row['Preferowana rola']||'').trim(),
+      license:String(row['Licencja']||'').trim(),
+      predispositions:preds,
+      kontrakt:{od:parseDate(row['Kontrakt od']),do:parseDate(row['Kontrakt do'])},
+      zaswNiekaralnosc:{data:parseDate(row['Zaśw. Niekaralność']),powiadomDni:30},
+      zaswRejestr:{data:parseDate(row['Zaśw. RSpS']),powiadomDni:30},
+      filosofia:String(row['Filozofia pracy']||'').trim(),
+      notes:'',oceny:[]
+    };
+    ok.push(p);
+  });
+  return {ok,errors:[],type:'karty-trenerow'};
+}
+
+function renderImportPreview(result,type){
+  var preview=document.getElementById('imp-preview');
+  var saveBtn=document.getElementById('mo-imp-save');
+  var flSpan=document.getElementById('mo-imp-fl');
+  var {ok,errors}=result;
+  var html='';
+  // Podsumowanie
+  html+='<div style="display:flex;gap:10px;margin-bottom:12px;">';
+  html+='<div style="flex:1;background:var(--lg);border-radius:var(--r2);padding:10px 14px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--dg);">'+ok.length+'</div><div style="font-size:10px;color:var(--g);text-transform:uppercase;font-weight:600;">Gotowe do importu</div></div>';
+  html+='<div style="flex:1;background:var(--lred);border-radius:var(--r2);padding:10px 14px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--red);">'+errors.length+'</div><div style="font-size:10px;color:var(--red);text-transform:uppercase;font-weight:600;">Błędy (pominięte)</div></div>';
+  html+='</div>';
+  // Błędy
+  if(errors.length){
+    html+='<div style="background:var(--lred);border-radius:var(--r2);padding:10px 14px;margin-bottom:12px;border-left:3px solid var(--red);">';
+    html+='<div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:6px;">Wiersze z błędami (zostaną pominięte):</div>';
+    errors.slice(0,8).forEach(e=>{html+='<div style="font-size:11px;margin-bottom:3px;color:var(--red);">Wiersz '+e.row+': <b>'+escH(e.name||'—')+'</b> — '+e.errs.join(', ')+'</div>';});
+    if(errors.length>8)html+='<div style="font-size:10px;color:var(--txt3);">+'+( errors.length-8)+' więcej błędów...</div>';
+    html+='</div>';
+  }
+  // Podgląd OK wierszy
+  if(ok.length){
+    html+='<div style="font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:6px;">Podgląd (pierwsze 5 rekordów):</div>';
+    html+='<div style="border:1px solid var(--brd);border-radius:var(--r2);overflow:hidden;">';
+    html+='<div style="background:var(--sur2);padding:6px 10px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;"><span>Imię i Nazwisko</span><span>Drużyna/Rola</span><span>Pozycja/Licencja</span><span>Data ur.</span></div>';
+    ok.slice(0,5).forEach((p,i)=>{
+      var bg=i%2===0?'var(--sur)':'#FAFAF9';
+      html+='<div style="background:'+bg+';padding:7px 10px;font-size:12px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;border-top:1px solid var(--brd);">';
+      html+='<span style="font-weight:500;">'+escH(p.name)+'</span>';
+      html+='<span style="color:var(--txt2);">'+escH(p.team||p.role||'—')+'</span>';
+      html+='<span style="color:var(--txt2);">'+escH(p.position||p.license||'—')+'</span>';
+      html+='<span style="color:var(--txt2);">'+escH(p.dob||'—')+'</span>';
+      html+='</div>';
+    });
+    if(ok.length>5)html+='<div style="padding:6px 10px;font-size:10px;color:var(--txt3);text-align:center;">+'+( ok.length-5)+' kolejnych rekordów...</div>';
+    html+='</div>';
+    // Opcja duplikatów
+    html+='<div style="margin-top:10px;background:var(--sur2);border-radius:var(--r2);padding:10px 14px;">';
+    html+='<div style="font-size:11px;font-weight:600;margin-bottom:6px;">Jeśli zawodnik/trener już istnieje:</div>';
+    html+='<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-bottom:4px;"><input type="radio" name="imp-dup" value="skip" checked style="accent-color:var(--g);"/>Pomiń (nie nadpisuj istniejących)</label>';
+    html+='<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;"><input type="radio" name="imp-dup" value="update"/>Zaktualizuj istniejące dane</label>';
+    html+='</div>';
+  }
+  preview.innerHTML=html;
+  // Zapisz wynik w dataset dla confirmImport
+  var mo=document.getElementById('mo-import');
+  if(mo)mo.dataset.result=JSON.stringify({ok,type});
+  saveBtn.style.display=ok.length?'':'none';
+  if(flSpan)flSpan.innerHTML=ok.length?'<span style="font-size:11px;color:var(--g);">✓ '+ok.length+' rekordów gotowych</span>':'';
+}
+
+function renderImportPreviewDruzyny(teamsResult,coachesResult){
+  var preview=document.getElementById('imp-preview');
+  var saveBtn=document.getElementById('mo-imp-save');
+  var {ok:teams,errors:tErr}=teamsResult;
+  var {ok:coaches,errors:cErr}=coachesResult;
+  var html='';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">';
+  html+='<div style="background:var(--lg);border-radius:var(--r2);padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:var(--dg);">'+teams.length+'</div><div style="font-size:10px;color:var(--g);text-transform:uppercase;font-weight:600;">Drużyny</div></div>';
+  html+='<div style="background:#E6F1FB;border-radius:var(--r2);padding:10px;text-align:center;"><div style="font-size:20px;font-weight:700;color:#0C447C;">'+coaches.length+'</div><div style="font-size:10px;color:#378ADD;text-transform:uppercase;font-weight:600;">Trenerzy</div></div>';
+  html+='</div>';
+  if(tErr.length||cErr.length){
+    html+='<div style="background:var(--lred);border-radius:var(--r2);padding:10px;margin-bottom:10px;color:var(--red);font-size:11px;">';
+    [...tErr,...cErr].slice(0,5).forEach(e=>{ html+='<div>Wiersz '+e.row+': <b>'+escH(e.name)+'</b> — '+e.errs.join(', ')+'</div>'; });
+    html+='</div>';
+  }
+  if(teams.length){
+    html+='<div style="font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:4px;">Drużyny (podgląd):</div>';
+    html+=teams.slice(0,3).map(t=>'<div style="font-size:12px;padding:5px 8px;background:var(--sur2);border-radius:3px;margin-bottom:3px;">'+escH(t.name)+' · '+escH(t.category)+' · '+escH(t.season)+'</div>').join('');
+  }
+  if(coaches.length){
+    html+='<div style="font-size:11px;font-weight:600;color:var(--txt2);margin-bottom:4px;margin-top:8px;">Trenerzy (podgląd):</div>';
+    html+=coaches.slice(0,3).map(c=>'<div style="font-size:12px;padding:5px 8px;background:#E6F1FB;border-radius:3px;margin-bottom:3px;">'+escH(c.name)+' · '+escH(c.role)+'</div>').join('');
+  }
+  preview.innerHTML=html;
+  var mo=document.getElementById('mo-import');
+  if(mo)mo.dataset.result=JSON.stringify({ok:{teams,coaches},type:'druzyny'});
+  saveBtn.style.display=(teams.length||coaches.length)?'':'none';
+}
+
+function confirmImport(){
+  var mo=document.getElementById('mo-import');
+  if(!mo||!mo.dataset.result)return;
+  var {ok,type}=JSON.parse(mo.dataset.result);
+  var dupMode=(document.querySelector('input[name="imp-dup"]:checked')||{}).value||'skip';
+  var added=0,updated=0,skipped=0;
+  if(type==='zawodnicy'){
+    ok.forEach(p=>{
+      var exists=PLAYERS.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase()&&x.team===p.team);
+      if(exists>=0){
+        if(dupMode==='update'){PLAYERS[exists]={...PLAYERS[exists],...p,id:PLAYERS[exists].id};updated++;}
+        else skipped++;
+      } else {PLAYERS.push(p);added++;}
+    });
+    saveLS();rIOZ();
+  } else if(type==='druzyny'){
+    var {teams,coaches}=ok;
+    teams.forEach(t=>{
+      var exists=TEAMS.findIndex(x=>x.name===t.name&&x.season===t.season);
+      if(exists>=0){if(dupMode==='update'){TEAMS[exists]={...TEAMS[exists],...t};updated++;}else skipped++;}
+      else{TEAMS.push(t);added++;}
+    });
+    coaches.forEach(c=>{
+      var exists=COACHES.findIndex(x=>x.name.toLowerCase()===c.name.toLowerCase());
+      if(exists>=0){if(dupMode==='update'){COACHES[exists]={...COACHES[exists],...c};updated++;}else skipped++;}
+      else{COACHES.push(c);added++;}
+    });
+    saveLS();rTeams();
+  } else if(type==='karty-trenerow'){
+    ok.forEach(p=>{
+      var exists=COACH_PROFILES.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase());
+      if(exists>=0){if(dupMode==='update'){COACH_PROFILES[exists]={...COACH_PROFILES[exists],...p};updated++;}else skipped++;}
+      else{COACH_PROFILES.push(p);added++;}
+    });
+    saveLS();rDirCoaches();
+  }
+  cM('mo-import');
+  ST('✓ Import: dodano '+added+(updated?' · zaktualizowano '+updated:'')+(skipped?' · pominięto '+skipped:''));
+}
+
+// Pobierz wzory XLSX (base64 embedded) — link do Supabase Storage lub inline download
+function dlWzor(type){
+  var urls={
+    'zawodnicy':'wzor_zawodnicy.xlsx',
+    'druzyny':'wzor_druzyny_trenerzy.xlsx',
+    'karty-trenerow':'wzor_karty_trenerow.xlsx'
+  };
+  // Wzory są przechowywane w Supabase Storage pod ścieżką templates/
+  var supaUrl=SUPA_URL+'/storage/v1/object/public/game-models/templates/'+urls[type];
+  // Otwórz w nowej karcie — jeśli nie ma Supabase, poinformuj
+  var a=document.createElement('a');a.href=supaUrl;a.download=urls[type];a.target='_blank';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  ST('Pobieranie wzoru… Jeśli nie działa, wgraj wzory do Supabase Storage (bucket: game-models/templates/)');
+}
 
 // ═══════════════ INIT ═══════════════
 // Najpierw załaduj z localStorage (instant), potem Supabase nadpisze
