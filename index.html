@@ -3405,8 +3405,8 @@ function rTeams(){
   html+='</select>';
   html+='</div>';
   html+='<div style="display:flex;gap:8px;">';
-  // Przyciski edycji tylko dla dyrektora/admina
-  var isDir2=currentUser&&(currentUser.role==='dyrektor'||currentUser.role==='admin');
+  // Przyciski edycji tylko dla dyrektora/admina W WIDOKU DYREKTORA
+  var isDir2=currentUser&&(currentUser.role==='dyrektor'||currentUser.role==='admin')&&_viewMode==='dir';
   if(isDir2){
     html+='<button class="btn" onclick="oImport(\'druzyny\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button>';
     html+='<button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button>';
