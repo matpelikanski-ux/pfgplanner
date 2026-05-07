@@ -709,7 +709,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- DRUŻYNY -->
 <div id="pg-teams" class="pg">
-  <div class="tb"><div><div class="t1">Drużyny i trenerzy</div><div class="t2">MKS Iskra Pszczyna</div></div><div class="tb-r"><button class="btn" onclick="oImport('druzyny')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button><button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button><button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button></div></div>
+  <div class="tb"><div><div class="t1">Drużyny i trenerzy</div><div class="t2">MKS Iskra Pszczyna</div></div><div class="tb-r"></div></div>
   <div class="inner" id="t-body"></div>
 </div>
 
@@ -940,7 +940,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- DIR: AKADEMIA -->
 <div id="pg-dir-academy" class="pg">
-  <div class="tb"><div><div class="t1">Akademia</div><div class="t2">Przegląd struktury klubu</div></div></div>
+  <div class="tb">
+    <div><div class="t1">Akademia</div><div class="t2">Przegląd struktury klubu</div></div>
+    <div class="tb-r">
+      <button class="btn" onclick="oImport('druzyny')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button>
+      <button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button>
+      <button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button>
+    </div>
+  </div>
   <div class="inner" id="dir-academy-body"></div>
 </div>
 
@@ -3398,8 +3405,13 @@ function rTeams(){
   html+='</select>';
   html+='</div>';
   html+='<div style="display:flex;gap:8px;">';
-  html+='<button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button>';
-  html+='<button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button>';
+  // Przyciski edycji tylko dla dyrektora/admina
+  var isDir2=currentUser&&(currentUser.role==='dyrektor'||currentUser.role==='admin');
+  if(isDir2){
+    html+='<button class="btn" onclick="oImport(\'druzyny\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button>';
+    html+='<button class="btn" onclick="oAddCoach()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj trenera</button>';
+    html+='<button class="btn pri" onclick="oAddTeam()"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><path d="M13 6v5M10.5 8.5h5"/></svg>Dodaj drużynę</button>';
+  }
   html+='</div>';
   html+='</div>';
 
@@ -3436,8 +3448,10 @@ function rTeams(){
       html+='</div>';
       html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
       html+='<button class="btn sm" onclick="oViewTeam(\''+t.id+'\')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>Podgląd</button>';
-      html+='<button class="btn sm" onclick="oEditTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>';
-      html+='<button class="btn sm dan" onclick="delTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
+      if(isDir2){
+        html+='<button class="btn sm" onclick="oEditTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>';
+        html+='<button class="btn sm dan" onclick="delTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
+      }
       html+='</div>';
       html+='</div>';
     });
@@ -3464,9 +3478,11 @@ function rTeams(){
       if(c.phone||c.email) html+='<div style="font-size:11px;color:var(--txt3);">'+(c.phone||'')+(c.phone&&c.email?' · ':'')+( c.email||'')+'</div>';
       html+='</div>';
       html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
-      html+='<button class="btn sm" onclick="oEditCoach('+idx+')">Edytuj</button>';
-      html+='<button class="btn sm" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;" onclick="promoteCoachToDir(\''+c.id+'\')" title="Utwórz kartę trenera w panelu dyrektorskim">🎓 Karta</button>';
-      html+='<button class="btn sm dan" onclick="delCoach('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
+      if(isDir2){
+        html+='<button class="btn sm" onclick="oEditCoach('+idx+')">Edytuj</button>';
+        html+='<button class="btn sm" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;" onclick="promoteCoachToDir(\''+c.id+'\')" title="Utwórz kartę trenera w panelu dyrektorskim">🎓 Karta</button>';
+        html+='<button class="btn sm dan" onclick="delCoach('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
+      }
       html+='</div>';
       html+='</div>';
     });
@@ -3692,7 +3708,10 @@ function saveTeam(){
   var name=document.getElementById('tm-name').value.trim();if(!name){ST('Podaj nazwę drużyny');return;}
   var t={id:editTeamIdx===null?genId():TEAMS[editTeamIdx].id,name,category:document.getElementById('tm-cat').value,season:document.getElementById('tm-season').value,players:parseInt(document.getElementById('tm-players').value)||16,color:document.getElementById('tm-color').value,coach:document.getElementById('tm-coach').value,coach2:document.getElementById('tm-coach2').value,notes:document.getElementById('tm-notes').value};
   if(editTeamIdx===null)TEAMS.push(t);else TEAMS[editTeamIdx]=t;
-  cM('mo-team');saveLS();rTeams();uD();ST('"'+name+'" '+(editTeamIdx===null?'dodana':'zaktualizowana'));
+  cM('mo-team');saveLS();rTeams();uD();
+  // Odśwież akademię dyrektora jeśli otwarta
+  var acBody=document.getElementById('dir-academy-body');if(acBody&&acBody.innerHTML)rDirAcademy();
+  ST('"'+name+'" '+(editTeamIdx===null?'dodana':'zaktualizowana'));
 }
 function delTeam(idx){if(!confirm('Usunąć drużynę "'+TEAMS[idx].name+'"?'))return;var n=TEAMS[idx].name;TEAMS.splice(idx,1);saveLS();rTeams();uD();ST('"'+n+'" usunięta');}
 function delTeamModal(){if(editTeamIdx===null)return;if(!confirm('Usunąć "'+TEAMS[editTeamIdx].name+'"?'))return;delTeam(editTeamIdx);cM('mo-team');}
@@ -3721,7 +3740,9 @@ function saveCoach(){
   var name=document.getElementById('co-name').value.trim();if(!name){ST('Podaj imię i nazwisko');return;}
   var c={id:editCoachIdx===null?genId():COACHES[editCoachIdx].id,name,role:document.getElementById('co-role').value,since:document.getElementById('co-since').value,phone:document.getElementById('co-phone').value,email:document.getElementById('co-email').value};
   if(editCoachIdx===null)COACHES.push(c);else COACHES[editCoachIdx]=c;
-  cM('mo-coach');saveLS();rTeams();ST('"'+name+'" '+(editCoachIdx===null?'dodany':'zaktualizowany'));
+  cM('mo-coach');saveLS();rTeams();
+  var acBody=document.getElementById('dir-academy-body');if(acBody&&acBody.innerHTML)rDirAcademy();
+  ST('"'+name+'" '+(editCoachIdx===null?'dodany':'zaktualizowany'));
 }
 function delCoach(idx){if(!confirm('Usunąć trenera "'+COACHES[idx].name+'"?'))return;var n=COACHES[idx].name;COACHES.splice(idx,1);saveLS();rTeams();ST('"'+n+'" usunięty');}
 function delCoachModal(){if(editCoachIdx===null)return;if(!confirm('Usunąć "'+COACHES[editCoachIdx].name+'"?'))return;delCoach(editCoachIdx);cM('mo-coach');}
