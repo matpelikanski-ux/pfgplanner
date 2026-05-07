@@ -526,8 +526,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="sb-user-name">—</div>
       <div style="font-size:11px;color:var(--txt2);" id="sb-user-role">—</div>
     </div>
-    <button onclick="doLogout()" title="Wyloguj" style="background:none;border:none;cursor:pointer;color:var(--txt3);padding:4px;" title="Wyloguj się">
+    <button onclick="doLogout()" title="Wyloguj" style="background:none;border:none;cursor:pointer;color:var(--txt3);padding:4px;">
       <svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M6 8h7M10 5l3 3-3 3"/><path d="M9 3H3v10h6"/></svg>
+    </button>
+  </div>
+  <!-- Przełącznik widoku dla admin/dyrektor -->
+  <div id="sb-view-switcher" style="display:none;padding:8px 10px;border-top:1px solid var(--brd);">
+    <button onclick="toggleViewMode()" id="sb-view-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur2);cursor:pointer;font-size:11px;font-weight:600;color:var(--txt2);transition:all .15s;">
+      <svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+      <span id="sb-view-label">Przełącz na panel trenera</span>
     </button>
   </div>
   <div style="padding:6px 14px 8px;font-size:10px;" id="sync-status"><span style="color:var(--txt3);">● Łączenie…</span></div>
@@ -5596,6 +5603,8 @@ async function doLogin(){
     if(!profile){errEl.textContent='Brak profilu — skontaktuj się z administratorem.';errEl.style.display='';setLoginLoading(false);return;}
     if(!profile.active){errEl.textContent='Konto nieaktywne. Skontaktuj się z administratorem.';errEl.style.display='';setLoginLoading(false);return;}
     currentUser={id:profile.id,role:profile.role,name:profile.name,email:profile.email,token};
+    // Admin i dyrektor startują w widoku dyrektora, trener w trenerskim
+    _viewMode=(profile.role==='trener')?'trener':'dir';
     // Ustaw token w nagłówkach Supabase
     SUPA_KEY_ACTIVE=token;
     document.getElementById('login-screen').style.display='none';
@@ -5668,21 +5677,63 @@ async function doLogout(){
   switchAuthTab('login');
 }
 
+var _viewMode='dir'; // 'dir' | 'trener' — aktywny widok dla admin/dyrektor
+
 function applyRole(){
   if(!currentUser)return;
   var r=currentUser.role;
-  // trener widzi panel trenerski; dyrektor i admin widzą panel dyrektorski
   var isDir=(r==='dyrektor'||r==='admin');
-  document.getElementById('sb-role-trener').style.display=!isDir?'':'none';
-  document.getElementById('sb-role-dyrektor').style.display=isDir?'':'none';
-  // Panel Użytkownicy — tylko admin
+
+  // Przełącznik widoku — tylko dla admin i dyrektor
+  var switcher=document.getElementById('sb-view-switcher');
+  if(switcher)switcher.style.display=isDir?'':'none';
+
+  // Ustal który sidebar pokazać
+  var showTrener=!isDir||_viewMode==='trener';
+  document.getElementById('sb-role-trener').style.display=showTrener?'':'none';
+  document.getElementById('sb-role-dyrektor').style.display=!showTrener?'':'none';
+
+  // Aktualizuj etykietę przycisku
+  var btn=document.getElementById('sb-view-btn');
+  var lbl=document.getElementById('sb-view-label');
+  if(btn&&lbl){
+    if(_viewMode==='trener'){
+      lbl.textContent='Przełącz na panel dyrektora';
+      btn.style.background='#EEEDFE';btn.style.color='#3C3489';btn.style.borderColor='#AFA9EC';
+      btn.querySelector('svg').innerHTML='<rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/>';
+    } else {
+      lbl.textContent='Przełącz na panel trenera';
+      btn.style.background='var(--sur2)';btn.style.color='var(--txt2)';btn.style.borderColor='var(--brd)';
+      btn.querySelector('svg').innerHTML='<path d="M2 4h12M2 8h8M2 12h10"/>';
+    }
+  }
+
+  // Panel Użytkownicy — tylko admin w widoku dyrektora
   var niUsers=document.getElementById('ni-dir-users');
-  if(niUsers)niUsers.style.display=r==='admin'?'':'none';
+  if(niUsers)niUsers.style.display=(r==='admin'&&_viewMode==='dir')?'':'none';
+
   var ini=(currentUser.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('sb-av').textContent=ini;
   document.getElementById('sb-user-name').textContent=currentUser.name||r;
   var roleLabel=r==='admin'?'Administrator':r==='dyrektor'?'Dyrektor / Koordynator':'Panel trenerski';
+  if(isDir&&_viewMode==='trener')roleLabel+=' (widok trenera)';
   document.getElementById('sb-user-role').textContent=roleLabel;
+}
+
+function toggleViewMode(){
+  var r=currentUser?currentUser.role:'trener';
+  if(r!=='admin'&&r!=='dyrektor')return;
+  _viewMode=_viewMode==='dir'?'trener':'dir';
+  applyRole();
+  // Przejdź na stronę startową odpowiedniego panelu
+  if(_viewMode==='trener'){
+    sT('macro');rYL();rCal();rTeams();rIOZ();uD();
+    SP('dash');
+  } else {
+    SP('dir-dash');
+    setTimeout(renderNotifBadge,200);
+  }
+  ST(_viewMode==='trener'?'Widok: Panel trenera':'Widok: Panel dyrektora');
 }
 
 function checkAutoLogin(){
@@ -5697,6 +5748,7 @@ function checkAutoLogin(){
         fetchUserProfile(token).then(function(profile){
           if(profile&&profile.active){
             currentUser={id:profile.id,role:profile.role,name:profile.name,email:profile.email,token};
+            _viewMode=(profile.role==='trener')?'trener':'dir';
             SUPA_KEY_ACTIVE=token;
             document.getElementById('login-screen').style.display='none';
             document.getElementById('app-shell').style.display='flex';
@@ -8678,61 +8730,4 @@ function confirmImport(){
   if(type==='zawodnicy'){
     ok.forEach(p=>{
       var exists=PLAYERS.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase()&&x.team===p.team);
-      if(exists>=0){
-        if(dupMode==='update'){PLAYERS[exists]={...PLAYERS[exists],...p,id:PLAYERS[exists].id};updated++;}
-        else skipped++;
-      } else {PLAYERS.push(p);added++;}
-    });
-    saveLS();rIOZ();
-  } else if(type==='druzyny'){
-    var {teams,coaches}=ok;
-    teams.forEach(t=>{
-      var exists=TEAMS.findIndex(x=>x.name===t.name&&x.season===t.season);
-      if(exists>=0){if(dupMode==='update'){TEAMS[exists]={...TEAMS[exists],...t};updated++;}else skipped++;}
-      else{TEAMS.push(t);added++;}
-    });
-    coaches.forEach(c=>{
-      var exists=COACHES.findIndex(x=>x.name.toLowerCase()===c.name.toLowerCase());
-      if(exists>=0){if(dupMode==='update'){COACHES[exists]={...COACHES[exists],...c};updated++;}else skipped++;}
-      else{COACHES.push(c);added++;}
-    });
-    saveLS();rTeams();
-  } else if(type==='karty-trenerow'){
-    ok.forEach(p=>{
-      var exists=COACH_PROFILES.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase());
-      if(exists>=0){if(dupMode==='update'){COACH_PROFILES[exists]={...COACH_PROFILES[exists],...p};updated++;}else skipped++;}
-      else{COACH_PROFILES.push(p);added++;}
-    });
-    saveLS();rDirCoaches();
-  }
-  cM('mo-import');
-  ST('✓ Import: dodano '+added+(updated?' · zaktualizowano '+updated:'')+(skipped?' · pominięto '+skipped:''));
-}
-
-// Pobierz wzory XLSX (base64 embedded) — link do Supabase Storage lub inline download
-function dlWzor(type){
-  var urls={
-    'zawodnicy':'wzor_zawodnicy.xlsx',
-    'druzyny':'wzor_druzyny_trenerzy.xlsx',
-    'karty-trenerow':'wzor_karty_trenerow.xlsx'
-  };
-  // Wzory są przechowywane w Supabase Storage pod ścieżką templates/
-  var supaUrl=SUPA_URL+'/storage/v1/object/public/game-models/templates/'+urls[type];
-  // Otwórz w nowej karcie — jeśli nie ma Supabase, poinformuj
-  var a=document.createElement('a');a.href=supaUrl;a.download=urls[type];a.target='_blank';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  ST('Pobieranie wzoru… Jeśli nie działa, wgraj wzory do Supabase Storage (bucket: game-models/templates/)');
-}
-
-// ═══════════════ INIT ═══════════════
-// Najpierw załaduj z localStorage (instant), potem Supabase nadpisze
-loadFromLocal();
-if(!TEAMS.length)TEAMS=getDefaultTeams();
-if(!COACHES.length)COACHES=getDefaultCoaches();
-calYear=TODAY.getFullYear();calMonth=TODAY.getMonth();
-document.addEventListener('click',function(e){if(!e.target.closest('.aer'))document.querySelectorAll('.dbr').forEach(r=>r.classList.remove('op'));});
-checkAutoLogin();
-setInterval(saveLS,30000);
-</script>
-</body>
-</html>
+      if(exists>=0
