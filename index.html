@@ -6674,7 +6674,11 @@ function rDirAcademy(){
     html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">';
     html+='<div style="width:42px;height:42px;border-radius:10px;background:'+t.color+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">'+ini+'</div>';
     html+='<div style="flex:1;"><div style="font-size:14px;font-weight:600;">'+escH(t.name)+'</div><div style="font-size:11px;color:var(--txt2);">'+escH(t.category)+'</div></div>';
-    html+='<div style="font-size:10px;color:var(--txt3);display:flex;align-items:center;gap:4px;">Szczegóły <svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M2 6h8M7 3l3 3-3 3"/></svg></div>';
+    html+='<div style="display:flex;gap:6px;align-items:center;">';
+    html+='<button class="btn sm" onclick="event.stopPropagation();oEditTeam('+tIdx+')" style="font-size:11px;">Edytuj</button>';
+    html+='<button class="btn sm dan" onclick="event.stopPropagation();delTeam('+tIdx+')" style="padding:4px 8px;" title="Usuń drużynę"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
+    html+='<div style="font-size:10px;color:var(--txt3);display:flex;align-items:center;gap:4px;margin-left:4px;">Szczegóły <svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M2 6h8M7 3l3 3-3 3"/></svg></div>';
+    html+='</div>';
     html+='</div>';
     // KPI grid
     html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;">';
