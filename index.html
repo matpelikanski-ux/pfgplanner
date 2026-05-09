@@ -744,7 +744,7 @@ if('serviceWorker' in navigator){
 </div>
 <!-- BAZA ĆWICZEŃ -->
 <div id="pg-ex" class="pg">
-  <div class="tb"><div><div class="t1"><span class="ni-lbl">Ćwiczenia</span></div><div class="t2" id="ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
+  <div class="tb"><div><div class="t1"><span class="ni-lbl">Ćwiczenia</span></div><div class="t2" id="ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn" onclick="oImport('cwiczenia')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
   <div class="inner">
     <div style="display:flex;gap:8px;margin-bottom:10px;"><input class="fi" id="ex-s" placeholder="Szukaj po nazwie lub opisie..." oninput="RE()" style="flex:1;"/></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
@@ -8639,6 +8639,26 @@ SP=function(n){
 
 // ═══════════════ IMPORT XLSX ═══════════════
 var IMPORT_TYPES={
+  'cwiczenia':{
+    label:'Baza ćwiczeń',
+    sheet:'Ćwiczenia',
+    cols:{
+      'Nazwa ćwiczenia':    {key:'n',   req:true},
+      'Faza gry':           {key:'f',   req:true},
+      'Temat':              {key:'t',   req:true},
+      'Koncept':            {key:'k',   req:false},
+      'Kategoria wiekowa min':{key:'km',req:false},
+      'Kategoria wiekowa max':{key:'kx',req:false},
+      'Czas':               {key:'cz',  req:false},
+      'Liczba zawodników':  {key:'lz',  req:false},
+      'Przestrzeń':         {key:'p',   req:false},
+      'Sprzęt':             {key:'sp',  req:false},
+      'Intensywność':       {key:'i',   req:false},
+      'Opis ćwiczenia':     {key:'o',   req:false},
+      'Coaching points':    {key:'z',   req:false},
+      'Link do wideo':      {key:'lv',  req:false},
+    }
+  },
   'zawodnicy':{
     label:'Karty zawodników',
     sheet:'Zawodnicy',
@@ -8723,6 +8743,7 @@ function oImport(type){
   // Pobierz wzór
   html+='<div class="sh" style="margin-top:0;">Krok 1 — Pobierz wzór</div>';
   html+='<div style="display:flex;gap:10px;margin-bottom:16px;">';
+  if(type==='cwiczenia')html+='<button class="btn" onclick="dlWzor(\'cwiczenia\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Pobierz wzór: Cwiczenia.xlsx</button>';
   if(type==='zawodnicy')html+='<button class="btn" onclick="dlWzor(\'zawodnicy\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Pobierz wzór: Zawodnicy.xlsx</button>';
   if(type==='druzyny')html+='<button class="btn" onclick="dlWzor(\'druzyny\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Pobierz wzór: Drużyny_Trenerzy.xlsx</button>';
   if(type==='karty-trenerow')html+='<button class="btn" onclick="dlWzor(\'karty-trenerow\')"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Pobierz wzór: KartyTrenerow.xlsx</button>';
@@ -8766,6 +8787,14 @@ function handleImportFile(file){
 function parseImportXLSX(wb,type){
   var preview=document.getElementById('imp-preview');
   var saveBtn=document.getElementById('mo-imp-save');
+  if(type==='cwiczenia'){
+    var wsCw=wb.Sheets['Ćwiczenia']||wb.Sheets['Cwiczenia']||wb.Sheets[wb.SheetNames[0]];
+    if(!wsCw){preview.innerHTML='<div style="color:var(--red);padding:10px;background:var(--lred);border-radius:var(--r2);">Nie znaleziono arkusza "Ćwiczenia".</div>';return;}
+    var rowsCw=XLSX.utils.sheet_to_json(wsCw,{defval:''});
+    var resultCw=parseCwiczenieRows(rowsCw);
+    renderImportPreview(resultCw,'cwiczenia');
+    return;
+  }
   if(type==='zawodnicy'){
     var ws=wb.Sheets['Zawodnicy']||wb.Sheets[wb.SheetNames[0]];
     if(!ws){preview.innerHTML='<div style="color:var(--red);">Nie znaleziono arkusza "Zawodnicy".</div>';return;}
@@ -8793,6 +8822,61 @@ function isDescRow(row){
   // Pomiń wiersze z opisem/przykładem — jeśli pole Imię zawiera słowo "Format" lub "Pełne"
   var name=row['Imię i Nazwisko']||row['Nazwa drużyny']||row['Imię i Nazwisko ★']||'';
   return /^(Format|Pełne|Opis|Unikaln|przykład|np\.|Liczba)/i.test(String(name).trim());
+}
+
+var VALID_FAZY=['Atakowanie','Bronienie','Umiejętności','Motoryka'];
+var VALID_KATS=['Skrzat U6/U7','Żak U8/U9','Orlik U10/U11','Młodzik U12/U13','Trampkarz U14/U15','Junior U16/U17','Junior U18/U19','Senior'];
+var VALID_INT=['Niska','Średnia','Wysoka'];
+// Nazwy przykładowych wierszy do pominięcia
+var SKIP_NAMES=['Rondo 4+1 vs 2','Presing na połowie — zamknięcie kanałów','Drybling 1v1 przy linii',
+  'Krótka, unikalna nazwa ćwiczenia','Krótka, unikalana nazwa ćwiczenia','np.','Przykład'];
+
+function parseCwiczenieRows(rows){
+  var ok=[],errors=[];
+  rows.forEach(function(rawRow,idx){
+    var row={};
+    Object.entries(rawRow).forEach(function(kv){row[normHeader(kv[0])]=kv[1];});
+    // Normalizuj klucze — obsłuż różne nazwy kolumn
+    var name=String(row['Nazwa ćwiczenia']||row['Nazwa']||'').trim();
+    if(!name)return;
+    // Pomiń wiersze opisowe i przykładowe
+    if(SKIP_NAMES.some(function(s){return name.toLowerCase().includes(s.toLowerCase());}))return;
+    if(/^(krótka|nazwa|format|opis|np\.|przykład)/i.test(name))return;
+    var faza=String(row['Faza gry']||row['Faza']||'').trim();
+    var temat=String(row['Temat']||'').trim();
+    var errs=[];
+    if(!faza)errs.push('Brak fazy gry');
+    else if(!VALID_FAZY.includes(faza))errs.push('Nieprawidłowa faza: "'+faza+'" (dozwolone: '+VALID_FAZY.join(', ')+')');
+    if(!temat)errs.push('Brak tematu');
+    var km=String(row['Kategoria wiekowa min']||row['Kat. min']||'').trim();
+    var kx=String(row['Kategoria wiekowa max']||row['Kat. max']||'').trim();
+    if(km&&!VALID_KATS.includes(km))errs.push('Nieznana kat. min: "'+km+'"');
+    if(kx&&!VALID_KATS.includes(kx))errs.push('Nieznana kat. max: "'+kx+'"');
+    var cz=parseInt(row['Czas']||row['Czas (minuty)']||0)||0;
+    var lz=parseInt(row['Liczba zawodników']||0)||0;
+    var intens=String(row['Intensywność']||'').trim();
+    if(intens&&!VALID_INT.includes(intens)){intens='';errs.push('Nieznana intensywność (pomiń lub: Niska/Średnia/Wysoka)');}
+    var ex={
+      id:genId(),
+      n:name,
+      f:faza,
+      t:temat,
+      k:String(row['Koncept']||'').trim(),
+      km:km||'',kx:kx||'',
+      cz:cz||'',
+      lz:lz||'',
+      p:String(row['Przestrzeń']||'').trim(),
+      sp:String(row['Sprzęt']||'').trim(),
+      i:intens,
+      o:String(row['Opis ćwiczenia']||row['Opis']||'').trim(),
+      z:String(row['Coaching points']||'').trim(),
+      lv:String(row['Link do wideo']||row['Link']||'').trim(),
+      pk:'',w:'',u:'',img:null,imn:null,fb:''
+    };
+    if(errs.length)errors.push({row:idx+2,name,errs,data:ex});
+    else ok.push(ex);
+  });
+  return{ok,errors,type:'cwiczenia'};
 }
 
 function parsePlayersRows(rows){
@@ -8982,7 +9066,14 @@ function confirmImport(){
   var {ok,type}=JSON.parse(mo.dataset.result);
   var dupMode=(document.querySelector('input[name="imp-dup"]:checked')||{}).value||'skip';
   var added=0,updated=0,skipped=0;
-  if(type==='zawodnicy'){
+  if(type==='cwiczenia'){
+    ok.forEach(function(ex){
+      var exists=EXS.findIndex(function(x){return x.n.toLowerCase()===ex.n.toLowerCase();});
+      if(exists>=0){if(dupMode==='update'){EXS[exists]={...EXS[exists],...ex,id:EXS[exists].id};updated++;}else skipped++;}
+      else{EXS.push(ex);added++;}
+    });
+    saveLS();RE();uD();
+  } else if(type==='zawodnicy'){
     ok.forEach(p=>{
       var exists=PLAYERS.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase()&&x.team===p.team);
       if(exists>=0){
@@ -9019,6 +9110,7 @@ function confirmImport(){
 // Pobierz wzory XLSX (base64 embedded) — link do Supabase Storage lub inline download
 function dlWzor(type){
   var urls={
+    'cwiczenia':'wzor_cwiczenia.xlsx',
     'zawodnicy':'wzor_zawodnicy.xlsx',
     'druzyny':'wzor_druzyny_trenerzy.xlsx',
     'karty-trenerow':'wzor_karty_trenerow.xlsx'
