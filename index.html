@@ -508,15 +508,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   #ni-dir-gamemodel .ni-lbl { font-size: 0; }
   #ni-dir-gamemodel .ni-lbl::after { font-size: 9px; }
 }
-</style>
 @supports (padding: env(safe-area-inset-top)) {
   .sb { padding-top: env(safe-area-inset-top); }
   .main { padding-bottom: 0; }
 }
-/* FAB przełącznik widoku na mobile */
-#mobile-view-fab {
-  display: none;
-}
+#mobile-view-fab { display: none; }
 @media (max-width: 768px) {
   #mobile-view-fab {
     display: flex;
