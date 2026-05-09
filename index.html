@@ -572,6 +572,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="sb-s">
       <div class="sb-lbl">Zarząd</div>
       <div class="ni active" id="ni-dir-dash" onclick="SP('dir-dash')"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Przegląd</div>
+      <div class="ni" id="ni-dir-overview" onclick="SP('dir-overview')"><svg viewBox="0 0 16 16"><circle cx="4" cy="12" r="2"/><circle cx="8" cy="6" r="2"/><circle cx="12" cy="9" r="2"/><path d="M4 10V5M8 4V2M12 7V3" stroke-width="1.2"/></svg>Akademia+</div>
+      <div class="ni" id="ni-dir-cal" onclick="SP('dir-cal')"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>Kalendarz</div>
+      <div class="ni" id="ni-dir-plan" onclick="SP('dir-plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
+      <div class="ni" id="ni-dir-ioz" onclick="SP('dir-ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Zawodnicy</div>
       <div class="ni" id="ni-dir-coaches" onclick="SP('dir-coaches')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M13 7l2 2-4 4-2-2"/></svg>Karty trenerów</div>
       <div class="ni" id="ni-dir-academy" onclick="SP('dir-academy')"><svg viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8v4c0 1 2.7 2 6 2s6-1 6-2V8"/><path d="M14 5v4"/></svg>Akademia</div>
       <div class="ni" id="ni-dir-skauting" onclick="SP('dir-skauting')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4"/><path d="M10 10l4 4"/><path d="M6 3v6M3 6h6"/></svg>Skauting</div>
@@ -628,7 +632,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- PLANOWANIE -->
 <div id="pg-plan" class="pg">
-  <div class="tb"><div><div class="t1">Planowanie</div><div class="t2" id="plan-sub">Sezon 2025/26</div></div><div class="tb-r"><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div><button class="btn pri" onclick="oAC()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj okres</button></div></div>
+  <div class="tb"><div><div class="t1">Planowanie</div><div class="t2" id="plan-sub">Sezon 2025/26</div></div><div class="tb-r"><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div><button class="btn pri" id="plan-add-btn" onclick="oAC()" style="display:none;"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj okres</button></div></div>
   <div class="inner">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;"><button onclick="chY(-1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2L4 6l4 4"/></svg></button><div id="yr-l" style="font-size:15px;font-weight:600;min-width:72px;text-align:center;">2025/26</div><button onclick="chY(1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></button></div><div style="font-size:11px;color:var(--txt2);">Przeciągnij myszką na osi aby narysować nowy okres</div></div>
     <div class="gw"><div class="ghdr"><div class="glc">Cykl</div><div class="mgr" id="m-hdr"></div></div><div id="g-rows"></div></div>
@@ -960,6 +964,89 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div style="margin-left:auto;display:flex;gap:10px;font-size:11px;color:var(--txt2);" id="sk2-summary"></div>
   </div>
   <div id="sk2-body" style="overflow:auto;flex:1;"></div>
+</div>
+
+<!-- DIR: PLANOWANIE (readonly — bez dodawania cykli) -->
+<!-- DIR: KALENDARZ -->
+<div id="pg-dir-cal" class="pg">
+  <div class="tb">
+    <div><div class="t1">Kalendarz</div><div class="t2" id="dir-cal-sub">Wszystkie drużyny</div></div>
+    <div class="tb-r">
+      <select class="fsel-sm" id="dir-cal-team" onchange="rDirCal()" style="min-width:150px;"><option value="">Wszystkie drużyny</option></select>
+      <button class="btn pri" onclick="oAddMatch()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj mecz</button>
+    </div>
+  </div>
+  <!-- Legenda -->
+  <div style="background:var(--sur);border-bottom:1px solid var(--brd);padding:6px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+    <div style="font-size:10px;color:var(--txt3);font-weight:600;text-transform:uppercase;">Legenda:</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt2);"><div style="width:10px;height:10px;border-radius:50%;background:#378ADD;flex-shrink:0;"></div>Trening</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt2);"><div style="width:10px;height:10px;border-radius:50%;background:#1D9E75;flex-shrink:0;"></div>Mecz</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt2);"><div style="width:10px;height:10px;border-radius:50%;background:#EF9F27;flex-shrink:0;"></div>Turniej</div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <button class="btn sm" onclick="dirCalPrev()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M10 4l-4 4 4 4"/></svg></button>
+      <div id="dir-cal-month-lbl" style="font-size:13px;font-weight:600;min-width:120px;text-align:center;"></div>
+      <button class="btn sm" onclick="dirCalNext()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M6 4l4 4-4 4"/></svg></button>
+    </div>
+  </div>
+  <div id="dir-cal-body" style="overflow-y:auto;flex:1;padding:14px;"></div>
+</div>
+
+<!-- DIR: PRZEGLĄD TRENERSKI (wzbogacony) -->
+<div id="pg-dir-overview" class="pg">
+  <div class="tb">
+    <div><div class="t1">Przegląd akademii</div><div class="t2" id="dir-ov-sub">MKS Iskra Pszczyna</div></div>
+    <div class="tb-r">
+      <select class="fsel-sm" id="dir-ov-season" onchange="rDirOverview()" style="min-width:110px;"></select>
+    </div>
+  </div>
+  <div class="inner" id="dir-ov-body"></div>
+</div>
+
+<div id="pg-dir-plan" class="pg">
+  <div class="tb">
+    <div><div class="t1">Planowanie sezonu</div><div class="t2" id="dir-plan-sub">Podgląd struktury sezonowej</div></div>
+    <div class="tb-r">
+      <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div>
+    </div>
+  </div>
+  <div class="pg.act" style="overflow-y:auto;flex:1;padding:16px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <button class="btn" onclick="prevY()"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M10 4l-4 4 4 4"/></svg></button>
+      <div style="font-size:13px;font-weight:600;" id="dir-yr-l"></div>
+      <button class="btn" onclick="nextY()"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M6 4l4 4-4 4"/></svg></button>
+      <div style="font-size:11px;color:var(--txt3);margin-left:8px;">Widok tylko do odczytu — edycja dostępna w panelu trenera</div>
+    </div>
+    <div id="dir-plan-gantt"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px;" id="dir-plan-cards"></div>
+  </div>
+</div>
+
+<!-- DIR: KARTY ZAWODNIKÓW -->
+<div id="pg-dir-ioz" class="pg">
+  <div class="tb">
+    <div><div class="t1">Karty zawodników</div><div class="t2" id="dir-ioz-sub">Wszystkie drużyny</div></div>
+    <div class="tb-r">
+      <button class="btn" onclick="oImport('zawodnicy')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button>
+      <button class="btn pri" onclick="oAddPlayer()"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M11 8v5M8.5 10.5h5"/></svg>Dodaj zawodnika</button>
+    </div>
+  </div>
+  <div class="inner">
+    <div class="ioz-filters">
+      <select class="fsel-sm" id="dir-ioz-ff-team" onchange="rDirIOZ()" style="min-width:140px;"><option value="">Wszystkie drużyny</option></select>
+      <select class="fsel-sm" id="dir-ioz-ff-grade" onchange="rDirIOZ()">
+        <option value="">Wszystkie oceny</option>
+        <option value="A">Ocena A</option>
+        <option value="B">Ocena B</option>
+        <option value="C">Ocena C</option>
+      </select>
+      <select class="fsel-sm" id="dir-ioz-ff-pos" onchange="rDirIOZ()">
+        <option value="">Wszystkie pozycje</option>
+        <option>Bramkarz</option><option>Obrońca</option><option>Pomocnik</option><option>Napastnik</option>
+      </select>
+      <input class="fi" id="dir-ioz-search" placeholder="Szukaj zawodnika..." oninput="rDirIOZ()" style="width:180px;padding:5px 10px;font-size:12px;"/>
+    </div>
+    <div id="dir-ioz-grid" class="ioz-grid"></div>
+  </div>
 </div>
 
 <!-- DIR: SKAUTING -->
@@ -1771,7 +1858,7 @@ function RE(){
   var lbl=document.getElementById('ex-lbl');if(lbl)lbl.textContent=EXS.length+' ćwiczeń'+(fil.length!==EXS.length?' ('+fil.length+' wyników)':'');
   var g=document.getElementById('ex-grid');var oe=document.getElementById('eex');if(oe)oe.remove();
   if(!fil.length){g.innerHTML='';g.insertAdjacentHTML('beforebegin','<div id="eex" class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(EXS.length?'Brak wyników':'Baza ćwiczeń jest pusta')+'</div><div style="font-size:12px;color:var(--txt2);">'+(EXS.length?'Zmień kryteria wyszukiwania.':'Kliknij "+ Dodaj ćwiczenie" aby zacząć.')+'</div></div>');return;}
-  g.innerHTML=fil.map(e=>{var idx=EXS.indexOf(e),c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'},ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div class="ec" onclick="oVE('+idx+')">'+(e.img?'<img src="'+e.img+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')+'<div class="en">'+e.n+'</div><div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+'</div><div class="ed">'+(e.o||'Brak opisu')+'</div><div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div></div>';}).join('');
+  g.innerHTML=fil.map(e=>{var idx=EXS.indexOf(e),c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'},ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div class="ec" onclick="oVE('+idx+')">'+(e.img?'<img src="'+e.img+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')+'<div class="en">'+e.n+'</div><div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div><div class="ed">'+(e.o||'Brak opisu')+'</div><div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div></div>';}).join('');
 }
 
 function oAE(){EI=null;IMG=null;IMN=null;rEF({},true);oM('mo-ex');}
@@ -1839,8 +1926,18 @@ function rEV(e,idx){
   b+='<div class="vf"><div class="vl">Faza / Temat / Koncept</div><div class="vbr">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.t+'</span>':'')+(e.k?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.k+'</span>':'')+'</div></div>';
   b+='<div class="v2"><div class="vf"><div class="vl">Intensywność</div>'+(ic2?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'<div class="vv m">Nie podano</div>')+'</div><div class="vf"><div class="vl">Kategorie wiekowe</div><div class="vv">'+(e.km||'—')+(e.kx&&e.kx!==e.km?' – '+e.kx:'')+'</div></div></div>';
   b+='<div class="v3"><div class="vf"><div class="vl">Czas</div><div class="vv">'+(e.cz?e.cz+' min':'—')+'</div></div><div class="vf"><div class="vl">Przestrzeń</div><div class="vv '+(e.p?'':'m')+'">'+(e.p||'Nie podano')+'</div></div><div class="vf"><div class="vl">Sprzęt</div><div class="vv '+(e.sp?'':'m')+'">'+(e.sp||'Nie podano')+'</div></div></div>';
-  var labs={o:'Opis',z:'Zasady',pk:'Punktacja',w:'Wskazówki',u:'Utrudnienia / Ułatwienia',fb:'Feedback'};
+  var labs={o:'Opis',z:'Coaching points',pk:'Punktacja',w:'Wskazówki',u:'Utrudnienia / Ułatwienia',fb:'Feedback'};
   Object.keys(labs).forEach(k=>{if(e[k])b+='<div class="vf"><div class="vl">'+labs[k]+'</div><div class="vv">'+e[k].replace(/\n/g,'<br>')+'</div></div>';});
+  // Link do wideo
+  if(e.lv&&e.lv.trim()){
+    var isYT=e.lv.includes('youtube')||e.lv.includes('youtu.be');
+    var isVimeo=e.lv.includes('vimeo');
+    var icon=isYT?'▶ YouTube':isVimeo?'▶ Vimeo':'🔗 Link';
+    b+='<div class="vf"><div class="vl">Film / Link</div><div class="vv">'
+      +'<a href="'+escH(e.lv)+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:'+(isYT?'#FFEEE8':'var(--lg)')+';color:'+(isYT?'#C0392B':'var(--dg)')+';border-radius:var(--r2);font-size:12px;font-weight:600;text-decoration:none;">'
+      +icon+'</a>'
+      +'</div></div>';
+  }
   document.getElementById('mo-ex-b').innerHTML=b;
   document.getElementById('mo-ex-f').innerHTML='<button class="btn dan sm" onclick="delE('+idx+')">Usuń ćwiczenie</button><div style="display:flex;gap:8px;"><button class="btn sm" onclick="cM(\'mo-ex\')">Zamknij</button><button class="btn pri sm" onclick="oEE('+idx+')">Edytuj</button></div>';
 }
@@ -3422,6 +3519,8 @@ function refreshCurrentPage(){
     'pg-tests':'tests',
     'pg-gamemodel':'gamemodel',  // moduł trenerski — tylko podgląd
     'pg-dir-dash':'dir-dash','pg-dir-coaches':'dir-coaches',
+    'pg-dir-cal':'dir-cal','pg-dir-overview':'dir-overview',
+    'pg-dir-plan':'dir-plan','pg-dir-ioz':'dir-ioz',
     'pg-dir-academy':'dir-academy','pg-dir-skauting':'dir-skauting',
     'pg-dir-finanse':'dir-finanse','pg-dir-gamemodel':'dir-gamemodel'
   };
@@ -6148,6 +6247,355 @@ function promoteCoachToDir(coachId){
 function coachHasProfile(coachId){return !!COACH_PROFILES.find(p=>p.coachId===coachId);}
 
 // ── WIDOK DIR: PRZEGLĄD ──
+// ── Planowanie dyrektora (readonly) ──
+function rDirPlan(){
+  // Aktualizuj etykiety roku
+  var lbl=document.getElementById('dir-yr-l');
+  if(lbl)lbl.textContent=cY+'/'+(String(cY+1).slice(2));
+  var sub=document.getElementById('dir-plan-sub');
+  if(sub)sub.textContent='Sezon '+cY+'/'+(String(cY+1).slice(2));
+  // Wyrenderuj Gantt (używa tej samej funkcji rG ale inna strona)
+  var ganttEl=document.getElementById('dir-plan-gantt');
+  if(!ganttEl)return;
+  // Tymczasowo podmień cel renderowania i wyrenderuj
+  var origEl=document.getElementById('gantt-wrap');
+  // Renderuj uproszczony widok cykli
+  if(!CYC.length){
+    ganttEl.innerHTML='<div class="empty"><div style="font-size:14px;font-weight:600;margin-bottom:6px;">Brak zaplanowanych cykli</div><div style="font-size:12px;color:var(--txt2);">Trenerzy mogą dodawać cykle w panelu trenera → Planowanie.</div></div>';
+  } else {
+    // Renderuj tabelę Gantt tylko do odczytu
+    var MONTHS=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
+    var html='<div style="overflow-x:auto;"><table style="border-collapse:collapse;min-width:600px;font-size:11px;width:100%;">';
+    html+='<thead><tr><th style="text-align:left;padding:5px 10px;background:var(--sur2);border:1px solid var(--brd);min-width:120px;">Cykl</th>';
+    MONTHS.forEach(m=>html+='<th style="padding:4px 2px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:36px;">'+m+'</th>');
+    html+='</tr></thead><tbody>';
+    var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':' var(--lg)'};
+    var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
+    var typeLabel={'macro':'Makrocykl','meso':'Mezocykl','micro':'Mikrocykl'};
+    CYC.filter(c=>c.year===cY).forEach((c,i)=>{
+      var bg=typeColors[c.type]||'var(--sur2)';
+      var bc=typeBorder[c.type]||'var(--brd)';
+      html+='<tr><td style="padding:5px 10px;border:1px solid var(--brd);font-weight:500;">'+escH(c.name)+'<div style="font-size:9px;color:var(--txt3);">'+typeLabel[c.type]+'</div></td>';
+      // Oblicz które miesiące
+      var startM=c.startM||0; var endM=c.endM||0;
+      MONTHS.forEach((m,mi)=>{
+        var inRange=(mi>=startM&&mi<=endM);
+        html+='<td style="padding:0;border:1px solid var(--brd);"><div style="height:24px;background:'+(inRange?bg:'transparent')+';border:'+(inRange?'1px solid '+bc:'none')+';border-radius:3px;margin:2px;"></div></td>';
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+    ganttEl.innerHTML=html;
+  }
+  // Karty podsumowania
+  var cards=document.getElementById('dir-plan-cards');
+  if(cards){
+    var macros=CYC.filter(c=>c.type==='macro'&&c.year===cY);
+    var mesos=CYC.filter(c=>c.type==='meso'&&c.year===cY);
+    var micros=CYC.filter(c=>c.type==='micro'&&c.year===cY);
+    cards.innerHTML=[
+      {label:'Makrocykle',count:macros.length,bg:'#E6F1FB',tc:'#0C447C'},
+      {label:'Mezocykle',count:mesos.length,bg:'#EEEDFE',tc:'#3C3489'},
+      {label:'Mikrocykle',count:micros.length,bg:'var(--lg)',tc:'var(--dg)'}
+    ].map(s=>'<div style="background:'+s.bg+';border-radius:var(--r);padding:14px;text-align:center;"><div style="font-size:22px;font-weight:700;color:'+s.tc+';">'+s.count+'</div><div style="font-size:11px;color:'+s.tc+';">'+s.label+'</div></div>').join('');
+  }
+}
+
+// ── Karty zawodników w module dyrektora ──
+function rDirIOZ(){
+  var grid=document.getElementById('dir-ioz-grid');
+  if(!grid)return;
+  var sub=document.getElementById('dir-ioz-sub');
+  // Aktualizuj filtry
+  var teamSel=document.getElementById('dir-ioz-ff-team');
+  if(teamSel){
+    var teams=[...new Set(PLAYERS.map(p=>p.team).filter(Boolean))].sort();
+    var prevT=teamSel.value;
+    teamSel.innerHTML='<option value="">Wszystkie drużyny</option>'+teams.map(t=>'<option value="'+escH(t)+'"'+(t===prevT?' selected':'')+'>'+escH(t)+'</option>').join('');
+  }
+  var fTeam=(document.getElementById('dir-ioz-ff-team')||{}).value||'';
+  var fGrade=(document.getElementById('dir-ioz-ff-grade')||{}).value||'';
+  var fPos=(document.getElementById('dir-ioz-ff-pos')||{}).value||'';
+  var fQ=((document.getElementById('dir-ioz-search')||{}).value||'').toLowerCase();
+  var fil=PLAYERS.filter(p=>{
+    if(fTeam&&p.team!==fTeam)return false;
+    if(fPos&&p.position!==fPos)return false;
+    if(fQ&&!(p.name||'').toLowerCase().includes(fQ))return false;
+    if(fGrade){
+      var lastGrade=(p.oceny&&p.oceny.length)?p.oceny[p.oceny.length-1].grade:'';
+      if(lastGrade!==fGrade)return false;
+    }
+    return true;
+  }).sort((a,b)=>(a.team||'').localeCompare(b.team||'')||(a.name||'').localeCompare(b.name||''));
+  if(sub)sub.textContent=fil.length+' zawodników'+(fTeam?' · '+fTeam:'');
+  if(!fil.length){grid.innerHTML='<div class="empty"><div style="font-size:14px;font-weight:600;">Brak zawodników</div><div style="font-size:12px;color:var(--txt2);margin-top:6px;">Dodaj zawodników przez import XLSX lub przycisk Dodaj zawodnika.</div></div>';return;}
+  // Użyj tej samej funkcji renderowania co rIOZ — tylko przekaż inny kontener
+  var origGrid=document.getElementById('ioz-grid');
+  grid.innerHTML=fil.map((p,idx)=>{
+    var realIdx=PLAYERS.indexOf(p);
+    var col2=playerColor(p.id||p.name);
+    var ini2=playerInitials(p.name);
+    var lastG=(p.oceny&&p.oceny.length)?p.oceny[p.oceny.length-1].grade:'';
+    var gCfg=GRADE_CFG[lastG]||{bg:'var(--sur2)',tc:'var(--txt3)'};
+    return '<div class="ioz-card" onclick="renderPlayerView('+realIdx+')">'
+      +'<div class="ioz-av" style="background:'+col2+';">'+ini2+'</div>'
+      +'<div class="ioz-info">'
+      +'<div class="ioz-name">'+escH(p.name)+'</div>'
+      +'<div class="ioz-meta">'+(p.position||'—')+' · '+(p.team||'—')+'</div>'
+      +'</div>'
+      +(lastG?'<div class="ioz-grade" style="background:'+gCfg.bg+';color:'+gCfg.tc+';">'+lastG+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+// ── Kalendarz dyrektora ──
+var dirCalYear=TODAY.getFullYear(), dirCalMonth=TODAY.getMonth();
+
+function dirCalPrev(){ dirCalMonth--; if(dirCalMonth<0){dirCalMonth=11;dirCalYear--;} rDirCal(); }
+function dirCalNext(){ dirCalMonth++; if(dirCalMonth>11){dirCalMonth=0;dirCalYear++;} rDirCal(); }
+
+function rDirCal(){
+  var body=document.getElementById('dir-cal-body'); if(!body)return;
+  var lbl=document.getElementById('dir-cal-month-lbl');
+  if(lbl)lbl.textContent=MONTH_NAMES[dirCalMonth]+' '+dirCalYear;
+  var sub=document.getElementById('dir-cal-sub');
+
+  // Aktualizuj filtr drużyn
+  var teamSel=document.getElementById('dir-cal-team');
+  if(teamSel){
+    var teams=TEAMS.filter(t=>t.season===currentSeason).map(t=>t.name).sort();
+    var prevT=teamSel.value;
+    teamSel.innerHTML='<option value="">Wszystkie drużyny</option>'+teams.map(t=>'<option value="'+escH(t)+'"'+(t===prevT?' selected':'')+'>'+escH(t)+'</option>').join('');
+  }
+  var fTeam=(document.getElementById('dir-cal-team')||{}).value||'';
+  if(sub) sub.textContent=fTeam||'Wszystkie drużyny';
+
+  // Zbierz wszystkie eventy (treningi + mecze) w danym miesiącu
+  var byDay={};
+  function addToDay(d,obj){if(!byDay[d])byDay[d]=[];byDay[d].push(obj);}
+
+  // Treningi
+  TRAININGS.forEach(tr=>{
+    if(!tr.date)return;
+    var dt=new Date(tr.date);
+    if(dt.getFullYear()!==dirCalYear||dt.getMonth()!==dirCalMonth)return;
+    if(fTeam&&tr.team!==fTeam)return;
+    addToDay(dt.getDate(),{type:'training',obj:tr});
+  });
+  // Mecze
+  MATCHES.forEach(m=>{
+    if(!m.date)return;
+    var dt=new Date(m.date);
+    if(dt.getFullYear()!==dirCalYear||dt.getMonth()!==dirCalMonth)return;
+    if(fTeam&&m.team!==fTeam)return;
+    addToDay(dt.getDate(),{type:'match',obj:m});
+  });
+
+  // Renderuj siatkę kalendarza
+  var firstDay=new Date(dirCalYear,dirCalMonth,1).getDay();
+  firstDay=(firstDay+6)%7; // Pn=0
+  var daysInMonth=new Date(dirCalYear,dirCalMonth+1,0).getDate();
+  var todayD=TODAY.getFullYear()===dirCalYear&&TODAY.getMonth()===dirCalMonth?TODAY.getDate():-1;
+  var DAY_NAMES=['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+
+  var html='<div class="cfg">';
+  DAY_NAMES.forEach(d=>html+='<div class="cdh">'+d+'</div>');
+  // Puste komórki przed 1
+  for(var i=0;i<firstDay;i++)html+='<div class="cc2 other"></div>';
+  for(var d2=1;d2<=daysInMonth;d2++){
+    var isToday=d2===todayD;
+    var evs=byDay[d2]||[];
+    var trainings=evs.filter(e=>e.type==='training');
+    var matches=evs.filter(e=>e.type==='match');
+    html+='<div class="cc2'+(isToday?' today':'')+'" onclick="dirCalDayClick('+d2+')" style="cursor:pointer;">';
+    html+='<div class="ccn'+(isToday?' today':'')+'">'+d2+'</div>';
+    // Eventy (max 3 widoczne)
+    var shown=0;
+    trainings.slice(0,2).forEach(e=>{
+      if(shown>=3)return;
+      html+='<div class="cev" style="background:#E6F1FB;color:#0C447C;font-size:9px;padding:1px 4px;border-radius:2px;margin:1px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">⬤ '+escH(e.obj.team||'Trening')+'</div>';
+      shown++;
+    });
+    matches.forEach(e=>{
+      if(shown>=3)return;
+      var isHome=!e.obj.away;
+      html+='<div class="cev" style="background:#E1F5EE;color:#085041;font-size:9px;padding:1px 4px;border-radius:2px;margin:1px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(isHome?'🏠':'✈️')+' '+escH(e.obj.opponent||'Mecz')+'</div>';
+      shown++;
+    });
+    if(evs.length>3)html+='<div style="font-size:9px;color:var(--txt3);padding-left:4px;">+'+( evs.length-3)+' więcej</div>';
+    html+='</div>';
+  }
+  html+='</div>';
+
+  // Legenda miesięczna
+  var tTotal=Object.values(byDay).reduce((s,es)=>s+es.filter(e=>e.type==='training').length,0);
+  var mTotal=Object.values(byDay).reduce((s,es)=>s+es.filter(e=>e.type==='match').length,0);
+  html+='<div style="display:flex;gap:12px;margin-top:12px;font-size:11px;color:var(--txt2);">';
+  html+='<span>📋 Treningi: <b>'+tTotal+'</b></span>';
+  html+='<span>⚽ Mecze: <b>'+mTotal+'</b></span>';
+  html+='</div>';
+
+  // Lista wydarzeń
+  html+='<div style="margin-top:16px;">';
+  html+='<div class="sh">Wszystkie wydarzenia — '+MONTH_NAMES[dirCalMonth]+' '+dirCalYear+'</div>';
+  var allEvs=[];
+  Object.entries(byDay).sort((a,b)=>a[0]-b[0]).forEach(([day,evs2])=>{
+    evs2.forEach(e=>allEvs.push({day:parseInt(day),ev:e}));
+  });
+  if(!allEvs.length){
+    html+='<div style="font-size:12px;color:var(--txt2);padding:12px 0;">Brak wydarzeń w tym miesiącu'+(fTeam?' dla '+fTeam:'')+'.</div>';
+  } else {
+    allEvs.forEach(({day,ev})=>{
+      var isMatch=ev.type==='match';
+      var obj=ev.obj;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd);">';
+      html+='<div style="width:32px;height:32px;border-radius:var(--r2);background:'+(isMatch?'#E1F5EE':'#E6F1FB')+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+(isMatch?'#085041':'#0C447C')+';flex-shrink:0;">'+day+'</div>';
+      html+='<div style="flex:1;min-width:0;">';
+      if(isMatch){
+        var isHome=!obj.away;
+        html+='<div style="font-size:12px;font-weight:600;">'+(isHome?'🏠':'✈️')+' '+escH(obj.opponent||'Mecz')+'</div>';
+        html+='<div style="font-size:11px;color:var(--txt2);">'+escH(obj.team||'')+(obj.time?' · '+obj.time:'')+(obj.location?' · '+obj.location:'')+'</div>';
+      } else {
+        html+='<div style="font-size:12px;font-weight:600;">⚽ Trening — '+escH(obj.team||'')+'</div>';
+        html+='<div style="font-size:11px;color:var(--txt2);">'+(obj.time||'')+(obj.location?' · '+obj.location:'')+(obj.konspekt?' · '+obj.konspekt:'')+'</div>';
+      }
+      html+='</div>';
+      html+='</div>';
+    });
+  }
+  html+='</div>';
+  body.innerHTML=html;
+}
+
+function dirCalDayClick(d){
+  // Pokaż modal dnia z listą wydarzeń
+  var evs=(TRAININGS.filter(t=>{var dt=new Date(t.date||'');return dt.getDate()===d&&dt.getFullYear()===dirCalYear&&dt.getMonth()===dirCalMonth;}).map(t=>({type:'training',obj:t})))
+    .concat(MATCHES.filter(m=>{var dt=new Date(m.date||'');return dt.getDate()===d&&dt.getFullYear()===dirCalYear&&dt.getMonth()===dirCalMonth;}).map(m=>({type:'match',obj:m})));
+  if(!evs.length)return;
+  var html='<div class="sh" style="margin-top:0;">'+d+' '+MONTH_NAMES[dirCalMonth]+' '+dirCalYear+'</div>';
+  evs.forEach(ev=>{
+    var isMatch=ev.type==='match';
+    var obj=ev.obj;
+    html+='<div style="padding:10px;background:var(--sur2);border-radius:var(--r2);margin-bottom:8px;">';
+    html+='<div style="font-size:13px;font-weight:600;margin-bottom:4px;">'+(isMatch?'⚽ Mecz: '+escH(obj.opponent||'—'):'📋 Trening: '+escH(obj.team||'—'))+'</div>';
+    if(!isMatch)html+='<div style="font-size:11px;color:var(--txt2);">Drużyna: '+escH(obj.team||'—')+'</div>';
+    if(isMatch)html+='<div style="font-size:11px;color:var(--txt2);">Drużyna: '+escH(obj.team||'—')+(obj.score?' · Wynik: '+obj.score:'')+'</div>';
+    html+='</div>';
+  });
+  var mo=document.getElementById('mo-generic-info');
+  if(!mo){mo=document.createElement('div');mo.className='mo';mo.id='mo-generic-info';mo.innerHTML='<div class="mbox"><div class="mh"><div class="mt2" id="mo-gi-ttl">Dzień</div><button class="mc2" onclick="cM(\'mo-generic-info\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-gi-body"></div><div class="mf"><button class="btn" onclick="cM(\'mo-generic-info\')">Zamknij</button></div></div>';mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});document.body.appendChild(mo);}
+  document.getElementById('mo-gi-ttl').textContent=d+' '+MONTH_NAMES[dirCalMonth]+' '+dirCalYear;
+  document.getElementById('mo-gi-body').innerHTML=html;
+  oM('mo-generic-info');
+}
+
+// ── Przegląd akademii (wzbogacony) ──
+function rDirOverview(){
+  var body=document.getElementById('dir-ov-body'); if(!body)return;
+
+  // Sezon selector
+  var seasonSel=document.getElementById('dir-ov-season');
+  if(seasonSel&&!seasonSel.options.length){
+    var seasons=[...new Set(TEAMS.map(t=>t.season).filter(Boolean))].sort().reverse();
+    if(!seasons.includes(currentSeason))seasons.unshift(currentSeason);
+    seasonSel.innerHTML=seasons.map(s=>'<option value="'+s+'"'+(s===currentSeason?' selected':'')+'>'+s+'</option>').join('');
+  }
+  var season=(seasonSel&&seasonSel.value)||currentSeason;
+  var sub=document.getElementById('dir-ov-sub');
+  if(sub)sub.textContent='MKS Iskra Pszczyna · Sezon '+season;
+
+  var teams=TEAMS.filter(t=>t.season===season);
+  var players=PLAYERS;
+  var totalKonsp=KONSP.length;
+  var totalEX=EXS.length;
+  var totalMatches=MATCHES.filter(m=>m.season===season||!m.season).length;
+  var won=MATCHES.filter(m=>{if(m.season&&m.season!==season)return false;if(!m.score)return false;var s=m.score.split('-');return s.length===2&&parseInt(s[0])>parseInt(s[1]);}).length;
+
+  var html='';
+  // ── KPI ──
+  html+='<div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">';
+  html+='<div class="sc"><div class="sl">Drużyny</div><div class="sv">'+teams.length+'</div><div class="sd">sezon '+season+'</div></div>';
+  html+='<div class="sc"><div class="sl">Zawodnicy</div><div class="sv">'+players.length+'</div><div class="sd">w bazie</div></div>';
+  html+='<div class="sc"><div class="sl">Mecze</div><div class="sv">'+totalMatches+'</div><div class="sd">rozegranych</div></div>';
+  html+='<div class="sc"><div class="sl">Wygrane</div><div class="sv" style="color:var(--g);">'+won+'</div><div class="sd">'+(totalMatches?Math.round(won/totalMatches*100)+'% skuteczność':'brak meczów')+'</div></div>';
+  html+='</div>';
+
+  html+='<div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">';
+  html+='<div class="sc"><div class="sl">Konspekty</div><div class="sv">'+totalKonsp+'</div><div class="sd" style="cursor:pointer;color:var(--g);" onclick="toggleViewMode();SP(\'konsp\')">→ Konspekty</div></div>';
+  html+='<div class="sc"><div class="sl">Ćwiczenia</div><div class="sv">'+totalEX+'</div><div class="sd" style="cursor:pointer;color:var(--g);" onclick="toggleViewMode();SP(\'ex\')">→ Baza ćwiczeń</div></div>';
+  html+='<div class="sc"><div class="sl">Trenerzy</div><div class="sv">'+COACHES.length+'</div><div class="sd" style="cursor:pointer;color:var(--g);" onclick="SP(\'dir-coaches\')">→ Karty trenerów</div></div>';
+  html+='<div class="sc"><div class="sl">Karty</div><div class="sv">'+COACH_PROFILES.length+'</div><div class="sd">dyrektorskie</div></div>';
+  html+='</div>';
+
+  // ── Drużyny z detalami ──
+  if(teams.length){
+    html+='<div class="sh">Drużyny akademii — '+season+'</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:20px;">';
+    teams.forEach(t=>{
+      var teamPlayers=players.filter(p=>p.team===t.name);
+      var teamMatches=MATCHES.filter(m=>m.team===t.name&&(!m.season||m.season===season));
+      var teamWon=teamMatches.filter(m=>{if(!m.score)return false;var s=m.score.split('-');return s.length===2&&parseInt(s[0])>parseInt(s[1]);}).length;
+      var teamKonsp=KONSP.filter(k=>k.team===t.name).length;
+      var mainCoach=COACHES.find(c=>c.id===t.coach);
+      var col=t.color||'#1D9E75';
+      var ini=t.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      html+='<div class="card" style="border-left:4px solid '+col+';cursor:pointer;" onclick="SP(\'dir-academy\')">';
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">';
+      html+='<div style="width:36px;height:36px;border-radius:8px;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">'+ini+'</div>';
+      html+='<div><div style="font-size:13px;font-weight:600;">'+escH(t.name)+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);">'+escH(t.category||'')+(mainCoach?' · '+escH(mainCoach.name):'')+'</div></div></div>';
+      html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;">';
+      html+='<div style="background:var(--sur2);border-radius:5px;padding:6px 4px;"><div style="font-size:16px;font-weight:700;color:var(--bl);">'+teamPlayers.length+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;">zawodników</div></div>';
+      html+='<div style="background:var(--sur2);border-radius:5px;padding:6px 4px;"><div style="font-size:16px;font-weight:700;color:var(--g);">'+teamMatches.length+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;">mecze</div></div>';
+      html+='<div style="background:var(--sur2);border-radius:5px;padding:6px 4px;"><div style="font-size:16px;font-weight:700;color:var(--pu);">'+teamKonsp+'</div><div style="font-size:9px;color:var(--txt3);text-transform:uppercase;">konspekty</div></div>';
+      html+='</div>';
+      if(teamMatches.length){
+        var pct=Math.round(teamWon/teamMatches.length*100);
+        html+='<div style="margin-top:8px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--txt2);margin-bottom:3px;"><span>Skuteczność</span><span>'+teamWon+'/'+teamMatches.length+' ('+pct+'%)</span></div>';
+        html+='<div style="height:5px;background:var(--brd);border-radius:3px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div></div>';
+      }
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  // ── Najbliższe mecze ──
+  var upcoming=MATCHES.filter(m=>{
+    if(!m.date)return false;
+    var dt=new Date(m.date);
+    return dt>=TODAY;
+  }).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,5);
+
+  if(upcoming.length){
+    html+='<div class="sh">Najbliższe mecze</div>';
+    html+='<div style="margin-bottom:16px;">';
+    upcoming.forEach(m=>{
+      var dt=new Date(m.date);
+      var isHome=!m.away;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd);">';
+      html+='<div style="width:36px;height:36px;border-radius:var(--r2);background:var(--lg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--dg);flex-shrink:0;text-align:center;line-height:1.2;">'+dt.getDate()+'<br>'+['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'][dt.getMonth()]+'</div>';
+      html+='<div style="flex:1;"><div style="font-size:12px;font-weight:600;">'+(isHome?'🏠':'✈️')+' '+escH(m.team||'')+'  vs  '+escH(m.opponent||'—')+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);">'+(m.time||'')+(m.location?' · '+m.location:'')+'</div></div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }
+
+  // ── Trenerzy bez karty ──
+  var noProfile=COACHES.filter(c=>!coachHasProfile(c.id));
+  if(noProfile.length){
+    html+='<div class="card" style="border-left:3px solid var(--am);margin-bottom:14px;">';
+    html+='<div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--am);">⚠️ Trenerzy bez karty dyrektorskiej ('+noProfile.length+')</div>';
+    html+=noProfile.map(c=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--brd);">'
+      +'<div style="font-size:12px;">'+escH(c.name)+' <span style="color:var(--txt3);">· '+escH(c.role||'')+'</span></div>'
+      +'<button class="btn sm" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;" onclick="promoteCoachToDir(\''+c.id+'\')">+ Utwórz kartę</button>'
+      +'</div>').join('');
+    html+='</div>';
+  }
+
+  body.innerHTML=html;
+}
+
 function rDirDash(){
   var body=document.getElementById('dir-dash-body');if(!body)return;
   var totalCoaches=COACH_PROFILES.length;
@@ -7966,10 +8414,25 @@ function onFinCellEdit(td){
   var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
   var sec=b.sections.find(s=>s.id===sid);if(!sec)return;
   var row=sec.rows.find(r=>r.id===rid);if(!row)return;
+  if(!row.vals[vi])row.vals[vi]={budzet:0,aktualny:null};
   row.vals[vi][field]=isNaN(val)?null:val;
   saveLS();
-  // Aktualizuj kolor
+  // Kolor komórki
   td.style.color=field==='budzet'?'#0C447C':'var(--txt)';
+  // Przerenderuj tabelę żeby zaktualizować sumy
+  // Użyj setTimeout żeby nie przerywać focusa
+  setTimeout(function(){
+    var body=document.getElementById('fin-body');
+    if(body){
+      // Zachowaj pozycję scroll
+      var wrap=document.getElementById('fin-scroll-wrap');
+      var scrollTop=wrap?wrap.scrollTop:0;
+      var scrollLeft=wrap?wrap.scrollLeft:0;
+      renderBudgetTable(b);
+      var newWrap=document.getElementById('fin-scroll-wrap');
+      if(newWrap){newWrap.scrollTop=scrollTop;newWrap.scrollLeft=scrollLeft;}
+    }
+  },0);
 }
 function setBudgetRowCategory(bid,sid,rid,val){
   var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
@@ -8551,7 +9014,17 @@ var _origSPStats=SP;
 SP=function(n){
   _origSPStats(n);
   if(n==='stats')rStats();
-  if(n==='dir-dash')rDirDash();
+  if(n==='plan'){
+    var addBtn=document.getElementById('plan-add-btn');
+    if(addBtn){
+      var canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='dyrektor');
+      addBtn.style.display=canEdit?'':'none';
+    }
+  }
+  if(n==='dir-plan')rDirPlan();
+  if(n==='dir-cal')rDirCal();
+  if(n==='dir-overview')rDirOverview();
+  if(n==='dir-ioz')rDirIOZ();
   if(n==='dir-coaches')rDirCoaches();
   if(n==='dir-academy')rDirAcademy();
   if(n==='dir-skauting')rSkauting();
