@@ -3672,17 +3672,8 @@ var TEAM_COLORS=['#1D9E75','#378ADD','#7F77DD','#D85A30','#BA7517','#E24B4A','#6
 var SEASONS=['2022/23','2023/24','2024/25','2025/26','2026/27','2027/28'];
 var AGE_CATS=['Skrzat U6/U7','Żak U8/U9','Orlik U10/U11','Młodzik U12/U13','Trampkarz U14/U15','Junior U16/U17','Junior U18/U19','Senior'];
 
-function getDefaultTeams(){return [
-  {id:'t1',name:'U10 Iskra',color:'#1D9E75',category:'Orlik U10/U11',players:14,season:'2025/26',coach:'t-coach1',coach2:'',notes:''},
-  {id:'t2',name:'U12 Iskra',color:'#378ADD',category:'Młodzik U12/U13',players:16,season:'2025/26',coach:'t-coach2',coach2:'',notes:''},
-  {id:'t3',name:'U14 Iskra',color:'#7F77DD',category:'Trampkarz U14/U15',players:18,season:'2025/26',coach:'t-coach1',coach2:'t-coach2',notes:''},
-  {id:'t4',name:'U16 Iskra',color:'#D85A30',category:'Junior U16/U17',players:20,season:'2025/26',coach:'t-coach2',coach2:'',notes:''},
-  {id:'t5',name:'Senior I',color:'#BA7517',category:'Senior',players:22,season:'2025/26',coach:'t-coach1',coach2:'',notes:''},
-];}
-function getDefaultCoaches(){return [
-  {id:'t-coach1',name:'Marek Kowalski',role:'Trener główny',phone:'',email:'',since:'2023/24'},
-  {id:'t-coach2',name:'Anna Nowak',role:'Trener asystent',phone:'',email:'',since:'2024/25'},
-];}
+function getDefaultTeams(){return [];}
+function getDefaultCoaches(){return [];}
 
 function genId(){return 't-'+Date.now();}
 
