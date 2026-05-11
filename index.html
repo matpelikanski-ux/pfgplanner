@@ -576,6 +576,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="ni" id="ni-dir-cal" onclick="SP('dir-cal')"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>Kalendarz</div>
       <div class="ni" id="ni-dir-plan" onclick="SP('dir-plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
       <div class="ni" id="ni-dir-ioz" onclick="SP('dir-ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Zawodnicy</div>
+      <div class="ni" id="ni-dir-talent" onclick="SP('dir-talent')"><svg viewBox="0 0 16 16"><polygon points="8,2 10,6 14,6.5 11,9.5 11.8,14 8,11.8 4.2,14 5,9.5 2,6.5 6,6"/></svg>Top Talent</div>
       <div class="ni" id="ni-dir-coaches" onclick="SP('dir-coaches')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M13 7l2 2-4 4-2-2"/></svg>Karty trenerów</div>
       <div class="ni" id="ni-dir-academy" onclick="SP('dir-academy')"><svg viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8v4c0 1 2.7 2 6 2s6-1 6-2V8"/><path d="M14 5v4"/></svg>Akademia</div>
       <div class="ni" id="ni-dir-skauting" onclick="SP('dir-skauting')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4"/><path d="M10 10l4 4"/><path d="M6 3v6M3 6h6"/></svg>Skauting</div>
@@ -632,11 +633,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- PLANOWANIE -->
 <div id="pg-plan" class="pg">
-  <div class="tb"><div><div class="t1">Planowanie</div><div class="t2" id="plan-sub">Sezon 2025/26</div></div><div class="tb-r"><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div><button class="btn pri" id="plan-add-btn" onclick="oAC()" style="display:none;"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj okres</button></div></div>
+  <div class="tb"><div><div class="t1">Planowanie</div><div class="t2" id="plan-sub">Sezon 2025/26</div></div><div class="tb-r"><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div></div></div>
   <div class="inner">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;"><button onclick="chY(-1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2L4 6l4 4"/></svg></button><div id="yr-l" style="font-size:15px;font-weight:600;min-width:72px;text-align:center;">2025/26</div><button onclick="chY(1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></button></div><div style="font-size:11px;color:var(--txt2);">Przeciągnij myszką na osi aby narysować nowy okres</div></div>
     <div class="gw"><div class="ghdr"><div class="glc">Cykl</div><div class="mgr" id="m-hdr"></div></div><div id="g-rows"></div></div>
-    <div class="cc3"><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:#378ADD;"></div>Makrocykle</div><button class="btn sm" onclick="oAC('macro')">+ Dodaj</button></div><div class="ccv" id="cnt-macro">0</div><div class="ccs">zdefiniowanych</div><div id="list-macro"></div></div><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:var(--pu);"></div>Mezocykle</div><button class="btn sm" onclick="oAC('meso')">+ Dodaj</button></div><div class="ccv" id="cnt-meso">0</div><div class="ccs">zdefiniowanych</div><div id="list-meso"></div></div><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:var(--g);"></div>Mikrocykle</div><button class="btn sm" onclick="oAC('micro')">+ Dodaj</button></div><div class="ccv" id="cnt-micro">0</div><div class="ccs">zdefiniowanych</div><div id="list-micro"></div></div></div>
+    <div class="cc3"><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:#378ADD;"></div>Makrocykle</div></div><div class="ccv" id="cnt-macro">0</div><div class="ccs">zdefiniowanych</div><div id="list-macro"></div></div><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:var(--pu);"></div>Mezocykle</div></div><div class="ccv" id="cnt-meso">0</div><div class="ccs">zdefiniowanych</div><div id="list-meso"></div></div><div class="ccd"><div class="cch"><div class="cct"><div class="cdo" style="background:var(--g);"></div>Mikrocykle</div></div><div class="ccv" id="cnt-micro">0</div><div class="ccs">zdefiniowanych</div><div id="list-micro"></div></div></div>
     <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:8px;">Notatki do planu sezonu</div><textarea class="fta" placeholder="Cele sezonu, priorytety, założenia planowania..."></textarea></div>
   </div>
 </div>
@@ -1002,22 +1003,126 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="inner" id="dir-ov-body"></div>
 </div>
 
-<div id="pg-dir-plan" class="pg">
+<div id="pg-dir-plan" class="pg" style="overflow:hidden;">
   <div class="tb">
-    <div><div class="t1">Planowanie sezonu</div><div class="t2" id="dir-plan-sub">Podgląd struktury sezonowej</div></div>
+    <div><div class="t1">Planowanie sezonu</div><div class="t2" id="dir-plan-sub">MKS Iskra Pszczyna</div></div>
     <div class="tb-r">
-      <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn sm" id="dp-view-gantt" onclick="setDPView('gantt')" style="background:var(--lg);color:var(--dg);border-color:#5DCAA5;">Gantt</button>
+        <button class="btn sm" id="dp-view-list" onclick="setDPView('list')">Lista</button>
+      </div>
+      <select class="fsel-sm" id="dp-team-filter" onchange="rDirPlan()" style="min-width:150px;"><option value="">Wszystkie drużyny</option></select>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <button class="btn sm" onclick="dpPrevY()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M10 4l-4 4 4 4"/></svg></button>
+        <div style="font-size:12px;font-weight:600;min-width:60px;text-align:center;" id="dp-yr-lbl">2025/26</div>
+        <button class="btn sm" onclick="dpNextY()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M6 4l4 4-4 4"/></svg></button>
+      </div>
     </div>
   </div>
-  <div class="pg.act" style="overflow-y:auto;flex:1;padding:16px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-      <button class="btn" onclick="prevY()"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M10 4l-4 4 4 4"/></svg></button>
-      <div style="font-size:13px;font-weight:600;" id="dir-yr-l"></div>
-      <button class="btn" onclick="nextY()"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M6 4l4 4-4 4"/></svg></button>
-      <div style="font-size:11px;color:var(--txt3);margin-left:8px;">Widok tylko do odczytu — edycja dostępna w panelu trenera</div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div style="width:290px;flex-shrink:0;border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden;">
+      <div style="background:var(--sur2);border-bottom:1px solid var(--brd);padding:5px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div style="font-size:11px;font-weight:600;color:var(--txt2);" id="dp-cal-lbl">2026</div>
+        <div style="display:flex;gap:3px;"><button class="btn sm" onclick="dpCalPrev()">&#8249;</button><button class="btn sm" onclick="dpCalNext()">&#8250;</button></div>
+      </div>
+      <div style="padding:5px;flex-shrink:0;" id="dp-cal-wrap"></div>
+      <div style="background:var(--sur2);border-top:1px solid var(--brd);border-bottom:1px solid var(--brd);padding:5px 10px;font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">Dodaj / Edytuj okres</div>
+      <div style="overflow-y:auto;flex:1;padding:10px;" id="dp-form-wrap">
+        <div style="margin-bottom:8px;">
+          <div style="font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:4px;">Typ cyklu</div>
+          <div style="display:flex;gap:4px;">
+            <button onclick="dpSelType('macro')" id="dp-t-macro" style="flex:1;padding:5px 3px;font-size:10px;border-radius:5px;border:1px solid #85B7EB;background:#E6F1FB;color:#0C447C;cursor:pointer;font-family:inherit;font-weight:600;">Makrocykl</button>
+            <button onclick="dpSelType('meso')" id="dp-t-meso" style="flex:1;padding:5px 3px;font-size:10px;border-radius:5px;border:1px solid var(--brd);background:var(--sur);color:var(--txt2);cursor:pointer;font-family:inherit;">Mezocykl</button>
+            <button onclick="dpSelType('micro')" id="dp-t-micro" style="flex:1;padding:5px 3px;font-size:10px;border-radius:5px;border:1px solid var(--brd);background:var(--sur);color:var(--txt2);cursor:pointer;font-family:inherit;">Mikrocykl</button>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;"><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Drużyna (opcjonalnie)</label><select class="fsel" id="dp-f-team" style="font-size:12px;padding:6px 8px;"><option value="">Cała akademia</option></select></div>
+        <div style="margin-bottom:8px;"><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Nazwa okresu *</label><input class="fi" id="dp-f-name" placeholder="np. Przygotowanie ogólne" style="font-size:12px;padding:6px 8px;"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+          <div><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Od *</label><input class="fi" id="dp-f-start" type="date" style="font-size:12px;padding:6px 8px;"/></div>
+          <div><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Do *</label><input class="fi" id="dp-f-end" type="date" style="font-size:12px;padding:6px 8px;"/></div>
+        </div>
+        <div style="margin-bottom:8px;"><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Faza gry</label><select class="fsel" id="dp-f-faza" onchange="dpUpdateTematy()" style="font-size:12px;padding:6px 8px;"><option value="">— wybierz fazę —</option><option>Atakowanie</option><option>Bronienie</option><option>Umiejętności</option><option>Motoryka</option></select></div>
+        <div style="margin-bottom:8px;"><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Temat</label><select class="fsel" id="dp-f-temat" onchange="dpUpdateKoncepty()" style="font-size:12px;padding:6px 8px;" disabled><option value="">— najpierw wybierz fazę —</option></select></div>
+        <div style="margin-bottom:10px;"><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Koncept</label><select class="fsel" id="dp-f-koncept" style="font-size:12px;padding:6px 8px;" disabled><option value="">— najpierw wybierz temat —</option></select></div>
+        <div style="margin-bottom:10px;"><label style="display:block;font-size:10px;font-weight:600;color:var(--txt2);margin-bottom:3px;">Opis / Cel okresu</label><textarea class="fta" id="dp-f-desc" style="min-height:52px;font-size:12px;" placeholder="Główny cel, założenia pracy..."></textarea></div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn" onclick="dpCancelEdit()" id="dp-cancel-btn" style="display:none;flex:1;font-size:12px;">Anuluj</button>
+          <button class="btn pri" onclick="dpSavePeriod()" style="flex:1;font-size:12px;"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2;"><path d="M3 8l4 4 6-7"/></svg>Zapisz</button>
+        </div>
+        <div style="margin-top:6px;font-size:10px;color:var(--txt3);text-align:center;">✓ Synchronizowane z panelem trenera</div>
+      </div>
     </div>
-    <div id="dir-plan-gantt"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px;" id="dir-plan-cards"></div>
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+      <div style="background:var(--sur2);border-bottom:1px solid var(--brd);padding:5px 12px;display:flex;gap:14px;align-items:center;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);"><div style="width:12px;height:8px;border-radius:2px;background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);"><div style="width:12px;height:8px;border-radius:2px;background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--txt2);"><div style="width:12px;height:8px;border-radius:2px;background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div>
+        <div style="margin-left:auto;font-size:10px;color:var(--txt3);" id="dp-count-lbl">0 okresów</div>
+      </div>
+      <div style="flex:1;overflow:auto;" id="dp-main-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIR: TOP TALENT + PODGLĄD SKŁADU -->
+<div id="pg-dir-talent" class="pg" style="overflow:hidden;">
+  <div class="tb">
+    <div><div class="t1">Top Talent</div><div class="t2" id="dir-talent-sub">Zawodnicy z wysokim potencjałem</div></div>
+    <div class="tb-r">
+      <select class="fsel-sm" id="tt-f-pos" onchange="rDirTalent()" style="min-width:130px;">
+        <option value="">Wszystkie pozycje</option>
+        <option>GK</option><option>LO</option><option>ŚO</option><option>PO</option>
+        <option>LW</option><option>PW</option>
+        <option>DP</option><option>ŚP</option><option>OP</option><option>LP</option><option>PP</option>
+        <option>LS</option><option>PS</option><option>N</option>
+      </select>
+      <select class="fsel-sm" id="tt-f-year" onchange="rDirTalent()" style="min-width:110px;"><option value="">Wszystkie roczniki</option></select>
+      <select class="fsel-sm" id="tt-f-team" onchange="rDirTalent()" style="min-width:130px;"><option value="">Wszystkie drużyny</option></select>
+      <select class="fsel-sm" id="tt-f-grade" onchange="rDirTalent()"><option value="">Ocena A+B</option><option value="A">Tylko A</option><option value="B">Tylko B</option></select>
+      <div class="formation-tabs" style="display:flex;gap:3px;">
+        <button id="tt-view-pitch" class="btn sm" onclick="setTTView('pitch')" style="background:var(--lg);color:var(--dg);border-color:#5DCAA5;">Boisko</button>
+        <button id="tt-view-list" class="btn sm" onclick="setTTView('list')">Lista</button>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <!-- Lewa kolumna — lista talentów -->
+    <div style="width:220px;flex-shrink:0;border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden;background:var(--sur2);">
+      <div style="padding:6px 10px;background:var(--sur2);border-bottom:1px solid var(--brd);font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">
+        Legenda potencjału
+      </div>
+      <div style="padding:8px 10px;border-bottom:1px solid var(--brd);flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:10px;color:var(--txt2);"><div style="width:10px;height:10px;border-radius:2px;background:#1D9E75;flex-shrink:0;"></div>Ocena A — wysoki potencjał</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:10px;color:var(--txt2);"><div style="width:10px;height:10px;border-radius:2px;background:#EF9F27;flex-shrink:0;"></div>Ocena B — dobry potencjał</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--txt2);"><div style="width:10px;height:10px;border-radius:2px;background:#E24B4A;flex-shrink:0;"></div>Ocena C — do obserwacji</div>
+      </div>
+      <div style="overflow-y:auto;flex:1;" id="tt-player-list"></div>
+    </div>
+    <!-- Prawa kolumna — boisko lub lista szczegółowa -->
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+      <!-- Nagłówek boiska z wyborem drużyny i formacji -->
+      <div style="padding:6px 12px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--sur);" id="tt-pitch-hdr">
+        <div style="font-size:11px;font-weight:600;color:var(--txt2);">Skład na boisku:</div>
+        <select class="fsel-sm" id="tt-pitch-team" onchange="rTTPitch()" style="min-width:140px;"><option value="">Wybierz drużynę...</option></select>
+        <select class="fsel-sm" id="tt-formation" onchange="rTTPitch()" style="min-width:100px;">
+          <optgroup label="Piłka 11-osobowa">
+            <option>4-3-3</option><option>4-2-3-1</option><option>4-4-2</option>
+            <option>4-1-4-1</option><option>4-1-2-1-2</option><option>4-3-1-2</option>
+            <option>4-1-3-2</option><option>4-3-2-1</option>
+            <option>3-5-2</option><option>3-4-3</option><option>3-1-4-2</option><option>3-4-2-1</option>
+          </optgroup>
+          <optgroup label="Piłka 9-osobowa">
+            <option>4-3-1</option><option>3-4-1</option><option>3-2-3</option>
+          </optgroup>
+          <optgroup label="Piłka 7-osobowa">
+            <option>2-3-1</option><option>3-2-1</option><option>3-1-2</option>
+          </optgroup>
+        </select>
+        <div style="margin-left:auto;font-size:10px;color:var(--txt3);">Zawodnicy z oceną A/B przypisani do pozycji automatycznie</div>
+      </div>
+      <div style="flex:1;overflow:auto;" id="tt-main"></div>
+    </div>
   </div>
 </div>
 
@@ -1041,7 +1146,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </select>
       <select class="fsel-sm" id="dir-ioz-ff-pos" onchange="rDirIOZ()">
         <option value="">Wszystkie pozycje</option>
-        <option>Bramkarz</option><option>Obrońca</option><option>Pomocnik</option><option>Napastnik</option>
+        <option>GK</option><option>LO</option><option>ŚO</option><option>PO</option>
+        <option>LW</option><option>PW</option>
+        <option>DP</option><option>ŚP</option><option>OP</option><option>LP</option><option>PP</option>
+        <option>LS</option><option>PS</option><option>N</option>
       </select>
       <input class="fi" id="dir-ioz-search" placeholder="Szukaj zawodnika..." oninput="rDirIOZ()" style="width:180px;padding:5px 10px;font-size:12px;"/>
     </div>
@@ -1501,11 +1609,11 @@ function rCL(){
 
 function sT(t){sCT=t;document.querySelectorAll('.pho').forEach(o=>{o.className='pho';if(o.dataset.t===t)o.classList.add(t==='macro'?'sm':t==='meso'?'se':'si');});}
 function oAC(t){sT(t||'macro');['mc-n','mc-d'].forEach(id=>document.getElementById(id).value='');aKL=[];rKT('mc-kt',aKL,false);document.getElementById('mc-ki').value='';if(!t){document.getElementById('mc-s').value='';document.getElementById('mc-e').value='';}oM('mo-cyc');}
-function sC(){var name=document.getElementById('mc-n').value.trim();if(!name){ST('Podaj nazwę okresu');return;}var s=document.getElementById('mc-s').value,e=document.getElementById('mc-e').value;if(!s||!e){ST('Podaj daty');return;}if(s>e){ST('Data końca musi być po dacie początku');return;}CYC.push({type:sCT,name,start:s,end:e,desc:document.getElementById('mc-d').value,koncepty:[...aKL]});cM('mo-cyc');rG();ST('"'+name+'" dodano do planu');}
+function sC(){var name=document.getElementById('mc-n').value.trim();if(!name){ST('Podaj nazwę okresu');return;}var s=document.getElementById('mc-s').value,e=document.getElementById('mc-e').value;if(!s||!e){ST('Podaj daty');return;}if(s>e){ST('Data końca musi być po dacie początku');return;}CYC.push({type:sCT,name,start:s,end:e,desc:document.getElementById('mc-d').value,koncepty:[...aKL]});saveLS();cM('mo-cyc');rG();if(document.getElementById('dir-plan-gantt'))rDirPlan();ST('"'+name+'" dodano do planu');}
 function oVC(idx){var c=CYC[idx];var tpn=['macro','meso','micro'],tpl=['Makrocykl','Mezocykl','Mikrocykl'];var bg=c.type==='macro'?'#E6F1FB':c.type==='meso'?'#EEEDFE':'#E1F5EE';var tc=c.type==='macro'?'#0C447C':c.type==='meso'?'#3C3489':'#085041';document.getElementById('mvc-t').innerHTML='<span class="bdg" style="background:'+bg+';color:'+tc+';">'+tpl[tpn.indexOf(c.type)]+'</span> '+c.name;document.getElementById('mvc-eb').onclick=function(){cM('mo-vc');oEC(idx);};var b='<div class="v2"><div class="vf"><div class="vl">Rozpoczęcie</div><div class="vv">'+fd(c.start)+'</div></div><div class="vf"><div class="vl">Zakończenie</div><div class="vv">'+fd(c.end)+'</div></div></div>';if(c.desc)b+='<div class="vf"><div class="vl">Opis / Cel / Temat</div><div class="vv">'+c.desc.replace(/\n/g,'<br>')+'</div></div>';if(c.koncepty&&c.koncepty.length)b+='<div class="vf"><div class="vl">Koncepty</div><div style="display:flex;gap:5px;flex-wrap:wrap;">'+c.koncepty.map(k=>'<span class="ktag">'+k+'</span>').join('')+'</div></div>';document.getElementById('mvc-b').innerHTML=b;oM('mo-vc');}
 function oEC(idx){eCYI=idx;var c=CYC[idx];document.getElementById('mec-ttl').textContent='Edytuj: '+c.name;document.getElementById('mec-n').value=c.name;document.getElementById('mec-s').value=c.start;document.getElementById('mec-e').value=c.end;document.getElementById('mec-d').value=c.desc||'';document.getElementById('mec-ki').value='';eKL=[...(c.koncepty||[])];rKT('mec-kt',eKL,true);oM('mo-ec');}
 function uC(){if(eCYI===null)return;var name=document.getElementById('mec-n').value.trim();if(!name){ST('Podaj nazwę');return;}var c=CYC[eCYI];c.name=name;c.start=document.getElementById('mec-s').value;c.end=document.getElementById('mec-e').value;c.desc=document.getElementById('mec-d').value;c.koncepty=[...eKL];cM('mo-ec');rG();ST('"'+name+'" zaktualizowany');}
-function dC(idx){if(!confirm('Usunąć "'+CYC[idx].name+'"?'))return;var n=CYC[idx].name;CYC.splice(idx,1);rG();ST('"'+n+'" usunięty');}
+function dC(idx){if(!confirm('Usunąć "'+CYC[idx].name+'"?'))return;var n=CYC[idx].name;CYC.splice(idx,1);saveLS();rG();if(document.getElementById('dir-plan-gantt'))rDirPlan();ST('"'+n+'" usunięty');}
 function dEC(){if(eCYI===null)return;if(!confirm('Usunąć "'+CYC[eCYI].name+'"?'))return;dC(eCYI);eCYI=null;cM('mo-ec');}
 function rKT(id,list,isEdit){var c=document.getElementById(id);if(!c)return;c.innerHTML=list.map((k,i)=>'<span class="ktag">'+k+'<button class="ktag-x" onclick="rmK('+i+','+isEdit+')">×</button></span>').join('');}
 function aK(){var inp=document.getElementById('mc-ki');var v=(inp.value||'').trim();if(!v)return;aKL.push(v);inp.value='';rKT('mc-kt',aKL,false);}
@@ -1858,7 +1966,7 @@ function RE(){
   var lbl=document.getElementById('ex-lbl');if(lbl)lbl.textContent=EXS.length+' ćwiczeń'+(fil.length!==EXS.length?' ('+fil.length+' wyników)':'');
   var g=document.getElementById('ex-grid');var oe=document.getElementById('eex');if(oe)oe.remove();
   if(!fil.length){g.innerHTML='';g.insertAdjacentHTML('beforebegin','<div id="eex" class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(EXS.length?'Brak wyników':'Baza ćwiczeń jest pusta')+'</div><div style="font-size:12px;color:var(--txt2);">'+(EXS.length?'Zmień kryteria wyszukiwania.':'Kliknij "+ Dodaj ćwiczenie" aby zacząć.')+'</div></div>');return;}
-  g.innerHTML=fil.map(e=>{var idx=EXS.indexOf(e),c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'},ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div class="ec" onclick="oVE('+idx+')">'+(e.img?'<img src="'+e.img+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')+'<div class="en">'+e.n+'</div><div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div><div class="ed">'+(e.o||'Brak opisu')+'</div><div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div></div>';}).join('');
+  g.innerHTML=fil.map(e=>{var idx=EXS.indexOf(e),c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'},ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div class="ec" onclick="oVE('+idx+')">'+((e.img||e.imgUrl)?'<img src="'+(e.img||e.imgUrl)+'" alt="'+e.n+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;" onerror="this.style.display=\"none\"">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')+'<div class="en">'+e.n+'</div><div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div><div class="ed">'+(e.o||'Brak opisu')+'</div><div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div></div>';}).join('');
 }
 
 function oAE(){EI=null;IMG=null;IMN=null;rEF({},true);oM('mo-ex');}
@@ -1875,6 +1983,7 @@ function rEF(e,isNew){
   var b='<div class="sh">Identyfikacja</div>';
   b+='<div class="fr"><label class="fl">Nazwa ćwiczenia *</label><input class="fi" id="ef-n" value="'+(e.n||'')+'" placeholder="np. Rondo 5v2"/></div>';
   b+='<div class="fr"><label class="fl">Link do wideo</label><input class="fi" id="ef-v" value="'+(e.lv||'')+'" placeholder="https://youtube.com/..."/></div>';
+  b+='<div class="fr"><label class="fl">Link do grafiki (URL)</label><input class="fi" id="ef-imgurl" value="'+(e.imgUrl||'')+'" placeholder="https://serwer.pl/schemat.png"/><div style="font-size:10px;color:var(--txt3);margin-top:3px;">Wklej URL do obrazka (JPG, PNG, GIF) — alternatywa dla wgranego zdjęcia</div></div>';
 
   // ── GRAFIKA ──
   b+='<div class="sh">Grafika ćwiczenia</div>';
@@ -1922,7 +2031,14 @@ function rEV(e,idx){
   document.getElementById('mo-ex-t').textContent=e.n;
   document.getElementById('ex-eb').innerHTML='<button class="btn sm" onclick="oEE('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>';
   var b='';
-  if(e.img)b+='<img src="'+e.img+'" style="width:100%;max-height:180px;object-fit:cover;border-radius:var(--r2);margin-bottom:14px;">';
+  // Grafika — najpierw base64 (wgrana ręcznie), potem URL z importu
+  var imgSrc = e.img || e.imgUrl || null;
+  if(imgSrc){
+    b+='<div style="position:relative;margin-bottom:14px;">';
+    b+='<img src="'+escH(imgSrc)+'" alt="'+escH(e.imn||e.n)+'" style="width:100%;max-height:220px;object-fit:cover;border-radius:var(--r2);" onerror="this.style.display=\'none\'">';
+    if(e.imn)b+='<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);color:#fff;font-size:10px;padding:4px 8px;border-radius:0 0 var(--r2) var(--r2);">'+escH(e.imn)+'</div>';
+    b+='</div>';
+  }
   b+='<div class="vf"><div class="vl">Faza / Temat / Koncept</div><div class="vbr">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.t+'</span>':'')+(e.k?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.k+'</span>':'')+'</div></div>';
   b+='<div class="v2"><div class="vf"><div class="vl">Intensywność</div>'+(ic2?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'<div class="vv m">Nie podano</div>')+'</div><div class="vf"><div class="vl">Kategorie wiekowe</div><div class="vv">'+(e.km||'—')+(e.kx&&e.kx!==e.km?' – '+e.kx:'')+'</div></div></div>';
   b+='<div class="v3"><div class="vf"><div class="vl">Czas</div><div class="vv">'+(e.cz?e.cz+' min':'—')+'</div></div><div class="vf"><div class="vl">Przestrzeń</div><div class="vv '+(e.p?'':'m')+'">'+(e.p||'Nie podano')+'</div></div><div class="vf"><div class="vl">Sprzęt</div><div class="vv '+(e.sp?'':'m')+'">'+(e.sp||'Nie podano')+'</div></div></div>';
@@ -1944,7 +2060,7 @@ function rEV(e,idx){
 
 function MFC(){var fa=document.getElementById('ef-f').value;var ts=document.getElementById('ef-t'),ks=document.getElementById('ef-k');ts.innerHTML='<option value="">'+(fa?'— wybierz —':'— wybierz fazę —')+'</option>';ts.disabled=!fa;ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=true;if(fa)GT(fa).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});}
 function MTC(){var fa=document.getElementById('ef-f').value,tm=document.getElementById('ef-t').value;var ks=document.getElementById('ef-k');ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=!tm;if(tm)GK(fa,tm).forEach(k=>{var o=document.createElement('option');o.textContent=k;ks.appendChild(o);});}
-function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();uD();}
+function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',imgUrl:(document.getElementById('ef-imgurl')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();uD();}
 function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();uD();ST('"'+n+'" usunięte');}
 function HFS(e){
   var f=e.target.files[0];
@@ -3519,7 +3635,7 @@ function refreshCurrentPage(){
     'pg-tests':'tests',
     'pg-gamemodel':'gamemodel',  // moduł trenerski — tylko podgląd
     'pg-dir-dash':'dir-dash','pg-dir-coaches':'dir-coaches',
-    'pg-dir-cal':'dir-cal','pg-dir-overview':'dir-overview',
+    'pg-dir-cal':'dir-cal','pg-dir-overview':'dir-overview','pg-dir-talent':'dir-talent',
     'pg-dir-plan':'dir-plan','pg-dir-ioz':'dir-ioz',
     'pg-dir-academy':'dir-academy','pg-dir-skauting':'dir-skauting',
     'pg-dir-finanse':'dir-finanse','pg-dir-gamemodel':'dir-gamemodel'
@@ -3569,6 +3685,44 @@ function getDefaultCoaches(){return [
 ];}
 
 function genId(){return 't-'+Date.now();}
+
+function oTeamSquad(teamName){
+  // Pobierz lub stwórz modal
+  var mo=document.getElementById('mo-team-squad');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-team-squad';
+    mo.innerHTML='<div class="mbox wide" style="width:900px;max-width:98%;max-height:96vh;display:flex;flex-direction:column;">'
+      +'<div class="mh"><div id="mo-ts-title" style="font-size:14px;font-weight:600;"></div>'
+      +'<button class="mc2" onclick="cM(\'mo-team-squad\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
+      +'<div style="padding:8px 16px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px;flex-shrink:0;">'
+      +'<div style="font-size:11px;color:var(--txt2);">Formacja:</div>'
+      +'<select id="mo-ts-formation" style="padding:4px 8px;border:1px solid var(--brd);border-radius:5px;font-size:12px;background:var(--sur);color:var(--txt);" onchange="refreshTeamSquadModal()">'
+      +'<optgroup label="Piłka 11-osobowa"><option>4-3-3</option><option>4-2-3-1</option><option>4-4-2</option><option>4-1-4-1</option><option>4-1-2-1-2</option><option>4-3-1-2</option><option>4-1-3-2</option><option>4-3-2-1</option><option>3-5-2</option><option>3-4-3</option><option>3-1-4-2</option><option>3-4-2-1</option></optgroup>'
+      +'<optgroup label="Piłka 9-osobowa"><option>4-3-1</option><option>3-4-1</option><option>3-2-3</option></optgroup>'
+      +'<optgroup label="Piłka 7-osobowa"><option>2-3-1</option><option>3-2-1</option><option>3-1-2</option></optgroup>'
+      +'</select>'
+      +'<div style="margin-left:auto;font-size:10px;color:var(--txt3);">Kliknij zawodnika aby otworzyć jego kartę</div>'
+      +'</div>'
+      +'<div id="mo-ts-body" style="flex:1;overflow:auto;min-height:350px;"></div>'
+      +'<div class="mf"><button class="btn" onclick="cM(\'mo-team-squad\')">Zamknij</button></div>'
+      +'</div>';
+    mo.addEventListener('click',function(e){if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+
+  mo.dataset.teamName=teamName;
+  document.getElementById('mo-ts-title').textContent='Najlepszy skład — '+teamName;
+  refreshTeamSquadModal();
+  oM('mo-team-squad');
+}
+
+function refreshTeamSquadModal(){
+  var mo=document.getElementById('mo-team-squad');if(!mo)return;
+  var teamName=mo.dataset.teamName||'';
+  var formation=(document.getElementById('mo-ts-formation')||{}).value||'4-3-3';
+  var body=document.getElementById('mo-ts-body');if(!body)return;
+  body.innerHTML=renderSquadPitch(teamName, formation);
+}
 
 function rTeams(){
   var body=document.getElementById('t-body');
@@ -3628,7 +3782,8 @@ function rTeams(){
       if(t.notes) html+='<div style="font-size:11px;color:var(--txt3);margin-top:2px;font-style:italic;">'+t.notes+'</div>';
       html+='</div>';
       html+='<div style="display:flex;gap:6px;flex-shrink:0;">';
-      html+='<button class="btn sm" onclick="oViewTeam(\''+t.id+'\')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>Podgląd</button>';
+      html+='<button class="btn sm" onclick="oViewTeam(\''+t.id+'\')" style="display:flex;align-items:center;gap:4px;"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>Podgląd</button>';
+      html+='<button class="btn sm" onclick="oTeamSquad(\''+escH(t.name)+'\')" style="display:flex;align-items:center;gap:4px;background:#1565C0;color:#fff;border-color:#1565C0;"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:#fff;fill:none;stroke-width:1.8;"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M12 6l2 2-2 2"/></svg>Skład</button>';
       if(isDir2){
         html+='<button class="btn sm" onclick="oEditTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-9 9H2v-3L11 2z"/></svg>Edytuj</button>';
         html+='<button class="btn sm dan" onclick="delTeam('+idx+')"><svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9"/></svg></button>';
@@ -4027,7 +4182,7 @@ function renderPlayerForm(p){
 
   var html='<div class="sh">Dane podstawowe</div>';
   html+='<div class="fr2"><div><label class="fl">Imię i nazwisko *</label><input class="fi" id="pl-name" value="'+(p.name||'')+'" placeholder="np. Jan Kowalski"/></div><div><label class="fl">Data urodzenia *</label><input class="fi" id="pl-dob" type="date" value="'+(p.dob||'')+'"/></div></div>';
-  html+='<div class="fr2"><div><label class="fl">Drużyna</label><select class="fsel" id="pl-team">'+teamOpts+'</select></div><div><label class="fl">Pozycja</label><input class="fi" id="pl-pos" value="'+(p.position||'')+'" placeholder="np. Środkowy pomocnik"/></div></div>';
+  html+='<div class="fr2"><div><label class="fl">Drużyna</label><select class="fsel" id="pl-team">'+teamOpts+'</select></div><div><label class="fl">Pozycja</label><select class="fsel" id="pl-pos"><option value="">— wybierz —</option><optgroup label="Obrona"><option value="GK"'+(p.position==='GK'?' selected':'')+'>GK – Bramkarz</option><option value="LO"'+(p.position==='LO'?' selected':'')+'>LO – Lewy obrońca</option><option value="ŚO"'+(p.position==='ŚO'?' selected':'')+'>ŚO – Środkowy obrońca</option><option value="PO"'+(p.position==='PO'?' selected':'')+'>PO – Prawy obrońca</option><option value="LW"'+(p.position==='LW'?' selected':'')+'>LW – Lewowachadłowy</option><option value="PW"'+(p.position==='PW'?' selected':'')+'>PW – Prawowachadłowy</option></optgroup><optgroup label="Pomocnicy"><option value="DP"'+(p.position==='DP'?' selected':'')+'>DP – Defensywny pomocnik</option><option value="ŚP"'+(p.position==='ŚP'?' selected':'')+'>ŚP – Środkowy pomocnik</option><option value="OP"'+(p.position==='OP'?' selected':'')+'>OP – Ofensywny pomocnik</option><option value="LP"'+(p.position==='LP'?' selected':'')+'>LP – Lewy pomocnik</option><option value="PP"'+(p.position==='PP'?' selected':'')+'>PP – Prawy pomocnik</option></optgroup><optgroup label="Atak"><option value="LS"'+(p.position==='LS'?' selected':'')+'>LS – Lewoskrzydłowy</option><option value="PS"'+(p.position==='PS'?' selected':'')+'>PS – Prawoskrzydłowy</option><option value="N"'+(p.position==='N'?' selected':'')+'>N – Napastnik</option></optgroup></select></div></div>';
   html+='<div class="sh">Notatki zdrowotne</div>';
   html+='<div class="fr"><textarea class="fta" id="pl-health" style="min-height:80px;" placeholder="Np. alergie, przebyte kontuzje, ograniczenia zdrowotne, leki, zalecenia lekarskie...">'+(p.healthNotes||'')+'</textarea></div>';
 
@@ -6249,56 +6404,72 @@ function coachHasProfile(coachId){return !!COACH_PROFILES.find(p=>p.coachId===co
 // ── WIDOK DIR: PRZEGLĄD ──
 // ── Planowanie dyrektora (readonly) ──
 function rDirPlan(){
-  // Aktualizuj etykiety roku
   var lbl=document.getElementById('dir-yr-l');
   if(lbl)lbl.textContent=cY+'/'+(String(cY+1).slice(2));
   var sub=document.getElementById('dir-plan-sub');
   if(sub)sub.textContent='Sezon '+cY+'/'+(String(cY+1).slice(2));
-  // Wyrenderuj Gantt (używa tej samej funkcji rG ale inna strona)
+
   var ganttEl=document.getElementById('dir-plan-gantt');
-  if(!ganttEl)return;
-  // Tymczasowo podmień cel renderowania i wyrenderuj
-  var origEl=document.getElementById('gantt-wrap');
-  // Renderuj uproszczony widok cykli
-  if(!CYC.length){
-    ganttEl.innerHTML='<div class="empty"><div style="font-size:14px;font-weight:600;margin-bottom:6px;">Brak zaplanowanych cykli</div><div style="font-size:12px;color:var(--txt2);">Trenerzy mogą dodawać cykle w panelu trenera → Planowanie.</div></div>';
-  } else {
-    // Renderuj tabelę Gantt tylko do odczytu
-    var MONTHS=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
-    var html='<div style="overflow-x:auto;"><table style="border-collapse:collapse;min-width:600px;font-size:11px;width:100%;">';
-    html+='<thead><tr><th style="text-align:left;padding:5px 10px;background:var(--sur2);border:1px solid var(--brd);min-width:120px;">Cykl</th>';
-    MONTHS.forEach(m=>html+='<th style="padding:4px 2px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:36px;">'+m+'</th>');
-    html+='</tr></thead><tbody>';
-    var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':' var(--lg)'};
-    var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
-    var typeLabel={'macro':'Makrocykl','meso':'Mezocykl','micro':'Mikrocykl'};
-    CYC.filter(c=>c.year===cY).forEach((c,i)=>{
-      var bg=typeColors[c.type]||'var(--sur2)';
-      var bc=typeBorder[c.type]||'var(--brd)';
-      html+='<tr><td style="padding:5px 10px;border:1px solid var(--brd);font-weight:500;">'+escH(c.name)+'<div style="font-size:9px;color:var(--txt3);">'+typeLabel[c.type]+'</div></td>';
-      // Oblicz które miesiące
-      var startM=c.startM||0; var endM=c.endM||0;
-      MONTHS.forEach((m,mi)=>{
-        var inRange=(mi>=startM&&mi<=endM);
-        html+='<td style="padding:0;border:1px solid var(--brd);"><div style="height:24px;background:'+(inRange?bg:'transparent')+';border:'+(inRange?'1px solid '+bc:'none')+';border-radius:3px;margin:2px;"></div></td>';
+  if(ganttEl){
+    // Renderuj uproszczony Gantt dla dyrektora
+    var cycsYear=CYC.filter(c=>c.year===cY);
+    if(!cycsYear.length){
+      ganttEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--txt2);font-size:12px;">Brak zaplanowanych cykli na rok '+cY+'. Kliknij „Dodaj okres" aby rozpocząć planowanie.</div>';
+    } else {
+      var MONTHS=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
+      var html='<div style="overflow-x:auto;margin-bottom:8px;"><table style="border-collapse:collapse;min-width:500px;font-size:11px;width:100%;">';
+      html+='<thead><tr><th style="text-align:left;padding:5px 10px;background:var(--sur2);border:1px solid var(--brd);min-width:140px;">Cykl</th>';
+      MONTHS.forEach(m=>html+='<th style="padding:3px 2px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:32px;text-align:center;">'+m+'</th>');
+      html+='<th style="padding:3px 6px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:60px;text-align:center;">Akcja</th></tr></thead><tbody>';
+      var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':'var(--lg)'};
+      var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
+      var typeLabel={'macro':'Makro','meso':'Mezo','micro':'Mikro'};
+      cycsYear.forEach((c,i)=>{
+        var realIdx=CYC.indexOf(c);
+        var bg=typeColors[c.type]||'var(--sur2)';
+        var bc=typeBorder[c.type]||'var(--brd)';
+        html+='<tr><td style="padding:5px 8px;border:1px solid var(--brd);">';
+        html+='<div style="font-size:11px;font-weight:500;">'+escH(c.name)+'</div>';
+        html+='<div style="font-size:9px;color:var(--txt3);">'+typeLabel[c.type]+'</div></td>';
+        MONTHS.forEach((m,mi)=>{
+          var inRange=(mi>=c.startM&&mi<=c.endM);
+          html+='<td style="padding:0;border:1px solid var(--brd);"><div style="height:22px;background:'+(inRange?bg:'transparent')+';'+(inRange?'border-left:2px solid '+bc+';':'')+'margin:1px;border-radius:2px;"></div></td>';
+        });
+        html+='<td style="padding:3px 4px;border:1px solid var(--brd);text-align:center;">';
+        html+='<button onclick="oEC('+realIdx+')" style="font-size:9px;background:var(--sur2);border:1px solid var(--brd);border-radius:3px;padding:2px 5px;cursor:pointer;margin-right:2px;">✎</button>';
+        html+='<button onclick="dC('+realIdx+')" style="font-size:9px;background:var(--lred);color:var(--red);border:1px solid #FECDD3;border-radius:3px;padding:2px 5px;cursor:pointer;">×</button>';
+        html+='</td></tr>';
       });
-      html+='</tr>';
-    });
-    html+='</tbody></table></div>';
-    ganttEl.innerHTML=html;
+      html+='</tbody></table></div>';
+      ganttEl.innerHTML=html;
+    }
   }
-  // Karty podsumowania
-  var cards=document.getElementById('dir-plan-cards');
-  if(cards){
-    var macros=CYC.filter(c=>c.type==='macro'&&c.year===cY);
-    var mesos=CYC.filter(c=>c.type==='meso'&&c.year===cY);
-    var micros=CYC.filter(c=>c.type==='micro'&&c.year===cY);
-    cards.innerHTML=[
-      {label:'Makrocykle',count:macros.length,bg:'#E6F1FB',tc:'#0C447C'},
-      {label:'Mezocykle',count:mesos.length,bg:'#EEEDFE',tc:'#3C3489'},
-      {label:'Mikrocykle',count:micros.length,bg:'var(--lg)',tc:'var(--dg)'}
-    ].map(s=>'<div style="background:'+s.bg+';border-radius:var(--r);padding:14px;text-align:center;"><div style="font-size:22px;font-weight:700;color:'+s.tc+';">'+s.count+'</div><div style="font-size:11px;color:'+s.tc+';">'+s.label+'</div></div>').join('');
-  }
+
+  // Karty cykli z listami
+  var types=['macro','meso','micro'];
+  types.forEach(function(type){
+    var cycs=CYC.filter(c=>c.year===cY&&c.type===type);
+    var cntEl=document.getElementById('dir-cnt-'+type);
+    var listEl=document.getElementById('dir-list-'+type);
+    if(cntEl)cntEl.textContent=cycs.length;
+    if(listEl){
+      listEl.innerHTML=cycs.map(function(c){
+        var idx=CYC.indexOf(c);
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--brd);font-size:11px;">'
+          +'<div><div style="font-weight:500;">'+escH(c.name)+'</div>'
+          +(c.startDate&&c.endDate?'<div style="font-size:10px;color:var(--txt3);">'+fd(c.startDate)+' – '+fd(c.endDate)+'</div>':'')
+          +'</div>'
+          +'<div style="display:flex;gap:4px;flex-shrink:0;">'
+          +'<button onclick="oEC('+idx+')" style="font-size:9px;background:var(--sur2);border:1px solid var(--brd);border-radius:3px;padding:2px 5px;cursor:pointer;">✎</button>'
+          +'<button onclick="dC('+idx+')" style="font-size:9px;background:var(--lred);color:var(--red);border:1px solid #FECDD3;border-radius:3px;padding:2px 5px;cursor:pointer;">×</button>'
+          +'</div></div>';
+      }).join('') || '<div style="font-size:11px;color:var(--txt3);padding:6px 0;">Brak</div>';
+    }
+  });
+
+  // Notatki
+  var notesEl=document.getElementById('dir-plan-notes');
+  if(notesEl&&CYC.planNotes!==undefined)notesEl.value=CYC.planNotes||'';
 }
 
 // ── Karty zawodników w module dyrektora ──
@@ -6595,6 +6766,1306 @@ function rDirOverview(){
 
   body.innerHTML=html;
 }
+
+// ═══════════════ PLANOWANIE DYREKTORA ═══════════════
+var dirPlanView='gantt'; // 'gantt' | 'cal' | 'list'
+var dirPlanCalMonth=TODAY.getMonth(), dirPlanCalYear=TODAY.getFullYear();
+
+function setDirPlanView(v){
+  dirPlanView=v;
+  ['gantt','cal','list'].forEach(function(x){
+    var btn=document.getElementById('dir-view-'+x);
+    if(btn){btn.style.background=x===v?'var(--lg)':'';btn.style.color=x===v?'var(--dg)':'';}
+  });
+  rDirPlan();
+}
+function dirPlanPrevY(){cY--;rYL();rDirPlan();}
+function dirPlanNextY(){cY++;rYL();rDirPlan();}
+
+function rDirPlan(){
+  var lbl=document.getElementById('dir-yr-l');
+  if(lbl)lbl.textContent=cY+'/'+(String(cY+1).slice(2));
+  var sub=document.getElementById('dir-plan-sub');
+  if(sub)sub.textContent='Sezon '+cY+'/'+(String(cY+1).slice(2));
+
+  // Aktualizuj filtr drużyn
+  var tSel=document.getElementById('dir-plan-team');
+  if(tSel){
+    var teams=TEAMS.filter(function(t){return t.season===currentSeason;}).map(function(t){return t.name;}).sort();
+    var prevT=tSel.value;
+    tSel.innerHTML='<option value="">Wszystkie drużyny</option>'+teams.map(function(t){return '<option value="'+escH(t)+'"'+(t===prevT?' selected':'')+'>'+escH(t)+'</option>';}).join('');
+  }
+  var fTeam=(document.getElementById('dir-plan-team')||{}).value||'';
+
+  var body=document.getElementById('dir-plan-body');
+  if(!body)return;
+
+  if(dirPlanView==='gantt')_renderDirGantt(body,fTeam);
+  else if(dirPlanView==='cal')_renderDirPlanCal(body,fTeam);
+  else _renderDirPlanList(body,fTeam);
+}
+
+// ── WIDOK GANTT ──
+function _renderDirGantt(body,fTeam){
+  var cycs=CYC.filter(function(c){
+    if(fTeam&&c.team&&c.team!==fTeam)return false;
+    return true;
+  });
+
+  var MONTHS=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
+  var html='<div style="padding:14px;">';
+
+  if(!cycs.length){
+    html+='<div style="text-align:center;padding:30px;color:var(--txt2);"><div style="font-size:32px;margin-bottom:10px;">📅</div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">Brak zaplanowanych cykli</div><div style="font-size:12px;margin-bottom:14px;">Kliknij „Dodaj okres" aby zaplanować makro, mezo lub mikrocykl.</div><button class="btn pri" onclick="oDirAC()">+ Dodaj pierwszy okres</button></div>';
+    body.innerHTML=html+'</div>';
+    return;
+  }
+
+  // Gantt table
+  html+='<div style="overflow-x:auto;margin-bottom:16px;">';
+  html+='<table style="border-collapse:collapse;font-size:11px;min-width:600px;width:100%;">';
+  html+='<thead><tr>';
+  html+='<th style="text-align:left;padding:6px 10px;background:#18181B;color:#fff;border:1px solid #333;min-width:160px;">Okres</th>';
+  html+='<th style="padding:4px 2px;background:#18181B;color:#fff;border:1px solid #333;font-size:9px;min-width:60px;">Drużyna</th>';
+  MONTHS.forEach(function(m){html+='<th style="padding:3px 2px;background:#18181B;color:#fff;border:1px solid #333;font-size:9px;min-width:30px;text-align:center;">'+m+'</th>';});
+  html+='<th style="padding:3px 4px;background:#18181B;color:#fff;border:1px solid #333;font-size:9px;min-width:58px;">Akcja</th>';
+  html+='</tr></thead><tbody>';
+
+  var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':'#E1F5EE'};
+  var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
+  var typeText={'macro':'Makrocykl','meso':'Mezocykl','micro':'Mikrocykl'};
+
+  cycs.forEach(function(c){
+    var realIdx=CYC.indexOf(c);
+    var bg=typeColors[c.type]||'var(--sur2)';
+    var bc=typeBorder[c.type]||'var(--brd)';
+    html+='<tr style="background:var(--sur);">';
+    html+='<td style="padding:6px 8px;border:1px solid var(--brd);"><div style="font-size:12px;font-weight:500;">'+escH(c.name)+'</div>';
+    html+='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;">';
+    html+='<span style="font-size:9px;background:'+bg+';color:'+bc+';padding:1px 5px;border-radius:8px;font-weight:600;">'+typeText[c.type]+'</span>';
+    if(c.txPhase)html+='<span style="font-size:9px;background:var(--sur2);color:var(--txt2);padding:1px 5px;border-radius:8px;">'+escH(c.txPhase)+'</span>';
+    if(c.txTopic)html+='<span style="font-size:9px;background:var(--sur2);color:var(--txt2);padding:1px 5px;border-radius:8px;">'+escH(c.txTopic)+'</span>';
+    html+='</div></td>';
+    html+='<td style="padding:4px 6px;border:1px solid var(--brd);font-size:10px;color:var(--txt2);">'+escH(c.team||'Wszyscy')+'</td>';
+    // Miesiące
+    MONTHS.forEach(function(m,mi){
+      var inRange=(mi>=c.startM&&mi<=c.endM);
+      html+='<td style="padding:0;border:1px solid var(--brd);"><div style="height:24px;background:'+(inRange?bg:'transparent')+';'+(inRange?'border-top:2px solid '+bc+';':'')+'margin:0;"></div></td>';
+    });
+    html+='<td style="padding:3px 4px;border:1px solid var(--brd);text-align:center;">';
+    html+='<button onclick="oDirVC('+realIdx+')" style="font-size:9px;background:#E6F1FB;color:#0C447C;border:1px solid #85B7EB;border-radius:3px;padding:2px 5px;cursor:pointer;margin-bottom:2px;display:block;width:100%;">👁 Podgląd</button>';
+    html+='<button onclick="oDirEC('+realIdx+')" style="font-size:9px;background:var(--sur2);border:1px solid var(--brd);border-radius:3px;padding:2px 5px;cursor:pointer;margin-bottom:2px;display:block;width:100%;">✎ Edytuj</button>';
+    html+='<button onclick="dC('+realIdx+')" style="font-size:9px;background:var(--lred);color:var(--red);border:1px solid #FECDD3;border-radius:3px;padding:2px 5px;cursor:pointer;display:block;width:100%;">× Usuń</button>';
+    html+='</td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  // Statystyki
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">';
+  ['macro','meso','micro'].forEach(function(tp){
+    var cnt=CYC.filter(function(c){return c.type===tp;}).length;
+    var bg=typeColors[tp];var bc=typeBorder[tp];
+    var lbl={'macro':'Makrocykle','meso':'Mezocykle','micro':'Mikrocykle'}[tp];
+    html+='<div style="background:'+bg+';border-radius:var(--r);padding:12px;text-align:center;border:1px solid '+bc+';">';
+    html+='<div style="font-size:22px;font-weight:700;color:'+bc+';">'+cnt+'</div>';
+    html+='<div style="font-size:11px;color:'+bc+';">'+lbl+'</div>';
+    html+='<button onclick="oDirAC(\''+tp+'\')" style="margin-top:6px;font-size:10px;background:rgba(255,255,255,.7);border:1px solid '+bc+';border-radius:5px;padding:3px 8px;cursor:pointer;color:'+bc+';">+ Dodaj</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  body.innerHTML=html+'</div>';
+}
+
+// ── WIDOK KALENDARZ ──
+function _renderDirPlanCal(body,fTeam){
+  var html='<div style="padding:14px;">';
+  // Nawigacja miesięcy
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">';
+  html+='<button class="btn sm" onclick="dirPlanCalPrev()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M10 4l-4 4 4 4"/></svg></button>';
+  html+='<div style="font-size:13px;font-weight:600;min-width:130px;text-align:center;">'+MONTH_NAMES[dirPlanCalMonth]+' '+dirPlanCalYear+'</div>';
+  html+='<button class="btn sm" onclick="dirPlanCalNext()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M6 4l4 4-4 4"/></svg></button>';
+  html+='</div>';
+
+  // Znajdź cykle aktywne w danym miesiącu
+  var monthStart=new Date(dirPlanCalYear,dirPlanCalMonth,1);
+  var monthEnd=new Date(dirPlanCalYear,dirPlanCalMonth+1,0);
+
+  var activeCycs=CYC.filter(function(c){
+    if(fTeam&&c.team&&c.team!==fTeam)return false;
+    if(!c.start||!c.end)return false;
+    var cs=new Date(c.start), ce=new Date(c.end);
+    return cs<=monthEnd&&ce>=monthStart;
+  });
+
+  // Siatka kalendarza
+  var firstDay=new Date(dirPlanCalYear,dirPlanCalMonth,1).getDay();
+  firstDay=(firstDay+6)%7;
+  var daysInMonth=new Date(dirPlanCalYear,dirPlanCalMonth+1,0).getDate();
+  var todayD=TODAY.getFullYear()===dirPlanCalYear&&TODAY.getMonth()===dirPlanCalMonth?TODAY.getDate():-1;
+  var DAY_NAMES=['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+
+  var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':'#E1F5EE'};
+  var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
+
+  html+='<div class="cfg">';
+  DAY_NAMES.forEach(function(d){html+='<div class="cdh">'+d+'</div>';});
+  for(var i=0;i<firstDay;i++)html+='<div class="cc2 other"></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var isToday=d===todayD;
+    var dayDate=new Date(dirPlanCalYear,dirPlanCalMonth,d);
+    // Cykle aktywne w tym dniu
+    var dayCycs=activeCycs.filter(function(c){
+      var cs=new Date(c.start),ce=new Date(c.end);
+      return dayDate>=cs&&dayDate<=ce;
+    });
+    html+='<div class="cc2'+(isToday?' today':'')+'" onclick="dirPlanDayClick(\''+dirPlanCalYear+'-'+String(dirPlanCalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')+'\')">';
+    html+='<div class="ccn'+(isToday?' today':'')+'">'+d+'</div>';
+    dayCycs.slice(0,3).forEach(function(c){
+      var bg=typeColors[c.type]||'var(--sur2)';
+      var bc=typeBorder[c.type]||'var(--brd)';
+      html+='<div style="font-size:8px;background:'+bg+';color:'+bc+';padding:1px 3px;border-radius:2px;margin:1px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-left:2px solid '+bc+';">'+escH(c.name)+'</div>';
+    });
+    if(dayCycs.length>3)html+='<div style="font-size:8px;color:var(--txt3);">+'+( dayCycs.length-3)+'</div>';
+    html+='</div>';
+  }
+  html+='</div>';
+
+  // Lista aktywnych cykli w miesiącu
+  if(activeCycs.length){
+    html+='<div style="margin-top:14px;"><div class="sh">Aktywne okresy — '+MONTH_NAMES[dirPlanCalMonth]+' '+dirPlanCalYear+'</div>';
+    activeCycs.forEach(function(c){
+      var realIdx=CYC.indexOf(c);
+      var bg=typeColors[c.type]||'var(--sur2)';
+      var bc=typeBorder[c.type]||'var(--brd)';
+      html+='<div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:'+bg+';border-radius:var(--r2);margin-bottom:8px;border-left:3px solid '+bc+';">';
+      html+='<div style="flex:1;">';
+      html+='<div style="font-size:13px;font-weight:600;margin-bottom:3px;">'+escH(c.name)+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);margin-bottom:4px;">'+fd(c.start)+' – '+fd(c.end)+(c.team?' · '+escH(c.team):'')+'</div>';
+      if(c.txPhase){
+        html+='<div style="display:flex;gap:4px;flex-wrap:wrap;">';
+        if(c.txPhase)html+='<span style="font-size:10px;background:rgba(255,255,255,.7);color:'+bc+';padding:1px 6px;border-radius:8px;font-weight:600;">'+escH(c.txPhase)+'</span>';
+        if(c.txTopic)html+='<span style="font-size:10px;background:rgba(255,255,255,.7);color:'+bc+';padding:1px 6px;border-radius:8px;">'+escH(c.txTopic)+'</span>';
+        if(c.txConcept)html+='<span style="font-size:10px;background:rgba(255,255,255,.7);color:'+bc+';padding:1px 6px;border-radius:8px;">'+escH(c.txConcept)+'</span>';
+        html+='</div>';
+      }
+      if(c.desc)html+='<div style="font-size:11px;color:var(--txt2);margin-top:4px;">'+escH(c.desc)+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;gap:5px;flex-shrink:0;">';
+      html+='<button onclick="oDirVC('+realIdx+')" class="btn sm">Podgląd</button>';
+      html+='<button onclick="oDirEC('+realIdx+')" class="btn sm">✎</button>';
+      html+='</div></div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div style="margin-top:14px;text-align:center;color:var(--txt2);font-size:12px;padding:20px;">Brak aktywnych cykli w '+MONTH_NAMES[dirPlanCalMonth]+' '+dirPlanCalYear+'.</div>';
+  }
+  body.innerHTML=html+'</div>';
+}
+
+function dirPlanCalPrev(){dirPlanCalMonth--;if(dirPlanCalMonth<0){dirPlanCalMonth=11;dirPlanCalYear--;}_renderDirPlanCal(document.getElementById('dir-plan-body'),(document.getElementById('dir-plan-team')||{}).value||'');}
+function dirPlanCalNext(){dirPlanCalMonth++;if(dirPlanCalMonth>11){dirPlanCalMonth=0;dirPlanCalYear++;}_renderDirPlanCal(document.getElementById('dir-plan-body'),(document.getElementById('dir-plan-team')||{}).value||'');}
+function dirPlanDayClick(dateStr){
+  var dayCycs=CYC.filter(function(c){return c.start<=dateStr&&c.end>=dateStr;});
+  if(!dayCycs.length){oDirAC();document.getElementById('dp-start').value=dateStr;document.getElementById('dp-end').value=dateStr;return;}
+  // Pokaż modal z listą cykli w tym dniu
+  var html=dayCycs.map(function(c){var idx=CYC.indexOf(c);return '<div style="padding:8px;background:var(--sur2);border-radius:var(--r2);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">'+escH(c.name)+'</div><div style="display:flex;gap:5px;"><button onclick="cM(\'mo-generic-info\');oDirVC('+idx+')" class="btn sm">Podgląd</button><button onclick="cM(\'mo-generic-info\');oDirEC('+idx+')" class="btn sm">✎</button></div></div>';}).join('');
+  var mo=document.getElementById('mo-generic-info');
+  if(!mo){mo=document.createElement('div');mo.className='mo';mo.id='mo-generic-info';mo.innerHTML='<div class="mbox"><div class="mh"><div class="mt2" id="mo-gi-ttl">Dzień</div><button class="mc2" onclick="cM(\'mo-generic-info\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-gi-body"></div><div class="mf"><button class="btn" onclick="cM(\'mo-generic-info\')">Zamknij</button><button class="btn pri" onclick="cM(\'mo-generic-info\');oDirAC()">+ Dodaj okres</button></div></div>';mo.addEventListener('click',function(e){if(e.target===mo)mo.classList.remove('op');});document.body.appendChild(mo);}
+  document.getElementById('mo-gi-ttl').textContent=fd(dateStr)+' — cykle ('+dayCycs.length+')';
+  document.getElementById('mo-gi-body').innerHTML=html;
+  oM('mo-generic-info');
+}
+
+// ── WIDOK LISTA ──
+function _renderDirPlanList(body,fTeam){
+  var cycs=CYC.filter(function(c){return !fTeam||!c.team||c.team===fTeam;}).sort(function(a,b){return (a.start||'').localeCompare(b.start||'');});
+  var html='<div style="padding:14px;">';
+  if(!cycs.length){html+='<div style="text-align:center;padding:30px;color:var(--txt2);">Brak cykli. Kliknij „Dodaj okres".</div>';body.innerHTML=html+'</div>';return;}
+  ['macro','meso','micro'].forEach(function(tp){
+    var items=cycs.filter(function(c){return c.type===tp;});
+    if(!items.length)return;
+    var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':'#E1F5EE'};
+    var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
+    var typeLabel={'macro':'Makrocykle','meso':'Mezocykle','micro':'Mikrocykle'};
+    html+='<div class="sh">'+typeLabel[tp]+' ('+items.length+')</div>';
+    items.forEach(function(c){
+      var realIdx=CYC.indexOf(c);
+      var bg=typeColors[c.type];var bc=typeBorder[c.type];
+      html+='<div style="border:1px solid var(--brd);border-left:3px solid '+bc+';border-radius:var(--r2);padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;">';
+      html+='<div style="flex:1;">';
+      html+='<div style="font-size:13px;font-weight:600;margin-bottom:3px;">'+escH(c.name)+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);margin-bottom:5px;">'+fd(c.start)+' – '+fd(c.end)+(c.team?' · <b>'+escH(c.team)+'</b>':'')+'</div>';
+      if(c.txPhase||c.txTopic||c.txConcept){
+        html+='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;">';
+        if(c.txPhase)html+='<span style="font-size:10px;background:'+bg+';color:'+bc+';padding:1px 7px;border-radius:8px;font-weight:600;">'+escH(c.txPhase)+'</span>';
+        if(c.txTopic)html+='<span style="font-size:10px;background:var(--sur2);color:var(--txt2);padding:1px 7px;border-radius:8px;">'+escH(c.txTopic)+'</span>';
+        if(c.txConcept)html+='<span style="font-size:10px;background:var(--sur2);color:var(--txt2);padding:1px 7px;border-radius:8px;">'+escH(c.txConcept)+'</span>';
+        html+='</div>';
+      }
+      if(c.txDetail)html+='<div style="font-size:11px;color:var(--txt2);border-left:2px solid '+bc+';padding-left:6px;margin-top:4px;">'+escH(c.txDetail)+'</div>';
+      if(c.koncepty&&c.koncepty.length)html+='<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px;">'+c.koncepty.map(function(k){return '<span class="ktag">'+escH(k)+'</span>';}).join('')+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">';
+      html+='<button onclick="oDirVC('+realIdx+')" class="btn sm">Podgląd</button>';
+      html+='<button onclick="oDirEC('+realIdx+')" class="btn sm">✎ Edytuj</button>';
+      html+='<button onclick="dC('+realIdx+')" class="btn sm dan">× Usuń</button>';
+      html+='</div></div>';
+    });
+  });
+  body.innerHTML=html+'</div>';
+}
+
+// ── FORMULARZ DODAWANIA (nowy z TX taksonomią) ──
+var _dirEditCycIdx=null;
+
+function oDirAC(type){
+  _dirEditCycIdx=null;
+  _openDirCycForm({type:type||'macro'});
+}
+function oDirEC(idx){
+  _dirEditCycIdx=idx;
+  _openDirCycForm(CYC[idx]);
+}
+function oDirVC(idx){
+  var c=CYC[idx];
+  var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':'#E1F5EE'};
+  var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
+  var typeLabel={'macro':'Makrocykl','meso':'Mezocykl','micro':'Mikrocykl'};
+  var bg=typeColors[c.type]||'var(--sur2)';
+  var bc=typeBorder[c.type]||'var(--brd)';
+  var mo=document.getElementById('mo-dir-vc');
+  if(!mo){mo=document.createElement('div');mo.className='mo';mo.id='mo-dir-vc';mo.innerHTML='<div class="mbox wide" style="width:580px;"><div class="mh"><div class="mt2" id="dvc-ttl"></div><button class="mc2" onclick="cM(\'mo-dir-vc\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="dvc-body"></div><div class="mfs"><button class="btn dan sm" id="dvc-del" onclick="_dirDelVC()">Usuń</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-dir-vc\')">Zamknij</button><button class="btn pri" id="dvc-edit" onclick="cM(\'mo-dir-vc\');oDirEC(0)">Edytuj</button></div></div></div>';mo.addEventListener('click',function(e){if(e.target===mo)mo.classList.remove('op');});document.body.appendChild(mo);}
+  document.getElementById('dvc-ttl').innerHTML='<span style="font-size:11px;background:'+bg+';color:'+bc+';padding:1px 7px;border-radius:8px;font-weight:600;margin-right:6px;">'+typeLabel[c.type]+'</span>'+escH(c.name);
+  document.getElementById('dvc-edit').onclick=function(){cM('mo-dir-vc');oDirEC(idx);};
+  document.getElementById('dvc-del').onclick=function(){if(confirm('Usunąć "'+c.name+'"?')){cM('mo-dir-vc');dC(idx);}};
+  var b='';
+  b+='<div class="fr2"><div class="vf"><div class="vl">Drużyna</div><div class="vv">'+escH(c.team||'Wszystkie drużyny')+'</div></div><div class="vf"><div class="vl">Okres</div><div class="vv">'+fd(c.start)+' – '+fd(c.end)+'</div></div></div>';
+  if(c.txPhase){b+='<div class="sh">Taksonomia treningowa</div>';b+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">';if(c.txPhase)b+='<span style="background:'+bg+';color:'+bc+';padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">'+escH(c.txPhase)+'</span>';if(c.txTopic)b+='<span style="background:var(--sur2);color:var(--txt2);padding:3px 10px;border-radius:20px;font-size:11px;">→ '+escH(c.txTopic)+'</span>';if(c.txConcept)b+='<span style="background:var(--sur2);color:var(--txt2);padding:3px 10px;border-radius:20px;font-size:11px;">→ '+escH(c.txConcept)+'</span>';b+='</div>';if(c.txDetail)b+='<div class="vf"><div class="vl">Szczegół</div><div class="vv" style="font-style:italic;">'+escH(c.txDetail)+'</div></div>';}
+  if(c.desc)b+='<div class="vf"><div class="vl">Opis / Cel</div><div class="vv">'+escH(c.desc).replace(/\n/g,'<br>')+'</div></div>';
+  if(c.koncepty&&c.koncepty.length)b+='<div class="vf"><div class="vl">Koncepty</div><div style="display:flex;gap:5px;flex-wrap:wrap;">'+c.koncepty.map(function(k){return '<span class="ktag">'+escH(k)+'</span>';}).join('')+'</div></div>';
+  document.getElementById('dvc-body').innerHTML=b||'<div style="color:var(--txt2);">Brak szczegółów.</div>';
+  oM('mo-dir-vc');
+}
+
+function _openDirCycForm(c){
+  var mo=document.getElementById('mo-dir-cyc');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-dir-cyc';
+    mo.innerHTML='<div class="mbox wide" style="width:620px;max-height:92vh;">'
+      +'<div class="mh"><div class="mt2" id="dp-ttl">Nowy okres</div><button class="mc2" onclick="cM(\'mo-dir-cyc\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
+      +'<div class="mbody" id="dp-body"></div>'
+      +'<div class="mfs"><button class="btn dan sm" id="dp-del" style="display:none;" onclick="_dirDelForm()">Usuń</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-dir-cyc\')">Anuluj</button><button class="btn pri" onclick="sDirC()">Zapisz okres</button></div></div>'
+      +'</div>';
+    mo.addEventListener('click',function(e){if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+  document.getElementById('dp-ttl').textContent=_dirEditCycIdx===null?'Nowy okres treningowy':'Edytuj: '+(c.name||'');
+  document.getElementById('dp-del').style.display=_dirEditCycIdx!==null?'':'none';
+
+  var teamOpts='<option value="">Wszystkie drużyny</option>'+TEAMS.filter(function(t){return t.season===currentSeason;}).map(function(t){return '<option value="'+escH(t.name)+'"'+(t.name===(c.team||'')?' selected':'')+'>'+escH(t.name)+'</option>';}).join('');
+
+  // Fazy TX
+  var txPhases=Object.keys(TX);
+  var phaseOpts='<option value="">— wybierz fazę —</option>'+txPhases.map(function(p){return '<option value="'+escH(p)+'"'+(p===(c.txPhase||'')?' selected':'')+'>'+escH(p)+'</option>';}).join('');
+
+  // Tematy TX (jeśli faza wybrana)
+  var topicOpts='<option value="">— najpierw wybierz fazę —</option>';
+  if(c.txPhase&&TX[c.txPhase]){
+    topicOpts='<option value="">— wybierz temat —</option>'+Object.keys(TX[c.txPhase]).map(function(t){return '<option value="'+escH(t)+'"'+(t===(c.txTopic||'')?' selected':'')+'>'+escH(t)+'</option>';}).join('');
+  }
+
+  // Koncepty TX
+  var conceptOpts='<option value="">— najpierw wybierz temat —</option>';
+  if(c.txPhase&&c.txTopic&&TX[c.txPhase]&&TX[c.txPhase][c.txTopic]){
+    conceptOpts='<option value="">— wybierz koncept —</option>'+TX[c.txPhase][c.txTopic].map(function(k){return '<option value="'+escH(k)+'"'+(k===(c.txConcept||'')?' selected':'')+'>'+escH(k)+'</option>';}).join('');
+  }
+
+  // Szczegóły konceptu
+  var detailOpts='<option value="">— najpierw wybierz koncept —</option>';
+  if(c.txConcept){
+    var details=getAllSzczegoly(c.txConcept);
+    if(details.length)detailOpts='<option value="">— wybierz szczegół —</option>'+details.map(function(d){return '<option value="'+escH(d)+'"'+(d===(c.txDetail||'')?' selected':'')+'>'+escH(d)+'</option>';}).join('');
+  }
+
+  var html='';
+  // Typ cyklu
+  html+='<div class="sh" style="margin-top:0;">Rodzaj i zakres</div>';
+  html+='<div class="fr2"><div><label class="fl">Typ okresu</label>';
+  html+='<div class="phs" id="dp-ph-sel">';
+  ['macro','meso','micro'].forEach(function(tp){
+    var lbl={'macro':'Makrocykl','meso':'Mezocykl','micro':'Mikrocykl'}[tp];
+    html+='<div class="pho'+(( c.type||'macro')===tp?' sm':'')+'" data-t="'+tp+'" onclick="sDirT(\''+tp+'\')">'+lbl+'</div>';
+  });
+  html+='</div></div>';
+  html+='<input type="hidden" id="dp-type" value="'+(c.type||'macro')+'">';
+  html+='<div><label class="fl">Drużyna</label><select class="fsel" id="dp-team">'+teamOpts+'</select></div></div>';
+
+  html+='<div class="fr"><label class="fl">Nazwa okresu *</label><input class="fi" id="dp-name" value="'+escH(c.name||'')+'" placeholder="np. Przygotowanie przedsezonowe"/></div>';
+  html+='<div class="fr2"><div><label class="fl">Rozpoczęcie *</label><input class="fi" id="dp-start" type="date" value="'+(c.start||'')+'"/></div>';
+  html+='<div><label class="fl">Zakończenie *</label><input class="fi" id="dp-end" type="date" value="'+(c.end||'')+'"/></div></div>';
+
+  // TX Taksonomia
+  html+='<div class="sh">Taksonomia treningowa <span style="font-weight:400;color:var(--txt3);">(opcjonalnie)</span></div>';
+  html+='<div class="fr"><label class="fl">Faza gry</label>';
+  html+='<select class="fsel" id="dp-phase" onchange="onDirPhaseChange()">' +phaseOpts+'</select></div>';
+  html+='<div class="fr"><label class="fl">Temat</label>';
+  html+='<select class="fsel" id="dp-topic" onchange="onDirTopicChange()" '+(c.txPhase?'':'disabled')+'>' +topicOpts+'</select></div>';
+  html+='<div class="fr"><label class="fl">Koncept</label>';
+  html+='<select class="fsel" id="dp-concept" onchange="onDirConceptChange()" '+( c.txTopic?'':'disabled')+'>' +conceptOpts+'</select></div>';
+  html+='<div class="fr"><label class="fl">Szczegół / Element techniczny</label>';
+  html+='<select class="fsel" id="dp-detail" '+(c.txConcept&&getAllSzczegoly(c.txConcept).length?'':'disabled')+'>' +detailOpts+'</select></div>';
+
+  // Opis i koncepty
+  html+='<div class="fr"><label class="fl">Opis / Cel okresu</label>';
+  html+='<textarea class="fta" id="dp-desc" style="min-height:60px;" placeholder="Główny cel i założenia tego okresu...">'+escH(c.desc||'')+'</textarea></div>';
+  html+='<div class="fr"><label class="fl">Dodatkowe koncepty</label>';
+  html+='<div class="ki"><input class="kinp" id="dp-ki" placeholder="Wpisz i naciśnij Enter..." onkeydown="if(event.key===\'Enter\'){event.preventDefault();addDirK();}"/><button class="kadd" onclick="addDirK()">+ Dodaj</button></div>';
+  html+='<div class="ktags" id="dp-kt"></div></div>';
+
+  document.getElementById('dp-body').innerHTML=html;
+
+  // Załaduj koncepty
+  window._dirKL=[...(c.koncepty||[])];
+  rKT('dp-kt',window._dirKL,false);
+  // Podmień rmK dla nowego formularza
+  document.getElementById('dp-kt').onclick=function(e){
+    var btn=e.target.closest('.ktag-x');
+    if(!btn)return;
+    var idx2=parseInt(btn.dataset.idx||'0');
+    window._dirKL.splice(idx2,1);
+    rDirKT();
+  };
+
+  oM('mo-dir-cyc');
+}
+
+function rDirKT(){
+  var c=document.getElementById('dp-kt');if(!c)return;
+  c.innerHTML=(window._dirKL||[]).map(function(k,i){return '<span class="ktag">'+escH(k)+'<button class="ktag-x" data-idx="'+i+'">×</button></span>';}).join('');
+}
+function addDirK(){
+  var inp=document.getElementById('dp-ki');var v=(inp.value||'').trim();if(!v)return;
+  window._dirKL=window._dirKL||[];window._dirKL.push(v);inp.value='';rDirKT();
+}
+
+function sDirT(t){
+  document.getElementById('dp-type').value=t;
+  document.querySelectorAll('#dp-ph-sel .pho').forEach(function(o){
+    o.className='pho'+(o.dataset.t===t?(' '+(t==='macro'?'sm':t==='meso'?'se':'si')):'');
+  });
+}
+
+function onDirPhaseChange(){
+  var phase=document.getElementById('dp-phase').value;
+  var topSel=document.getElementById('dp-topic');
+  var conSel=document.getElementById('dp-concept');
+  var detSel=document.getElementById('dp-detail');
+  topSel.innerHTML='<option value="">— wybierz temat —</option>';
+  if(phase&&TX[phase])Object.keys(TX[phase]).forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=t;topSel.appendChild(o);});
+  topSel.disabled=!phase;
+  conSel.innerHTML='<option value="">— najpierw wybierz temat —</option>';conSel.disabled=true;
+  detSel.innerHTML='<option value="">— najpierw wybierz koncept —</option>';detSel.disabled=true;
+}
+function onDirTopicChange(){
+  var phase=document.getElementById('dp-phase').value;
+  var topic=document.getElementById('dp-topic').value;
+  var conSel=document.getElementById('dp-concept');
+  var detSel=document.getElementById('dp-detail');
+  conSel.innerHTML='<option value="">— wybierz koncept —</option>';
+  if(phase&&topic&&TX[phase]&&TX[phase][topic])TX[phase][topic].forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=k;conSel.appendChild(o);});
+  conSel.disabled=!topic;
+  detSel.innerHTML='<option value="">— najpierw wybierz koncept —</option>';detSel.disabled=true;
+}
+function onDirConceptChange(){
+  var concept=document.getElementById('dp-concept').value;
+  var detSel=document.getElementById('dp-detail');
+  detSel.innerHTML='<option value="">— wybierz szczegół —</option>';
+  var details=concept?getAllSzczegoly(concept):[];
+  details.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;detSel.appendChild(o);});
+  detSel.disabled=!details.length;
+}
+
+function sDirC(){
+  var name=(document.getElementById('dp-name').value||'').trim();
+  if(!name){ST('Podaj nazwę okresu');return;}
+  var s=document.getElementById('dp-start').value;
+  var e=document.getElementById('dp-end').value;
+  if(!s||!e){ST('Podaj daty');return;}
+  if(s>e){ST('Data końca musi być po dacie początku');return;}
+
+  var type=document.getElementById('dp-type').value||'macro';
+  var team=document.getElementById('dp-team').value||'';
+  var txPhase=document.getElementById('dp-phase').value||'';
+  var txTopic=document.getElementById('dp-topic').value||'';
+  var txConcept=document.getElementById('dp-concept').value||'';
+  var txDetail=document.getElementById('dp-detail').value||'';
+  var desc=document.getElementById('dp-desc').value||'';
+
+  // Oblicz startM/endM dla Gantta (0=lip, 11=cze przy sezonie lip-cze)
+  var sDate=new Date(s), eDate=new Date(e);
+  var startM=((sDate.getMonth()-6+12)%12);
+  var endM=((eDate.getMonth()-6+12)%12);
+
+  var obj={
+    type,name,start:s,end:e,year:cY,
+    startM,endM,
+    team,txPhase,txTopic,txConcept,txDetail,
+    desc,koncepty:[...(window._dirKL||[])]
+  };
+
+  var isNew=_dirEditCycIdx===null;
+  if(isNew)CYC.push(obj);
+  else{Object.assign(CYC[_dirEditCycIdx],obj);}
+
+  saveLS();cM('mo-dir-cyc');
+  rG(); // odśwież Gantt w panelu trenera
+  rDirPlan(); // odśwież panel dyrektora
+  ST('"'+name+'" '+(isNew?'dodany':'zaktualizowany'));
+}
+
+function _dirDelForm(){
+  if(_dirEditCycIdx===null)return;
+  if(!confirm('Usunąć "'+CYC[_dirEditCycIdx].name+'"?'))return;
+  dC(_dirEditCycIdx);_dirEditCycIdx=null;cM('mo-dir-cyc');
+}
+function _dirDelVC(){
+  var idx=parseInt(document.getElementById('dvc-edit').dataset.idx||'-1');
+  if(idx<0)return;
+  if(!confirm('Usunąć ten okres?'))return;
+  dC(idx);cM('mo-dir-vc');
+}
+
+// ═══════════════ PLANOWANIE DYREKTORA ═══════════════
+var _dpYear = TODAY.getFullYear();
+var _dpCalYear = TODAY.getFullYear();
+var _dpCalMonth = TODAY.getMonth();
+var _dpView = 'gantt';   // 'gantt' | 'list'
+var _dpEditIdx = null;   // null = nowy, number = edytowany indeks w CYC
+var _dpType = 'macro';
+
+// Kolory per typ
+var DP_COLORS = {
+  macro: {bg:'#E6F1FB', bc:'#85B7EB', tc:'#0C447C'},
+  meso:  {bg:'#EEEDFE', bc:'#AFA9EC', tc:'#3C3489'},
+  micro: {bg:'var(--lg)', bc:'#5DCAA5', tc:'var(--dg)'}
+};
+var DP_LABELS = {macro:'Makrocykl', meso:'Mezocykl', micro:'Mikrocykl'};
+var DP_MONTHS_SHORT = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+var DP_MONTH_NAMES = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+
+function dpPrevY(){_dpYear--;rDirPlan();}
+function dpNextY(){_dpYear++;rDirPlan();}
+function dpCalPrev(){_dpCalMonth--;if(_dpCalMonth<0){_dpCalMonth=11;_dpCalYear--;}dpRenderCal();}
+function dpCalNext(){_dpCalMonth++;if(_dpCalMonth>11){_dpCalMonth=0;_dpCalYear++;}dpRenderCal();}
+function setDPView(v){
+  _dpView=v;
+  ['gantt','list'].forEach(function(k){
+    var btn=document.getElementById('dp-view-'+k);
+    if(btn){btn.style.background=k===v?'var(--lg)':'var(--sur)';btn.style.color=k===v?'var(--dg)':'var(--txt2)';btn.style.borderColor=k===v?'#5DCAA5':'var(--brd)';}
+  });
+  dpRenderMain();
+}
+
+function dpSelType(t){
+  _dpType=t;
+  var styles={
+    macro:{sel:'border:1px solid #85B7EB;background:#E6F1FB;color:#0C447C;font-weight:600;',unsel:'border:1px solid var(--brd);background:var(--sur);color:var(--txt2);'},
+    meso: {sel:'border:1px solid #AFA9EC;background:#EEEDFE;color:#3C3489;font-weight:600;',unsel:'border:1px solid var(--brd);background:var(--sur);color:var(--txt2);'},
+    micro:{sel:'border:1px solid #5DCAA5;background:var(--lg);color:var(--dg);font-weight:600;',unsel:'border:1px solid var(--brd);background:var(--sur);color:var(--txt2);'}
+  };
+  ['macro','meso','micro'].forEach(function(k){
+    var btn=document.getElementById('dp-t-'+k);
+    if(btn)btn.style.cssText='flex:1;padding:5px 3px;font-size:10px;border-radius:5px;cursor:pointer;font-family:inherit;'+(k===t?styles[t].sel:styles[k].unsel);
+  });
+}
+
+function dpUpdateTematy(){
+  var faza=(document.getElementById('dp-f-faza')||{}).value||'';
+  var tSel=document.getElementById('dp-f-temat');
+  var kSel=document.getElementById('dp-f-koncept');
+  if(!tSel||!kSel)return;
+  if(!faza||!TX[faza]){
+    tSel.innerHTML='<option value="">— najpierw wybierz fazę —</option>';
+    tSel.disabled=true;
+    kSel.innerHTML='<option value="">— najpierw wybierz temat —</option>';
+    kSel.disabled=true;
+    return;
+  }
+  var tematy=Object.keys(TX[faza]);
+  tSel.innerHTML='<option value="">— wybierz temat —</option>'+tematy.map(function(t){return '<option value="'+escH(t)+'">'+escH(t)+'</option>';}).join('');
+  tSel.disabled=false;
+  kSel.innerHTML='<option value="">— najpierw wybierz temat —</option>';
+  kSel.disabled=true;
+}
+
+function dpUpdateKoncepty(){
+  var faza=(document.getElementById('dp-f-faza')||{}).value||'';
+  var temat=(document.getElementById('dp-f-temat')||{}).value||'';
+  var kSel=document.getElementById('dp-f-koncept');
+  if(!kSel)return;
+  if(!faza||!temat||!TX[faza]||!TX[faza][temat]){
+    kSel.innerHTML='<option value="">— najpierw wybierz temat —</option>';
+    kSel.disabled=true;
+    return;
+  }
+  var koncepty=TX[faza][temat];
+  kSel.innerHTML='<option value="">— wybierz koncept (opcjonalnie) —</option>'+koncepty.map(function(k){return '<option value="'+escH(k)+'">'+escH(k)+'</option>';}).join('');
+  kSel.disabled=false;
+}
+
+function dpSavePeriod(){
+  var name=(document.getElementById('dp-f-name')||{}).value||'';
+  var start=(document.getElementById('dp-f-start')||{}).value||'';
+  var end=(document.getElementById('dp-f-end')||{}).value||'';
+  if(!name.trim()){ST('Podaj nazwę okresu');return;}
+  if(!start||!end){ST('Podaj daty początku i końca');return;}
+  if(start>end){ST('Data końca musi być po dacie początku');return;}
+
+  var team=(document.getElementById('dp-f-team')||{}).value||'';
+  var faza=(document.getElementById('dp-f-faza')||{}).value||'';
+  var temat=(document.getElementById('dp-f-temat')||{}).value||'';
+  var koncept=(document.getElementById('dp-f-koncept')||{}).value||'';
+  var desc=(document.getElementById('dp-f-desc')||{}).value||'';
+
+  // Oblicz rok i miesiące startowe/końcowe
+  var sDate=new Date(start), eDate=new Date(end);
+  var year=sDate.getFullYear();
+  // Miesiące w układzie sezonowym (lip=0...cze=11)
+  function toSeasonM(date){var m=date.getMonth();return m>=6?m-6:m+6;}
+  var startM=toSeasonM(sDate);
+  var endM=toSeasonM(eDate);
+
+  var period={
+    id:_dpEditIdx!==null?CYC[_dpEditIdx].id:genId(),
+    type:_dpType,
+    name:name.trim(),
+    team:team,
+    start:start, end:end,
+    year:year,
+    startM:startM, endM:endM,
+    faza:faza, temat:temat, koncept:koncept,
+    desc:desc
+  };
+
+  if(_dpEditIdx!==null){CYC[_dpEditIdx]=period;}
+  else{CYC.push(period);}
+  saveLS();
+  dpCancelEdit();
+  rDirPlan();
+  // Synchronizuj z panelem trenera
+  var planSub=document.getElementById('plan-sub');
+  if(planSub)rYL();
+  ST('"'+period.name+'" '+ (_dpEditIdx===null?'dodany':'zaktualizowany'));
+}
+
+function dpEditPeriod(idx){
+  var c=CYC[idx];if(!c)return;
+  _dpEditIdx=idx;
+  _dpType=c.type||'macro';
+  dpSelType(_dpType);
+  // Wypełnij formularz
+  var setVal=function(id,val){var el=document.getElementById(id);if(el)el.value=val||'';};
+  setVal('dp-f-name',c.name);
+  setVal('dp-f-start',c.start);
+  setVal('dp-f-end',c.end);
+  setVal('dp-f-desc',c.desc);
+  // Drużyna
+  var tSel=document.getElementById('dp-f-team');
+  if(tSel)tSel.value=c.team||'';
+  // Taksonomia - kaskadowo
+  var fSel=document.getElementById('dp-f-faza');
+  if(fSel){fSel.value=c.faza||'';dpUpdateTematy();}
+  setTimeout(function(){
+    var tSel2=document.getElementById('dp-f-temat');
+    if(tSel2&&c.temat){tSel2.value=c.temat;dpUpdateKoncepty();}
+    setTimeout(function(){
+      var kSel=document.getElementById('dp-f-koncept');
+      if(kSel&&c.koncept)kSel.value=c.koncept;
+    },50);
+  },50);
+  // Pokaż Anuluj
+  var cancelBtn=document.getElementById('dp-cancel-btn');
+  if(cancelBtn)cancelBtn.style.display='';
+  var saveBtn=document.getElementById('dp-save-btn');
+  if(saveBtn)saveBtn.innerHTML='<svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2;"><path d="M3 8l4 4 6-7"/></svg>Zaktualizuj';
+  // Scroll do formularza
+  var fw=document.getElementById('dp-form-wrap');
+  if(fw)fw.scrollTop=0;
+}
+
+function dpCancelEdit(){
+  _dpEditIdx=null;
+  ['dp-f-name','dp-f-desc'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['dp-f-start','dp-f-end'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var fSel=document.getElementById('dp-f-faza');if(fSel){fSel.value='';dpUpdateTematy();}
+  var tSel=document.getElementById('dp-f-team');if(tSel)tSel.value='';
+  dpSelType('macro');
+  var cancelBtn=document.getElementById('dp-cancel-btn');
+  if(cancelBtn)cancelBtn.style.display='none';
+  var saveBtn=document.getElementById('dp-save-btn');
+  if(saveBtn)saveBtn.innerHTML='<svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2;"><path d="M3 8l4 4 6-7"/></svg>Zapisz';
+}
+
+function dpDeletePeriod(idx){
+  if(!confirm('Usunąć okres "'+CYC[idx].name+'"?'))return;
+  var n=CYC[idx].name;
+  CYC.splice(idx,1);
+  if(_dpEditIdx===idx){dpCancelEdit();_dpEditIdx=null;}
+  saveLS();rDirPlan();rYL();
+  ST('"'+n+'" usunięty');
+}
+
+function dpRenderCal(){
+  var wrap=document.getElementById('dp-cal-wrap');
+  if(!wrap)return;
+  var lbl=document.getElementById('dp-cal-lbl');
+  if(lbl)lbl.textContent=DP_MONTH_NAMES[_dpCalMonth]+' '+_dpCalYear;
+
+  // Zbierz okresy w tym miesiącu
+  var periodsInMonth=CYC.filter(function(c){
+    if(!c.start||!c.end)return false;
+    var s=new Date(c.start),e=new Date(c.end);
+    var mStart=new Date(_dpCalYear,_dpCalMonth,1);
+    var mEnd=new Date(_dpCalYear,_dpCalMonth+1,0);
+    return s<=mEnd&&e>=mStart;
+  });
+
+  var firstDay=new Date(_dpCalYear,_dpCalMonth,1).getDay();
+  firstDay=(firstDay+6)%7;
+  var daysInMonth=new Date(_dpCalYear,_dpCalMonth+1,0).getDate();
+  var todayMark=TODAY.getFullYear()===_dpCalYear&&TODAY.getMonth()===_dpCalMonth?TODAY.getDate():-1;
+
+  var html='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--brd);border:1px solid var(--brd);border-radius:5px;overflow:hidden;font-size:9px;">';
+  ['P','W','Ś','C','P','S','N'].forEach(function(d){html+='<div style="background:var(--sur2);text-align:center;padding:3px 0;color:var(--txt3);font-weight:600;">'+d+'</div>';});
+  for(var i=0;i<firstDay;i++)html+='<div style="background:var(--sur);padding:3px;min-height:26px;"></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var isToday=d===todayMark;
+    var dayPeriods=periodsInMonth.filter(function(c){
+      var ds=new Date(c.start),de=new Date(c.end);
+      var thisDay=new Date(_dpCalYear,_dpCalMonth,d);
+      return thisDay>=ds&&thisDay<=de;
+    });
+    var dots=dayPeriods.map(function(c){
+      var col=DP_COLORS[c.type]||DP_COLORS.macro;
+      return '<div style="width:100%;height:3px;background:'+col.bc+';border-radius:1px;margin-top:1px;"></div>';
+    }).join('');
+    html+='<div style="background:'+(isToday?'#1D9E75':'var(--sur)')+';padding:2px;min-height:26px;cursor:pointer;text-align:center;" onclick="dpCalDayClick('+d+')">'
+      +'<div style="font-size:9px;font-weight:'+(isToday?700:400)+';color:'+(isToday?'#fff':'var(--txt)')+';">'+d+'</div>'
+      +dots
+      +'</div>';
+  }
+  html+='</div>';
+  wrap.innerHTML=html;
+}
+
+function dpCalDayClick(d){
+  var date=new Date(_dpCalYear,_dpCalMonth,d);
+  var dateStr=date.toISOString().slice(0,10);
+  // Ustaw daty w formularzu i scrolluj do formularza
+  var startEl=document.getElementById('dp-f-start');
+  var endEl=document.getElementById('dp-f-end');
+  if(startEl&&!startEl.value)startEl.value=dateStr;
+  else if(endEl&&!endEl.value&&startEl&&dateStr>=startEl.value)endEl.value=dateStr;
+  var fw=document.getElementById('dp-form-wrap');
+  if(fw)fw.scrollTo({top:fw.scrollHeight,behavior:'smooth'});
+}
+
+function dpRenderGantt(){
+  var body=document.getElementById('dp-main-body');if(!body)return;
+  var fTeam=(document.getElementById('dp-team-filter')||{}).value||'';
+  var cycsYear=CYC.filter(function(c){
+    if(!c.start)return false;
+    var y=new Date(c.start).getFullYear();
+    return y===_dpYear;
+  }).filter(function(c){
+    return !fTeam||c.team===fTeam||!c.team;
+  }).sort(function(a,b){return a.start<b.start?-1:1;});
+
+  var cntEl=document.getElementById('dp-count-lbl');
+  if(cntEl)cntEl.textContent=cycsYear.length+' '+(cycsYear.length===1?'okres':'okresów');
+
+  if(!cycsYear.length){
+    body.innerHTML='<div style="text-align:center;padding:40px;color:var(--txt2);"><div style="font-size:14px;font-weight:600;margin-bottom:8px;">Brak okresów na rok '+_dpYear+'</div><div style="font-size:12px;">Użyj formularza po lewej aby dodać pierwszy okres planowania.</div></div>';
+    return;
+  }
+
+  // Grupuj per drużyna (brak drużyny = "Cała akademia")
+  var groups={};
+  cycsYear.forEach(function(c){
+    var key=c.team||'__all__';
+    if(!groups[key])groups[key]=[];
+    groups[key].push(c);
+  });
+
+  var html='<div style="overflow-x:auto;padding:12px;">';
+  html+='<table style="border-collapse:collapse;min-width:600px;width:100%;font-size:11px;">';
+  html+='<thead><tr style="position:sticky;top:0;z-index:2;">';
+  html+='<th style="text-align:left;padding:6px 10px;background:var(--sur2);border:1px solid var(--brd);min-width:160px;position:sticky;left:0;z-index:3;">Cykl</th>';
+  // Miesiące sezonowe: lip→cze
+  var seasonMonths=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
+  var seasonMonthNums=[6,7,8,9,10,11,0,1,2,3,4,5]; // getMonth() values
+  var seasonYears=seasonMonthNums.map(function(m){return m>=6?_dpYear:_dpYear+1;});
+  seasonMonths.forEach(function(m,mi){
+    html+='<th style="padding:4px 2px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:40px;text-align:center;color:var(--txt2);">'+m+'<br><span style="font-size:8px;color:var(--txt3);">'+seasonYears[mi]+'</span></th>';
+  });
+  html+='<th style="padding:4px 6px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:70px;text-align:center;">Taksonomia</th>';
+  html+='<th style="padding:4px 6px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:56px;text-align:center;">Akcja</th>';
+  html+='</tr></thead><tbody>';
+
+  Object.entries(groups).forEach(function(entry){
+    var key=entry[0], periods=entry[1];
+    var teamLabel=key==='__all__'?'Cała akademia':key;
+    html+='<tr><td colspan="'+(seasonMonths.length+3)+'" style="background:var(--sur2);color:var(--txt3);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border:1px solid var(--brd);">'+escH(teamLabel)+'</td></tr>';
+
+    periods.forEach(function(c){
+      var realIdx=CYC.indexOf(c);
+      var col=DP_COLORS[c.type]||DP_COLORS.macro;
+      var sDate=new Date(c.start), eDate=new Date(c.end);
+
+      html+='<tr style="background:var(--sur);">';
+      html+='<td style="padding:5px 8px;border:1px solid var(--brd);position:sticky;left:0;background:var(--sur);z-index:1;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;">';
+      html+='<div style="width:8px;height:8px;border-radius:2px;background:'+col.bg+';border:1px solid '+col.bc+';flex-shrink:0;"></div>';
+      html+='<div><div style="font-size:11px;font-weight:500;">'+escH(c.name)+'</div>';
+      html+='<div style="font-size:9px;color:var(--txt3);">'+DP_LABELS[c.type||'macro']+'</div></div></div></td>';
+
+      // Komórki miesięcy
+      seasonMonthNums.forEach(function(monthNum,mi){
+        var cellYear=seasonYears[mi];
+        var cellStart=new Date(cellYear,monthNum,1);
+        var cellEnd=new Date(cellYear,monthNum+1,0);
+        var inRange=sDate<=cellEnd&&eDate>=cellStart;
+        if(inRange){
+          // Oblicz procent pokrycia
+          var barStart=sDate>cellStart?sDate:cellStart;
+          var barEnd=eDate<cellEnd?eDate:cellEnd;
+          var totalDays=cellEnd.getDate();
+          var startDay=barStart.getDate();
+          var endDay=barEnd.getDate();
+          var leftPct=Math.round((startDay-1)/totalDays*100);
+          var widthPct=Math.round((endDay-startDay+1)/totalDays*100);
+          html+='<td style="padding:2px;border:1px solid var(--brd);">';
+          html+='<div style="position:relative;height:18px;">';
+          html+='<div style="position:absolute;left:'+leftPct+'%;width:'+widthPct+'%;height:100%;background:'+col.bg+';border:1px solid '+col.bc+';border-radius:2px;" title="'+escH(c.name)+'"></div>';
+          html+='</div></td>';
+        } else {
+          html+='<td style="border:1px solid var(--brd);"></td>';
+        }
+      });
+
+      // Taksonomia
+      var taxParts=[];
+      if(c.faza)taxParts.push(escH(c.faza));
+      if(c.temat)taxParts.push(escH(c.temat));
+      if(c.koncept)taxParts.push(escH(c.koncept));
+      html+='<td style="padding:3px 5px;border:1px solid var(--brd);vertical-align:middle;">';
+      if(taxParts.length){
+        html+='<div style="font-size:9px;color:var(--txt2);line-height:1.4;">'+taxParts.join('<br><span style="color:var(--txt3);">→</span> ')+'</div>';
+      } else {
+        html+='<div style="font-size:9px;color:var(--txt3);">—</div>';
+      }
+      html+='</td>';
+
+      // Akcja
+      html+='<td style="padding:3px 4px;border:1px solid var(--brd);text-align:center;">';
+      html+='<button onclick="dpEditPeriod('+realIdx+')" style="font-size:9px;padding:2px 6px;background:var(--sur2);border:1px solid var(--brd);border-radius:3px;cursor:pointer;margin-right:2px;" title="Edytuj">✎</button>';
+      html+='<button onclick="dpDeletePeriod('+realIdx+')" style="font-size:9px;padding:2px 6px;background:var(--lred);color:var(--red);border:1px solid #FECDD3;border-radius:3px;cursor:pointer;" title="Usuń">×</button>';
+      html+='</td></tr>';
+    });
+  });
+
+  html+='</tbody></table></div>';
+  body.innerHTML=html;
+}
+
+function dpRenderList(){
+  var body=document.getElementById('dp-main-body');if(!body)return;
+  var fTeam=(document.getElementById('dp-team-filter')||{}).value||'';
+  var cycs=CYC.filter(function(c){
+    return !fTeam||c.team===fTeam||!c.team;
+  }).sort(function(a,b){return (a.start||'')>(b.start||'')?1:-1;});
+
+  var cntEl=document.getElementById('dp-count-lbl');
+  if(cntEl)cntEl.textContent=cycs.length+' '+(cycs.length===1?'okres':'okresów');
+
+  if(!cycs.length){body.innerHTML='<div style="text-align:center;padding:40px;color:var(--txt2);">Brak zdefiniowanych okresów.</div>';return;}
+
+  var html='<div style="padding:12px;">';
+  cycs.forEach(function(c){
+    var realIdx=CYC.indexOf(c);
+    var col=DP_COLORS[c.type]||DP_COLORS.macro;
+    var taxParts=[];
+    if(c.faza)taxParts.push(c.faza);
+    if(c.temat)taxParts.push(c.temat);
+    if(c.koncept)taxParts.push(c.koncept);
+
+    html+='<div style="background:var(--sur);border:1px solid var(--brd);border-left:4px solid '+col.bc+';border-radius:var(--r2);padding:10px 14px;margin-bottom:8px;">';
+    html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">';
+    html+='<div style="flex:1;">';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">';
+    html+='<div style="font-size:13px;font-weight:600;">'+escH(c.name)+'</div>';
+    html+='<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:'+col.bg+';color:'+col.tc+';">'+DP_LABELS[c.type||'macro']+'</span>';
+    if(c.team)html+='<span style="font-size:9px;padding:2px 7px;border-radius:10px;background:var(--sur2);color:var(--txt2);">'+escH(c.team)+'</span>';
+    html+='</div>';
+    html+='<div style="font-size:11px;color:var(--txt2);margin-bottom:4px;">📅 '+(c.start?fdShort(c.start):'?')+' — '+(c.end?fdShort(c.end):'?')+'</div>';
+    if(taxParts.length)html+='<div style="font-size:11px;color:var(--pu);">'+taxParts.join(' → ')+'</div>';
+    if(c.desc)html+='<div style="font-size:11px;color:var(--txt2);margin-top:4px;font-style:italic;">'+escH(c.desc).substring(0,120)+(c.desc.length>120?'...':'')+'</div>';
+    html+='</div>';
+    html+='<div style="display:flex;gap:4px;flex-shrink:0;">';
+    html+='<button onclick="dpEditPeriod('+realIdx+')" class="btn sm">Edytuj</button>';
+    html+='<button onclick="dpDeletePeriod('+realIdx+')" class="btn sm dan">×</button>';
+    html+='</div></div></div>';
+  });
+  html+='</div>';
+  body.innerHTML=html;
+}
+
+function dpRenderMain(){
+  if(_dpView==='gantt')dpRenderGantt();
+  else dpRenderList();
+}
+
+function rDirPlan(){
+  // Aktualizuj rok label
+  var yrLbl=document.getElementById('dp-yr-lbl');
+  if(yrLbl)yrLbl.textContent=_dpYear+'/'+(String(_dpYear+1).slice(2));
+  var sub=document.getElementById('dir-plan-sub');
+  if(sub)sub.textContent='MKS Iskra Pszczyna · Sezon '+_dpYear+'/'+(String(_dpYear+1).slice(2));
+
+  // Aktualizuj filtr drużyn
+  var teamSel=document.getElementById('dp-team-filter');
+  var teamSelForm=document.getElementById('dp-f-team');
+  if(teamSel||teamSelForm){
+    var teams=TEAMS.filter(function(t){return t.season===currentSeason;}).map(function(t){return t.name;}).sort();
+    var opts='<option value="">Wszystkie drużyny</option>'+teams.map(function(t){return '<option value="'+escH(t)+'">'+escH(t)+'</option>';}).join('');
+    var optsForm='<option value="">Cała akademia</option>'+teams.map(function(t){return '<option value="'+escH(t)+'">'+escH(t)+'</option>';}).join('');
+    if(teamSel){var prev=teamSel.value;teamSel.innerHTML=opts;if(prev)teamSel.value=prev;}
+    if(teamSelForm){var prevF=teamSelForm.value;teamSelForm.innerHTML=optsForm;if(prevF)teamSelForm.value=prevF;}
+  }
+
+  dpRenderCal();
+  dpRenderMain();
+}
+
+// ═══════════════ TOP TALENT & SKŁAD NA BOISKU ═══════════════
+var _ttView='pitch';
+
+var FORMATIONS={
+  '4-3-3':     {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['DP',42,50],['ŚP',52,28],['OP',52,72],['LS',75,15],['N',75,50],['PS',75,85]]},
+  '4-2-3-1':   {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['DP',40,37],['DP',40,63],['LS',60,15],['OP',60,50],['PS',60,85],['N',78,50]]},
+  '4-4-2':     {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['LP',44,15],['ŚP',44,37],['ŚP',44,63],['PP',44,85],['N',72,37],['N',72,63]]},
+  '4-1-4-1':   {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['DP',38,50],['LP',52,15],['ŚP',52,37],['ŚP',52,63],['PP',52,85],['N',72,50]]},
+  '4-1-2-1-2': {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['DP',38,50],['ŚP',52,35],['ŚP',52,65],['OP',64,50],['N',78,32],['N',78,68]]},
+  '4-3-1-2':   {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['ŚP',40,22],['ŚP',40,50],['ŚP',40,78],['OP',58,50],['N',74,35],['N',74,65]]},
+  '4-1-3-2':   {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['DP',36,50],['ŚP',50,32],['ŚP',50,50],['ŚP',50,68],['N',72,35],['N',72,65]]},
+  '4-3-2-1':   {n:11,slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['ŚP',40,22],['ŚP',40,50],['ŚP',40,78],['OP',58,32],['OP',58,68],['N',76,50]]},
+  '3-5-2':     {n:11,slots:[['GK',8,50],['ŚO',22,25],['ŚO',22,50],['ŚO',22,75],['LW',44,8],['DP',44,32],['OP',44,50],['DP',44,68],['PW',44,92],['N',72,32],['N',72,68]]},
+  '3-4-3':     {n:11,slots:[['GK',8,50],['ŚO',22,25],['ŚO',22,50],['ŚO',22,75],['LW',42,8],['ŚP',42,35],['ŚP',42,65],['PW',42,92],['N',72,20],['N',72,50],['N',72,80]]},
+  '3-1-4-2':   {n:11,slots:[['GK',8,50],['ŚO',22,25],['ŚO',22,50],['ŚO',22,75],['DP',36,50],['LW',50,8],['ŚP',50,32],['ŚP',50,68],['PW',50,92],['N',72,35],['N',72,65]]},
+  '3-4-2-1':   {n:11,slots:[['GK',8,50],['ŚO',22,25],['ŚO',22,50],['ŚO',22,75],['LW',42,8],['ŚP',42,35],['ŚP',42,65],['PW',42,92],['OP',60,32],['OP',60,68],['N',76,50]]},
+  '4-3-1':     {n:9, slots:[['GK',8,50],['LO',22,15],['ŚO',22,37],['ŚO',22,63],['PO',22,85],['ŚP',46,22],['ŚP',46,50],['ŚP',46,78],['N',70,50]]},
+  '3-4-1':     {n:9, slots:[['GK',8,50],['ŚO',22,25],['ŚO',22,50],['ŚO',22,75],['LW',42,8],['ŚP',42,35],['ŚP',42,65],['PW',42,92],['N',70,50]]},
+  '3-2-3':     {n:9, slots:[['GK',8,50],['ŚO',22,25],['ŚO',22,50],['ŚO',22,75],['ŚP',44,35],['ŚP',44,65],['N',70,18],['N',70,50],['N',70,82]]},
+  '2-3-1':     {n:7, slots:[['GK',8,50],['ŚO',24,35],['ŚO',24,65],['ŚP',46,20],['ŚP',46,50],['ŚP',46,80],['N',72,50]]},
+  '3-2-1':     {n:7, slots:[['GK',8,50],['ŚO',23,25],['ŚO',23,50],['ŚO',23,75],['ŚP',46,35],['ŚP',46,65],['N',72,50]]},
+  '3-1-2':     {n:7, slots:[['GK',8,50],['ŚO',23,25],['ŚO',23,50],['ŚO',23,75],['ŚP',46,50],['N',70,32],['N',70,68]]}
+};
+
+var POS_MAP={
+  'Bramkarz':['GK'],
+  'Obrońca':['CB','LB','RB','SW','LWB','RWB'],
+  'Pomocnik':['CM','CAM','CDM','LM','RM','DM','AM'],
+  'Napastnik':['ST','CF','LW','RW','SS']
+};
+
+var POS_GROUPS={
+  gk:['Bramkarz','GK'],
+  def:['Obrońca','CB','LB','RB','SW','LWB','RWB'],
+  mid:['Pomocnik','CM','CAM','CDM','LM','RM','DM','AM'],
+  att:['Napastnik','ST','CF','LW','RW','SS']
+};
+
+var GRADE_COLORS={
+  A:{bg:'#E1F5EE',tc:'#085041',bc:'#1D9E75'},
+  B:{bg:'#FAEEDA',tc:'#633806',bc:'#EF9F27'},
+  C:{bg:'#FAECE7',tc:'#712B13',bc:'#E24B4A'}
+};
+
+function lastGrade(p){
+  if(!p.oceny||!p.oceny.length)return'';
+  return p.oceny[p.oceny.length-1].grade||'';
+}
+
+function playerInitialsShort(name){
+  if(!name)return'?';
+  var parts=name.trim().split(' ');
+  if(parts.length>=2)return parts[0][0]+parts[1][0];
+  return name.slice(0,2);
+}
+
+function playerBirthYear(p){
+  if(p.birthYear)return parseInt(p.birthYear);
+  if(p.born)return parseInt(String(p.born).slice(0,4));
+  if(p.dob)return parseInt(String(p.dob).slice(0,4));
+  return null;
+}
+
+function getTalentPlayers(minGrade){
+  var grades=minGrade?[minGrade]:['A','B'];
+  return PLAYERS.filter(function(p){
+    var g=lastGrade(p);
+    return grades.includes(g);
+  });
+}
+
+function setTTView(v){
+  _ttView=v;
+  var phdr=document.getElementById('tt-pitch-hdr');
+  var ptchBtn=document.getElementById('tt-view-pitch');
+  var lstBtn=document.getElementById('tt-view-list');
+  if(phdr)phdr.style.display=v==='pitch'?'flex':'none';
+  if(ptchBtn){ptchBtn.style.background=v==='pitch'?'var(--lg)':'var(--sur)';ptchBtn.style.color=v==='pitch'?'var(--dg)':'var(--txt2)';ptchBtn.style.borderColor=v==='pitch'?'#5DCAA5':'var(--brd)';}
+  if(lstBtn){lstBtn.style.background=v==='list'?'var(--lg)':'var(--sur)';lstBtn.style.color=v==='list'?'var(--dg)':'var(--txt2)';lstBtn.style.borderColor=v==='list'?'#5DCAA5':'var(--brd)';}
+  rDirTalent();
+}
+
+function rDirTalent(){
+  var posF=(document.getElementById('tt-f-pos')||{}).value||'';
+  var yearF=(document.getElementById('tt-f-year')||{}).value||'';
+  var teamF=(document.getElementById('tt-f-team')||{}).value||'';
+  var gradeF=(document.getElementById('tt-f-grade')||{}).value||'';
+
+  // Aktualizuj filtry
+  var yearSel=document.getElementById('tt-f-year');
+  var teamSel=document.getElementById('tt-f-team');
+  var pitchTeam=document.getElementById('tt-pitch-team');
+  if(yearSel&&yearSel.options.length<=1){
+    var years=[...new Set(PLAYERS.map(playerBirthYear).filter(Boolean))].sort();
+    years.forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y;yearSel.appendChild(o);});
+  }
+  if(teamSel||pitchTeam){
+    var teams=TEAMS.filter(function(t){return t.season===currentSeason;}).map(function(t){return t.name;}).sort();
+    if(teamSel&&teamSel.options.length<=1){teams.forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=t;teamSel.appendChild(o);});}
+    if(pitchTeam&&pitchTeam.options.length<=1){teams.forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=t;pitchTeam.appendChild(o);});}
+  }
+
+  var grades=gradeF?[gradeF]:['A','B'];
+  var players=PLAYERS.filter(function(p){
+    var g=lastGrade(p);
+    if(!grades.includes(g))return false;
+    if(posF&&p.position!==posF)return false;
+    if(yearF){var y=playerBirthYear(p);if(!y||String(y)!==yearF)return false;}
+    if(teamF&&p.team!==teamF)return false;
+    return true;
+  }).sort(function(a,b){
+    var gA=lastGrade(a),gB=lastGrade(b);
+    if(gA!==gB)return gA<gB?-1:1;
+    return(a.name||'').localeCompare(b.name||'');
+  });
+
+  var sub=document.getElementById('dir-talent-sub');
+  if(sub)sub.textContent=players.length+' zawodników z wysokim potencjałem';
+
+  // Renderuj listę po lewej
+  var listEl=document.getElementById('tt-player-list');
+  if(listEl){
+    if(!players.length){
+      listEl.innerHTML='<div style="padding:20px 12px;text-align:center;font-size:12px;color:var(--txt2);">Brak zawodników spełniających kryteria.<br><br>Upewnij się że zawodnicy mają oceny A lub B na kartach zawodników.</div>';
+    } else {
+      listEl.innerHTML=players.map(function(p){
+        var idx=PLAYERS.indexOf(p);
+        var g=lastGrade(p)||'—';
+        var gc=GRADE_COLORS[g]||{bg:'var(--sur2)',tc:'var(--txt2)',bc:'var(--brd)'};
+        var ini=playerInitialsShort(p.name);
+        var by=playerBirthYear(p);
+        return '<div style="display:flex;align-items:center;gap:7px;padding:6px 10px;cursor:pointer;border-bottom:0.5px solid var(--brd);" onclick="renderPlayerView('+idx+')" onmouseenter="this.style.background=\'var(--sur)\'" onmouseleave="this.style.background=\'\'">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:'+gc.bg+';color:'+gc.tc+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0;">'+ini+'</div>'
+          +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:11px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(p.name||'—')+'</div>'
+          +'<div style="font-size:10px;color:var(--txt3);">'+(p.position||'—')+(by?' · '+by:'')+(p.team?' · '+escH(p.team):'')+'</div>'
+          +'</div>'
+          +'<div style="font-size:9px;padding:1px 5px;border-radius:8px;font-weight:600;background:'+gc.bg+';color:'+gc.tc+';flex-shrink:0;">'+g+'</div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  if(_ttView==='pitch') rTTPitch();
+  else rTTList(players);
+}
+
+// ═══ BOISKO POZIOME — FM STYLE ═══
+// Pobierz zawodników przypisanych do drużyny, posortowanych wg oceny A>B>C
+function getTeamPlayersSorted(teamName){
+  return PLAYERS.filter(function(p){return p.team===teamName;}).sort(function(a,b){
+    var gv=function(g){return g==='A'?0:g==='B'?1:g==='C'?2:3;};
+    return gv(lastGrade(a))-gv(lastGrade(b));
+  });
+}
+
+// Mapowanie skrótów pozycji na grupy do matchowania
+var POS_ABBR_MAP={
+  'GK':['Bramkarz','GK','BR'],
+  'LO':['Obrońca','LB','LO','CB'],
+  'ŚO':['Obrońca','CB','ŚO','SW'],
+  'PO':['Obrońca','RB','PO','CB'],
+  'LW':['Obrońca','LWB','LW','Pomocnik'],
+  'PW':['Obrońca','RWB','PW','Pomocnik'],
+  'DP':['Pomocnik','CDM','DM','DP','Defensywny'],
+  'ŚP':['Pomocnik','CM','ŚP','Central'],
+  'OP':['Pomocnik','CAM','AM','OP','Ofensywny'],
+  'LP':['Pomocnik','LM','LW','LP'],
+  'PP':['Pomocnik','RM','RW','PP'],
+  'LS':['Napastnik','LW','LS','Winger'],
+  'PS':['Napastnik','RW','PS','Winger'],
+  'N':['Napastnik','ST','CF','N','FW'],
+};
+
+// Przypisz najlepszych zawodników do slotów, zwróć listę {pos, player, alts[]}
+function assignPlayersToSlots(teamName, formationKey){
+  var form=FORMATIONS[formationKey]||FORMATIONS['4-3-3'];
+  var slots=form.slots||form;  // obsłuż oba formaty
+  var players=getTeamPlayersSorted(teamName);
+  var used=[];
+  var result=[];
+
+  slots.forEach(function(slot){
+    var posAbbr=slot[0], x=slot[1], y=slot[2];
+    var matchGroups=POS_ABBR_MAP[posAbbr]||[posAbbr];
+
+    var pool=players.filter(function(p){
+      if(used.includes(p.name))return false;
+      var pos=p.position||'';
+      return matchGroups.some(function(m){
+        return pos.toLowerCase().includes(m.toLowerCase())||m.toLowerCase().includes(pos.toLowerCase());
+      });
+    });
+
+    if(!pool.length){
+      pool=players.filter(function(p){return!used.includes(p.name);});
+    }
+
+    var alts=pool.slice(0,3);
+    var starter=alts[0]||null;
+    if(starter)used.push(starter.name);
+
+    result.push({posAbbr:posAbbr, x:x, y:y, starter:starter, alts:alts.slice(1)});
+  });
+
+  return result;
+}
+
+function renderPosCard(slot){
+  var g=slot.starter?lastGrade(slot.starter):'—';
+  var gc=GRADE_COLORS[g]||{bg:'rgba(255,255,255,0.12)',tc:'#ddd',bc:'rgba(255,255,255,0.4)'};
+  var idx=slot.starter?PLAYERS.indexOf(slot.starter):-1;
+
+  var html='<div style="position:absolute;left:'+slot.x+'%;top:'+slot.y+'%;transform:translate(-50%,-50%);z-index:3;cursor:'+(slot.starter?'pointer':'default')+';text-align:center;" '+(idx>=0?'onclick="renderPlayerView('+idx+')"':'')+'>';
+
+  // Niebieskie kółko z kodem pozycji
+  html+='<div style="width:32px;height:32px;border-radius:50%;background:#1565C0;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-size:8px;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,0.5);box-shadow:0 2px 6px rgba(0,0,0,0.4);">'+escH(slot.posAbbr)+'</div>';
+
+  // Karta zawodników — ciemne tło, wyraźny tekst
+  html+='<div style="background:rgba(10,20,35,0.88);border:1px solid rgba(255,255,255,0.2);border-radius:5px;overflow:hidden;min-width:90px;max-width:115px;box-shadow:0 2px 8px rgba(0,0,0,0.5);">';
+
+  // Zawodnik #1 — starter — duży biały tekst
+  var sName=slot.starter?escH(slot.starter.name):'<span style="opacity:.4;font-style:italic;">Wolna pozycja</span>';
+  html+='<div style="padding:4px 7px;background:rgba(255,255,255,0.06);'+(slot.alts.length?'border-bottom:1px solid rgba(255,255,255,0.1)':'')+';">';
+  html+='<div style="font-size:9.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em;">'+sName+'</div>';
+  if(g&&g!=='—'){
+    var dotColor=g==='A'?'#1D9E75':g==='B'?'#EF9F27':'#E24B4A';
+    html+='<div style="display:flex;align-items:center;gap:3px;margin-top:1px;">'
+      +'<div style="width:6px;height:6px;border-radius:50%;background:'+dotColor+';flex-shrink:0;"></div>'
+      +'<span style="font-size:8px;color:'+dotColor+';font-weight:600;">'+g+'</span>'
+      +'</div>';
+  }
+  html+='</div>';
+
+  // Zawodnik #2 — mniejszy, szary, separator
+  if(slot.alts[0]){
+    var p2=slot.alts[0]; var g2=lastGrade(p2); var i2=PLAYERS.indexOf(p2);
+    var dotColor2=g2==='A'?'#1D9E75':g2==='B'?'#EF9F27':g2==='C'?'#E24B4A':'rgba(255,255,255,0.3)';
+    html+='<div style="padding:3px 7px;'+(slot.alts[1]?'border-bottom:1px solid rgba(255,255,255,0.07)':'')+';cursor:pointer;" onclick="event.stopPropagation();renderPlayerView('+i2+')">';
+    html+='<div style="font-size:8.5px;color:rgba(255,255,255,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;">'+escH(p2.name)+'</div>';
+    if(g2&&g2!=='—')html+='<div style="display:flex;align-items:center;gap:2px;"><div style="width:5px;height:5px;border-radius:50%;background:'+dotColor2+';"></div><span style="font-size:7.5px;color:'+dotColor2+';">'+g2+'</span></div>';
+    html+='</div>';
+  }
+  // Zawodnik #3
+  if(slot.alts[1]){
+    var p3=slot.alts[1]; var g3=lastGrade(p3); var i3=PLAYERS.indexOf(p3);
+    var dotColor3=g3==='A'?'#1D9E75':g3==='B'?'#EF9F27':g3==='C'?'#E24B4A':'rgba(255,255,255,0.3)';
+    html+='<div style="padding:3px 7px;cursor:pointer;" onclick="event.stopPropagation();renderPlayerView('+i3+')">';
+    html+='<div style="font-size:8.5px;color:rgba(255,255,255,0.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(p3.name)+'</div>';
+    if(g3&&g3!=='—')html+='<div style="display:flex;align-items:center;gap:2px;"><div style="width:5px;height:5px;border-radius:50%;background:'+dotColor3+';"></div><span style="font-size:7.5px;color:'+dotColor3+';">'+g3+'</span></div>';
+    html+='</div>';
+  }
+
+  html+='</div></div>';
+  return html;
+}
+// Renderuj boisko poziome z zawodnikami FM-style
+function renderPitchFM(teamName, formationKey, containerId){
+  formationKey=formationKey||'4-3-3';
+  var slots=assignPlayersToSlots(teamName, formationKey);
+  
+  // Kolor murawy zielony
+  var pitchBg='#2D5A1B';
+  var lineCol='rgba(255,255,255,0.35)';
+  
+  var html='<div style="position:relative;width:100%;padding-bottom:60%;background:'+pitchBg+';overflow:hidden;">';
+  
+  // SVG boisko POZIOME (bramki po lewej i prawej)
+  html+='<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 100 60" preserveAspectRatio="none">';
+  // Tło
+  html+='<rect width="100" height="60" fill="'+pitchBg+'"/>';
+  // Pasy murawy
+  for(var i=0;i<10;i++){html+='<rect x="'+(i*10)+'" y="0" width="10" height="60" fill="'+(i%2===0?'rgba(0,0,0,0.06)':'rgba(0,0,0,0)')+'" />';}
+  // Linie boiska
+  html+='<rect x="3" y="3" width="94" height="54" fill="none" stroke="'+lineCol+'" stroke-width="0.4"/>';
+  // Linia środkowa
+  html+='<line x1="50" y1="3" x2="50" y2="57" stroke="'+lineCol+'" stroke-width="0.3"/>';
+  // Środkowe koło
+  html+='<circle cx="50" cy="30" r="9.15" fill="none" stroke="'+lineCol+'" stroke-width="0.3"/>';
+  html+='<circle cx="50" cy="30" r="0.6" fill="'+lineCol+'"/>';
+  // Pole karne lewe
+  html+='<rect x="3" y="15" width="16.5" height="30" fill="none" stroke="'+lineCol+'" stroke-width="0.3"/>';
+  html+='<rect x="3" y="22" width="5.5" height="16" fill="none" stroke="'+lineCol+'" stroke-width="0.25"/>';
+  // Bramka lewa
+  html+='<rect x="1" y="25.5" width="2" height="9" fill="none" stroke="'+lineCol+'" stroke-width="0.4"/>';
+  // Łuk PK lewy
+  html+='<path d="M19.5 24 A9.15 9.15 0 0 1 19.5 36" fill="none" stroke="'+lineCol+'" stroke-width="0.25"/>';
+  // Punkt karny lewy
+  html+='<circle cx="11" cy="30" r="0.4" fill="'+lineCol+'"/>';
+  // Pole karne prawe
+  html+='<rect x="80.5" y="15" width="16.5" height="30" fill="none" stroke="'+lineCol+'" stroke-width="0.3"/>';
+  html+='<rect x="91.5" y="22" width="5.5" height="16" fill="none" stroke="'+lineCol+'" stroke-width="0.25"/>';
+  // Bramka prawa
+  html+='<rect x="97" y="25.5" width="2" height="9" fill="none" stroke="'+lineCol+'" stroke-width="0.4"/>';
+  // Łuk PK prawy
+  html+='<path d="M80.5 24 A9.15 9.15 0 0 0 80.5 36" fill="none" stroke="'+lineCol+'" stroke-width="0.25"/>';
+  // Punkt karny prawy
+  html+='<circle cx="89" cy="30" r="0.4" fill="'+lineCol+'"/>';
+  // Narożniki
+  ['3,3','97,3','3,57','97,57'].forEach(function(pt){var c=pt.split(',');html+='<path d="M'+c[0]+' '+(parseFloat(c[1])+2*(parseFloat(c[1])<30?1:-1))+' A2 2 0 0 '+(parseFloat(c[0])<50?'1':'0')+' '+(parseFloat(c[0])+2*(parseFloat(c[0])<50?1:-1))+' '+c[1]+'" fill="none" stroke="'+lineCol+'" stroke-width="0.3"/>';});
+  html+='</svg>';
+  
+  // Zawodnicy
+  slots.forEach(function(slot){
+    html+=renderPosCard(slot);
+  });
+  
+  html+='</div>';
+  return html;
+}
+
+// Renderuj skład drużyny z ławką (dla modalu Akademii)
+function renderSquadPitch(teamName, formation){
+  formation=formation||'4-3-3';
+  var players=getTeamPlayersSorted(teamName);
+  
+  // Zbierz startujących
+  var startingSlots=assignPlayersToSlots(teamName, formation);
+  var startingNames=startingSlots.filter(function(s){return s.starter;}).map(function(s){return s.starter.name;});
+  var bench=players.filter(function(p){return!startingNames.includes(p.name);}).slice(0,7);
+  
+  var html=renderPitchFM(teamName, formation, null);
+  
+  // Ławka
+  if(bench.length){
+    html+='<div style="background:rgba(0,0,0,0.85);padding:6px 10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">';
+    html+='<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.05em;margin-right:4px;">Ławka:</div>';
+    bench.forEach(function(p){
+      var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'rgba(255,255,255,0.1)',tc:'#ccc',bc:'rgba(255,255,255,0.3)'};
+      var idx=PLAYERS.indexOf(p);
+      html+='<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:4px;padding:3px 6px;cursor:pointer;font-size:9px;color:#fff;" onclick="renderPlayerView('+idx+')">'
+        +escH(p.name)+(g&&g!=='—'?'<span style="font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;background:'+gc.bg+';color:'+gc.tc+';">'+g+'</span>':'')
+        +'</div>';
+    });
+    html+='</div>';
+  }
+  return html;
+}
+
+function rTTPitch(){
+  var main=document.getElementById('tt-main');if(!main)return;
+  var teamSel=document.getElementById('tt-pitch-team');
+  var formation=(document.getElementById('tt-formation')||{}).value||'4-3-3';
+  var team=teamSel?teamSel.value:'';
+
+  if(!team){
+    main.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--txt2);font-size:13px;text-align:center;padding:40px;"><div><div style="font-size:32px;margin-bottom:12px;">⚽</div><div style="font-weight:500;margin-bottom:6px;">Wybierz drużynę</div><div style="font-size:12px;color:var(--txt3);">Wybierz drużynę z listy powyżej aby zobaczyć najlepszy skład na boisku</div></div></div>';
+    return;
+  }
+
+  var players=getTeamPlayersSorted(team);
+  var slots=assignPlayersToSlots(team, formation);
+  var startingNames=slots.filter(function(s){return s.starter;}).map(function(s){return s.starter.name;});
+  var bench=players.filter(function(p){return!startingNames.includes(p.name);}).slice(0,7);
+  var html='<div style="display:flex;flex-direction:column;height:100%;">';
+  html+=renderPitchFM(team, formation, null);
+  // Ławka
+  html+='<div style="background:rgba(0,0,0,0.82);padding:7px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">';
+  html+='<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.06em;margin-right:6px;flex-shrink:0;">Ławka:</div>';
+  if(!bench.length){
+    html+='<span style="font-size:11px;color:rgba(255,255,255,0.4);">Brak zawodników na ławce</span>';
+  } else {
+    bench.forEach(function(p){
+      var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'rgba(255,255,255,0.1)',tc:'#ccc',bc:'rgba(255,255,255,0.3)'};
+      var idx=PLAYERS.indexOf(p);
+      html+='<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 7px;cursor:pointer;font-size:10px;color:#fff;" onclick="renderPlayerView('+idx+')">'
+        +escH(p.name)+(g&&g!=='—'?'<span style="font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;background:'+gc.bg+';color:'+gc.tc+';">'+g+'</span>':'')
+        +'</div>';
+    });
+  }
+  html+='</div></div>';
+  main.innerHTML=html;
+}
+
+
+function rTTList(players){
+  var main=document.getElementById('tt-main');if(!main)return;
+  if(!players){
+    var grades=['A','B'];
+    players=PLAYERS.filter(function(p){return grades.includes(lastGrade(p));});
+  }
+  if(!players.length){main.innerHTML='<div style="padding:40px;text-align:center;color:var(--txt2);">Brak zawodników spełniających kryteria.</div>';return;}
+
+  // Grupuj wg pozycji
+  var byPos={};
+  players.forEach(function(p){
+    var pos=p.position||'—';
+    if(!byPos[pos])byPos[pos]=[];
+    byPos[pos].push(p);
+  });
+
+  var posOrder=['Bramkarz','Obrońca','Pomocnik','Napastnik'];
+  var html='<div style="padding:12px;">';
+  posOrder.concat(Object.keys(byPos).filter(function(k){return!posOrder.includes(k);})).forEach(function(pos){
+    if(!byPos[pos]||!byPos[pos].length)return;
+    html+='<div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;margin-top:10px;">'+pos+' ('+byPos[pos].length+')</div>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:8px;">';
+    byPos[pos].forEach(function(p){
+      var g=lastGrade(p);
+      var gc=GRADE_COLORS[g]||{bg:'var(--sur2)',tc:'var(--txt2)',bc:'var(--brd)'};
+      var idx=PLAYERS.indexOf(p);
+      var by=playerBirthYear(p);
+      html+='<div style="background:var(--sur);border:0.5px solid var(--brd);border-left:3px solid '+gc.bc+';border-radius:6px;padding:8px 10px;cursor:pointer;" onclick="renderPlayerView('+idx+')">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<div style="width:30px;height:30px;border-radius:50%;background:'+gc.bg+';color:'+gc.tc+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">'+playerInitialsShort(p.name)+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:12px;font-weight:500;color:var(--txt);">'+escH(p.name)+'</div>'
+        +'<div style="font-size:10px;color:var(--txt3);">'+(by||'—')+(p.team?' · '+escH(p.team):'')+'</div>'
+        +'</div>'
+        +'<span style="font-size:11px;padding:2px 7px;border-radius:10px;background:'+gc.bg+';color:'+gc.tc+';font-weight:600;flex-shrink:0;">'+g+'</span>'
+        +'</div></div>';
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  main.innerHTML=html;
+}
+
+// ── Podgląd składu w modalu drużyny (w module Akademii) ──
 
 function rDirDash(){
   var body=document.getElementById('dir-dash-body');if(!body)return;
@@ -7407,6 +8878,16 @@ function oAcademyTeam(teamId){
   // Zestawienie tematów treningowych
   html+='<div class="sh" style="margin-top:0;">Realizacja tematów treningowych</div>';
   html+=renderTopicStats(teamKonsp);
+
+  // Skład na boisku
+  if(players.length>=5){
+    html+='<div class="sh" style="margin-top:0;">Skład na boisku</div>';
+    html+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
+    html+='<select id="at-formation-sel" style="padding:4px 8px;border:1px solid var(--brd);border-radius:5px;font-size:11px;background:var(--sur);color:var(--txt);" onchange="document.getElementById(\'at-pitch-wrap\').innerHTML=renderSquadPitch(\''+t.name.replace(/'/g,"\\'")+'\',(this.value))">';
+    html+='<option>4-3-3</option><option>4-2-3-1</option><option>4-4-2</option><option>4-1-4-1</option><option>4-1-2-1-2</option><option>4-3-1-2</option><option>4-1-3-2</option><option>4-3-2-1</option><option>3-5-2</option><option>3-4-3</option><option>3-1-4-2</option><option>3-4-2-1</option><optgroup label="9-osobowa"><option>4-3-1</option><option>3-4-1</option><option>3-2-3</option></optgroup><optgroup label="7-osobowa"><option>2-3-1</option><option>3-2-1</option><option>3-1-2</option></optgroup></select>';
+    html+='<span style="font-size:10px;color:var(--txt3);">Formacja — zawodnicy przypisani wg pozycji i oceny</span></div>';
+    html+='<div id="at-pitch-wrap" style="border:1px solid var(--brd);border-radius:var(--r2);overflow:hidden;min-height:300px;">'+renderSquadPitch(t.name,'4-3-3')+'</div>';
+  }
 
   // Zawodnicy z oceną
   html+='<div class="sh" style="margin-top:0;">Zawodnicy ('+players.length+')</div>';
@@ -9014,16 +10495,11 @@ var _origSPStats=SP;
 SP=function(n){
   _origSPStats(n);
   if(n==='stats')rStats();
-  if(n==='plan'){
-    var addBtn=document.getElementById('plan-add-btn');
-    if(addBtn){
-      var canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='dyrektor');
-      addBtn.style.display=canEdit?'':'none';
-    }
-  }
+
   if(n==='dir-plan')rDirPlan();
   if(n==='dir-cal')rDirCal();
   if(n==='dir-overview')rDirOverview();
+  if(n==='dir-talent')rDirTalent();
   if(n==='dir-ioz')rDirIOZ();
   if(n==='dir-coaches')rDirCoaches();
   if(n==='dir-academy')rDirAcademy();
@@ -9240,9 +10716,16 @@ function parsePlayersRows(rows){
     // Sprawdź czy drużyna istnieje
     var teamExists=TEAMS.some(t=>t.name===team);
     if(team&&!teamExists)errs.push('Drużyna "'+team+'" nie istnieje w systemie');
+    // Pozycja — obsłuż format "GK – Bramkarz" z droplisty lub sam skrót
+    var posRaw=String(row['Pozycja']||'').trim();
+    var posClean=posRaw;
+    if(posRaw.includes('–')){
+      // Format "GK – Bramkarz" — weź część przed myślnikiem
+      posClean=posRaw.split('–')[0].trim();
+    }
     var p={
       id:genId(),name,dob,team,
-      position:String(row['Pozycja']||'').trim(),
+      position:posClean,
       number:String(row['Numer zawodnika']||'').trim(),
       foot:String(row['Noga dominująca']||'').trim(),
       contact:String(row['Kontakt rodzica']||'').trim(),
@@ -9567,7 +11050,11 @@ function parseCwiczenieRows(rows){
       o:String(row['Opis ćwiczenia']||row['Opis']||'').trim(),
       z:String(row['Coaching points']||'').trim(),
       lv:String(row['Link do wideo']||row['Link']||'').trim(),
-      pk:'',w:'',u:'',img:null,imn:null,fb:''
+      // Grafika
+      imgUrl:String(row['Link do grafiki']||'').trim(),
+      imn:String(row['Opis grafiki']||'').trim()||null,
+      img:null,  // base64 (wgrywanie ręczne)
+      pk:'',w:'',u:'',fb:''
     };
     if(errs.length)errors.push({row:idx+2,name,errs,data:ex});
     else ok.push(ex);
