@@ -397,6 +397,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tn2{width:22px;height:22px;background:var(--g);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
 .cev{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .cdh{border-right:1px solid var(--brd);padding:6px;font-size:11px;font-weight:600;color:var(--txt2);text-align:center;background:var(--sur2);}
+@keyframes spin{to{transform:rotate(360deg)}}
 /* KONSP */
 .kc{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
 .kc:hover{border-color:var(--g);}
@@ -702,15 +703,113 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- MODAL GENERATOR AI KONSPEKTU -->
+<div class="mo" id="mo-ai-konsp">
+  <div class="mbox wide" style="width:680px;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="mh">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:#3C3489;fill:none;stroke-width:1.8;"><path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z"/></svg>
+        </div>
+        <div class="mt2">Generator konspektu AI</div>
+      </div>
+      <button class="mc2" onclick="cM('mo-ai-konsp')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+    </div>
+    <div class="mbody" style="overflow-y:auto;padding:16px;" id="mo-ai-konsp-body">
+
+      <!-- Parametry -->
+      <div id="ai-k-params">
+        <div style="background:var(--lg);border-radius:var(--r2);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--dg);">
+          🤖 AI dobierze ćwiczenia z Twojej bazy według wybranej fazy → tematu → konceptu. Jeśli baza ćwiczeń jest pusta, AI wygeneruje propozycje samodzielnie.
+        </div>
+
+        <div class="sh" style="margin-top:0;">Informacje o treningu</div>
+        <div class="fr2">
+          <div><label class="fl">Drużyna *</label><select class="fsel" id="ai-team"></select></div>
+          <div><label class="fl">Data</label><input class="fi" id="ai-date" type="date"/></div>
+        </div>
+        <div class="fr2">
+          <div><label class="fl">Czas treningu (min) *</label><input class="fi" id="ai-dur" type="number" value="90" min="30" max="180" placeholder="np. 90"/></div>
+          <div><label class="fl">Miejsce</label><input class="fi" id="ai-place" placeholder="np. Boisko główne"/></div>
+        </div>
+        <div class="fr2">
+          <div><label class="fl">I Trener</label><select class="fsel" id="ai-coach"></select></div>
+          <div><label class="fl">Liczba zawodników</label><input class="fi" id="ai-players" type="number" value="16" min="4" max="30" placeholder="np. 16"/></div>
+        </div>
+
+        <div class="sh">Cel taktyczny</div>
+        <div class="fr2">
+          <div><label class="fl">Faza gry *</label>
+            <select class="fsel" id="ai-faza" onchange="aiUpdateTematy()">
+              <option value="">— wybierz fazę —</option>
+              <option>Atakowanie</option><option>Bronienie</option><option>Umiejętności</option><option>Motoryka</option>
+            </select>
+          </div>
+          <div><label class="fl">Temat *</label>
+            <select class="fsel" id="ai-temat" onchange="aiUpdateKoncepty()" disabled>
+              <option value="">— najpierw wybierz fazę —</option>
+            </select>
+          </div>
+        </div>
+        <div class="fr"><label class="fl">Koncept (opcjonalnie)</label>
+          <select class="fsel" id="ai-koncept" disabled>
+            <option value="">— wybierz koncept —</option>
+          </select>
+        </div>
+        <div class="fr"><label class="fl">Dodatkowe wskazówki dla AI (opcjonalnie)</label>
+          <textarea class="fta" id="ai-notes" style="min-height:52px;" placeholder="np. Skupić się na grze w trójkątach, zawodnicy mają problem z obrotem po przyjęciu piłki"></textarea>
+        </div>
+
+        <!-- Podział czasu -->
+        <div class="sh">Podział czasu treningu</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;" id="ai-time-grid">
+          <div>
+            <label class="fl">Część wstępna (min)</label>
+            <input class="fi" id="ai-t-warm" type="number" value="20" min="5" max="40" oninput="aiUpdateTimePreview()"/>
+            <div style="font-size:10px;color:var(--txt3);margin-top:2px;">2 ćwiczenia: motoryczne + techniczne</div>
+          </div>
+          <div>
+            <label class="fl">Część główna (min)</label>
+            <input class="fi" id="ai-t-main" type="number" value="55" min="15" max="90" oninput="aiUpdateTimePreview()"/>
+            <div style="font-size:10px;color:var(--txt3);margin-top:2px;">Sytuacja meczowa + gra</div>
+          </div>
+          <div>
+            <label class="fl">Część końcowa (min)</label>
+            <input class="fi" id="ai-t-cool" type="number" value="15" min="5" max="30" oninput="aiUpdateTimePreview()"/>
+            <div style="font-size:10px;color:var(--txt3);margin-top:2px;">Wyciszenie + omówienie</div>
+          </div>
+        </div>
+        <div id="ai-time-preview" style="background:var(--sur2);border-radius:var(--r2);padding:8px 12px;font-size:11px;color:var(--txt2);margin-bottom:4px;"></div>
+      </div>
+
+      <!-- Wynik AI -->
+      <div id="ai-k-result" style="display:none;"></div>
+    </div>
+    <div class="mfs" id="ai-k-footer">
+      <button class="btn" onclick="cM('mo-ai-konsp')">Anuluj</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="aiKReset()" id="ai-k-reset-btn" style="display:none;">← Nowe parametry</button>
+        <button class="btn pri" onclick="aiKGenerate()" id="ai-k-gen-btn">
+          <svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:#fff;fill:none;stroke-width:1.8;"><path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z"/></svg>
+          Generuj konspekt
+        </button>
+        <button class="btn pri" onclick="aiKApply()" id="ai-k-apply-btn" style="display:none;">
+          ✓ Użyj tego konspektu
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- KONSPEKTY -->
 <div id="pg-konsp" class="pg">
-  <div class="tb"><div><div class="t1">Konspekty treningowe</div><div class="t2" id="k-lbl">0 konspektów · sezon 2025/26</div></div><div class="tb-r"><button class="btn" onclick="ST('Filtruj')">Filtruj</button><button class="btn pri" onclick="startK()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Nowy konspekt</button></div></div>
+  <div class="tb"><div><div class="t1">Konspekty treningowe</div><div class="t2" id="k-lbl">0 konspektów · sezon 2025/26</div></div><div class="tb-r"><button class="btn" onclick="ST('Filtruj')">Filtruj</button><button class="btn" onclick="oAIKonspekt()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z"/></svg>Generator AI</button><button class="btn pri" onclick="startK()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Nowy konspekt</button></div></div>
   <div class="inner" id="k-list"></div>
 </div>
 
 <!-- KREATOR -->
 <div id="pg-kreator" class="pg" style="overflow:hidden;">
-  <div class="tb"><div><div class="t1" id="kr-t">Nowy konspekt</div><div class="t2" id="kr-s">Krok 1 z 4</div></div><div class="tb-r"><button class="btn" onclick="SP('konsp')">← Wróć do listy</button><button class="btn" onclick="saveK()"><svg viewBox="0 0 16 16"><path d="M3 5h10v8H3zM6 5V3h4v2"/></svg>Zapisz konspekt</button><button class="btn pri" onclick="dlPDF()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 11l5 3 5-3"/></svg>Pobierz PDF</button></div></div>
+  <div class="tb"><div><div class="t1" id="kr-t">Nowy konspekt</div><div class="t2" id="kr-s">Krok 1 z 4</div></div><div class="tb-r"><button class="btn" onclick="SP('konsp')">← Wróć do listy</button><button class="btn" onclick="oAIKonspekt()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z"/></svg>Generator AI</button><button class="btn" onclick="saveK()"><svg viewBox="0 0 16 16"><path d="M3 5h10v8H3zM6 5V3h4v2"/></svg>Zapisz konspekt</button><button class="btn pri" onclick="dlPDF()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 11l5 3 5-3"/></svg>Pobierz PDF</button></div></div>
   <div class="kl">
     <div class="ksb">
       <div class="ks act" id="ks-1" onclick="gKS(1)"><div class="ksn">1</div><div class="ksl">Informacje</div></div>
@@ -8445,7 +8544,322 @@ function rTTList(players){
 
 // ── Podgląd składu w modalu drużyny (w module Akademii) ──
 
-// ═══════════════ ZARZĄDZANIE SEZONEM ═══════════════
+// ═══════════════ GENERATOR AI KONSPEKTU ═══════════════
+var _aiKResult = null;  // wygenerowany konspekt do zastosowania
+
+function oAIKonspekt(){
+  // Wypełnij selektory
+  var teamSel=document.getElementById('ai-team');
+  var coachSel=document.getElementById('ai-coach');
+  if(teamSel){
+    teamSel.innerHTML='<option value="">— wybierz —</option>'+
+      TEAMS.filter(t=>t.season===currentSeason).map(t=>'<option value="'+escH(t.name)+'">'+escH(t.name)+'</option>').join('');
+  }
+  if(coachSel){
+    coachSel.innerHTML='<option value="">— brak —</option>'+
+      COACHES.map(c=>'<option value="'+escH(c.name)+'">'+escH(c.name)+'</option>').join('');
+  }
+  // Dzisiejsza data
+  var dateEl=document.getElementById('ai-date');
+  if(dateEl&&!dateEl.value) dateEl.value=TODAY.toISOString().slice(0,10);
+
+  // Reset
+  aiKReset();
+  aiUpdateTimePreview();
+  oM('mo-ai-konsp');
+}
+
+function aiUpdateTematy(){
+  var faza=(document.getElementById('ai-faza')||{}).value||'';
+  var tSel=document.getElementById('ai-temat');
+  var kSel=document.getElementById('ai-koncept');
+  if(!tSel||!kSel)return;
+  if(!faza||!TX[faza]){
+    tSel.innerHTML='<option value="">— najpierw wybierz fazę —</option>';
+    tSel.disabled=true; kSel.disabled=true; return;
+  }
+  var tematy=Object.keys(TX[faza]);
+  tSel.innerHTML='<option value="">— wybierz temat —</option>'+tematy.map(t=>'<option value="'+escH(t)+'">'+escH(t)+'</option>').join('');
+  tSel.disabled=false;
+  kSel.innerHTML='<option value="">— wybierz koncept —</option>';
+  kSel.disabled=true;
+}
+
+function aiUpdateKoncepty(){
+  var faza=(document.getElementById('ai-faza')||{}).value||'';
+  var temat=(document.getElementById('ai-temat')||{}).value||'';
+  var kSel=document.getElementById('ai-koncept');
+  if(!kSel)return;
+  if(!faza||!temat||!TX[faza]||!TX[faza][temat]){kSel.disabled=true;return;}
+  var koncepty=TX[faza][temat];
+  kSel.innerHTML='<option value="">— wybierz koncept —</option>'+koncepty.map(k=>'<option value="'+escH(k)+'">'+escH(k)+'</option>').join('');
+  kSel.disabled=false;
+}
+
+function aiUpdateTimePreview(){
+  var warm=parseInt((document.getElementById('ai-t-warm')||{}).value)||20;
+  var main=parseInt((document.getElementById('ai-t-main')||{}).value)||55;
+  var cool=parseInt((document.getElementById('ai-t-cool')||{}).value)||15;
+  var total=warm+main+cool;
+  var el=document.getElementById('ai-time-preview');
+  if(!el)return;
+  var durEl=document.getElementById('ai-dur');
+  var dur=parseInt((durEl||{}).value)||90;
+  var diff=total-dur;
+  var diffStr=diff===0?'✓ Suma zgodna z czasem treningu':(diff>0?'⚠ O '+diff+' min za dużo':'⚠ O '+Math.abs(diff)+' min za mało');
+  var c=diff===0?'var(--dg)':diff>0?'var(--red)':'var(--am)';
+  el.innerHTML='<span style="color:'+c+';font-weight:500;">'+diffStr+'</span>'
+    +' &nbsp;·&nbsp; Razem: <b>'+total+' min</b>'
+    +' = Wstępna '+warm+' + Główna '+main+' + Końcowa '+cool;
+}
+
+function aiKReset(){
+  _aiKResult=null;
+  var params=document.getElementById('ai-k-params');
+  var result=document.getElementById('ai-k-result');
+  var genBtn=document.getElementById('ai-k-gen-btn');
+  var applyBtn=document.getElementById('ai-k-apply-btn');
+  var resetBtn=document.getElementById('ai-k-reset-btn');
+  if(params)params.style.display='';
+  if(result){result.style.display='none';result.innerHTML='';}
+  if(genBtn)genBtn.style.display='';
+  if(applyBtn)applyBtn.style.display='none';
+  if(resetBtn)resetBtn.style.display='none';
+}
+
+async function aiKGenerate(){
+  var team=(document.getElementById('ai-team')||{}).value||'';
+  var faza=(document.getElementById('ai-faza')||{}).value||'';
+  var temat=(document.getElementById('ai-temat')||{}).value||'';
+  var koncept=(document.getElementById('ai-koncept')||{}).value||'';
+  var dur=parseInt((document.getElementById('ai-dur')||{}).value)||90;
+  var warm=parseInt((document.getElementById('ai-t-warm')||{}).value)||20;
+  var main=parseInt((document.getElementById('ai-t-main')||{}).value)||55;
+  var cool=parseInt((document.getElementById('ai-t-cool')||{}).value)||15;
+  var notes=(document.getElementById('ai-notes')||{}).value||'';
+  var players=parseInt((document.getElementById('ai-players')||{}).value)||16;
+  var coachName=(document.getElementById('ai-coach')||{}).value||'';
+  var place=(document.getElementById('ai-place')||{}).value||'';
+  var dateStr=(document.getElementById('ai-date')||{}).value||'';
+
+  if(!faza||!temat){ST('Wybierz fazę i temat');return;}
+
+  // Pobierz ćwiczenia z bazy pasujące do fazy/tematu/konceptu
+  var matchedEXS=EXS.filter(function(e){
+    var fMatch=!faza||e.f===faza;
+    var tMatch=!temat||e.t===temat;
+    var kMatch=!koncept||e.k===koncept;
+    return fMatch&&tMatch;
+  });
+  var exList=matchedEXS.slice(0,30).map(function(e){
+    return '- ID:'+e.id+' | Nazwa: '+e.n+' | Faza: '+(e.f||'')+' | Temat: '+(e.t||'')+' | Koncept: '+(e.k||'')+' | Czas: '+(e.cz||'?')+' min | Opis: '+(e.o||'').substring(0,80);
+  }).join('\n');
+
+  // Szczegóły konceptu
+  var szczegoly=koncept?getAllSzczegoly(koncept):[];
+
+  var prompt=`Jesteś ekspertem od szkolenia piłkarskiego. Wygeneruj konspekt treningowy dla akademii piłkarskiej.
+
+PARAMETRY TRENINGU:
+- Drużyna: ${team||'nieznana'}
+- Czas: ${dur} minut
+- Liczba zawodników: ${players}
+- Faza gry: ${faza}
+- Temat: ${temat}
+- Koncept: ${koncept||'dowolny z tematu'}
+- Coaching points z konceptu: ${szczegoly.length?szczegoly.slice(0,5).join(', '):'brak szczegółów'}
+${notes?'- Dodatkowe wskazówki trenera: '+notes:''}
+
+STRUKTURA TRENINGU (nie zmieniaj tej struktury):
+1. CZĘŚĆ WSTĘPNA (${warm} min):
+   - Ćwiczenie 1: MOTORYCZNE (rozgrzewka, koordynacja, szybkość) — ${Math.round(warm*0.45)} min
+   - Ćwiczenie 2: TECHNICZNE (technika piłkarska powiązana z tematem) — ${Math.round(warm*0.55)} min
+
+2. CZĘŚĆ GŁÓWNA (${main} min):
+   - Ćwiczenie 3: SYTUACJA MECZOWA (mała gra lub ćwiczenie taktyczne 4v4–8v8) — ${Math.round(main*0.5)} min
+   - Ćwiczenie 4: GRA (gra na duże bramki lub wielka gra tematyczna) — ${Math.round(main*0.5)} min
+
+3. CZĘŚĆ KOŃCOWA (${cool} min):
+   - Ćwiczenie 5: WYCISZENIE (stretching, oddechowe) — ${Math.round(cool*0.4)} min
+   - Ćwiczenie 6: OMÓWIENIE ZAJĘĆ (koło drużynowe, feedback, Q&A) — ${Math.round(cool*0.6)} min
+
+${exList?'DOSTĘPNE ĆWICZENIA Z BAZY KLUBU (możesz z nich korzystać wstawiając ich ID):\n'+exList+'\n\nJeśli ćwiczenie z bazy pasuje — użyj go (podaj jego ID). Jeśli nie — zaproponuj własne.':'BAZA ĆWICZEŃ JEST PUSTA — zaproponuj ćwiczenia samodzielnie.'}
+
+Odpowiedz WYŁĄCZNIE w formacie JSON (bez markdown, bez \`\`\`, bez opisu przed/po):
+{
+  "title": "Tytuł konspektu",
+  "goal": "Główny cel treningu",
+  "goals": "• cel 1\\n• cel 2\\n• cel 3",
+  "warm": [
+    {"name": "Nazwa ćwiczenia 1", "dur": ${Math.round(warm*0.45)}, "desc": "Opis organizacji", "coaching": "Coaching points", "db_id": null},
+    {"name": "Nazwa ćwiczenia 2", "dur": ${Math.round(warm*0.55)}, "desc": "Opis organizacji", "coaching": "Coaching points", "db_id": null}
+  ],
+  "main": [
+    {"name": "Nazwa ćwiczenia 3", "dur": ${Math.round(main*0.5)}, "desc": "Opis organizacji", "coaching": "Coaching points", "db_id": null},
+    {"name": "Nazwa ćwiczenia 4", "dur": ${Math.round(main*0.5)}, "desc": "Opis organizacji", "coaching": "Coaching points", "db_id": null}
+  ],
+  "cool": [
+    {"name": "Wyciszenie i stretching", "dur": ${Math.round(cool*0.4)}, "desc": "Opis ćwiczeń rozciągających", "coaching": "Uwaga na spokojny oddech i relaks mięśni", "db_id": null},
+    {"name": "Omówienie zajęć", "dur": ${Math.round(cool*0.6)}, "desc": "Koło drużynowe, pytania i odpowiedzi, podsumowanie trenera", "coaching": "Co zapamiętali? Co było trudne? Co poprawić?", "db_id": null}
+  ]
+}`;
+
+  // Pokaż loader
+  var resultEl=document.getElementById('ai-k-result');
+  var paramsEl=document.getElementById('ai-k-params');
+  var genBtn=document.getElementById('ai-k-gen-btn');
+  if(genBtn){genBtn.disabled=true;genBtn.innerHTML='<svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:#fff;fill:none;stroke-width:1.8;animation:spin 1s linear infinite;"><path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke-dasharray="24" stroke-dashoffset="8"/></svg> Generuję…';}
+  if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<div style="text-align:center;padding:40px;"><div style="font-size:32px;margin-bottom:12px;">🤖</div><div style="font-size:14px;font-weight:500;color:var(--txt2);margin-bottom:6px;">AI dobiera ćwiczenia…</div><div style="font-size:11px;color:var(--txt3);">Analizuję bazę ćwiczeń i generuję plan treningowy</div></div>';}
+  if(paramsEl)paramsEl.style.display='none';
+
+  try{
+    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    var data=await resp.json();
+    var raw=data.content&&data.content[0]&&data.content[0].text?data.content[0].text:'';
+    // Wyczyść markdown jeśli AI go dodał
+    raw=raw.replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(raw);
+    _aiKResult={parsed,team,faza,temat,koncept,dur,warm,main,cool,coachName,place,dateStr,players};
+    aiKRenderResult(parsed,warm,main,cool);
+  } catch(err){
+    if(resultEl)resultEl.innerHTML='<div style="background:var(--lred);border-radius:var(--r2);padding:16px;color:var(--red);font-size:12px;">❌ Błąd generowania: '+escH(String(err.message||err))+'<br><br>Sprawdź połączenie z internetem i spróbuj ponownie.</div>';
+    if(paramsEl)paramsEl.style.display='';
+  }
+  if(genBtn){genBtn.disabled=false;genBtn.innerHTML='<svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:#fff;fill:none;stroke-width:1.8;"><path d="M8 2l1.5 3.5L13 7l-3.5 1.5L8 12l-1.5-3.5L3 7l3.5-1.5z"/></svg>Generuj ponownie';genBtn.style.display='';}
+  var applyBtn=document.getElementById('ai-k-apply-btn');
+  var resetBtn=document.getElementById('ai-k-reset-btn');
+  if(applyBtn)applyBtn.style.display=_aiKResult?'':'none';
+  if(resetBtn)resetBtn.style.display='';
+}
+
+function aiKRenderResult(p,warm,main,cool){
+  var resultEl=document.getElementById('ai-k-result');
+  if(!resultEl)return;
+  var html='';
+
+  // Nagłówek wyniku
+  html+='<div style="background:var(--lg);border-radius:var(--r2);padding:12px 16px;margin-bottom:16px;">';
+  html+='<div style="font-size:14px;font-weight:600;color:var(--dg);margin-bottom:4px;">'+escH(p.title||'Konspekt treningowy')+'</div>';
+  html+='<div style="font-size:11px;color:var(--g);">Cel: '+escH(p.goal||'—')+'</div>';
+  html+='</div>';
+
+  // Sekcje
+  var sections=[
+    {key:'warm',label:'Część wstępna',color:'var(--am)',dur:warm,
+     desc:'ćwiczenie motoryczne + techniczne'},
+    {key:'main',label:'Część główna',color:'var(--g)',dur:main,
+     desc:'sytuacja meczowa + gra'},
+    {key:'cool',label:'Część końcowa',color:'var(--pu)',dur:cool,
+     desc:'wyciszenie + omówienie'},
+  ];
+
+  sections.forEach(function(sec){
+    var exercises=p[sec.key]||[];
+    html+='<div style="margin-bottom:16px;">';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html+='<div style="width:10px;height:10px;border-radius:2px;background:'+sec.color+';flex-shrink:0;"></div>';
+    html+='<div style="font-size:13px;font-weight:600;">'+escH(sec.label)+' <span style="font-weight:400;color:var(--txt3);font-size:11px;">('+sec.dur+' min · '+sec.desc+')</span></div>';
+    html+='</div>';
+
+    exercises.forEach(function(ex,i){
+      // Sprawdź czy ćwiczenie pochodzi z bazy
+      var dbEx=ex.db_id?EXS.find(function(e){return e.id===ex.db_id;}):null;
+      html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 14px;margin-bottom:6px;border-left:3px solid '+sec.color+';">';
+      html+='<div style="display:flex;align-items:flex-start;gap:10px;">';
+      html+='<div style="width:22px;height:22px;border-radius:50%;background:'+sec.color+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px;">'+(i+1)+'</div>';
+      html+='<div style="flex:1;min-width:0;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">';
+      html+='<div style="font-size:12px;font-weight:600;">'+escH(ex.name||'Ćwiczenie')+'</div>';
+      html+='<span style="font-size:10px;background:var(--sur);border:1px solid var(--brd);border-radius:8px;padding:1px 6px;color:var(--txt2);">'+ex.dur+' min</span>';
+      if(dbEx)html+='<span style="font-size:9px;background:#E1F5EE;color:#085041;border-radius:8px;padding:1px 6px;">📚 z bazy</span>';
+      html+='</div>';
+      if(ex.desc)html+='<div style="font-size:11px;color:var(--txt2);margin-bottom:4px;">'+escH(ex.desc)+'</div>';
+      if(ex.coaching)html+='<div style="font-size:10px;color:var(--pu);font-style:italic;border-top:1px solid var(--brd);padding-top:4px;margin-top:4px;">💬 '+escH(ex.coaching)+'</div>';
+      html+='</div></div></div>';
+    });
+    html+='</div>';
+  });
+
+  // Coaching points z konceptu
+  if(_aiKResult&&_aiKResult.koncept){
+    var sz=getAllSzczegoly(_aiKResult.koncept);
+    if(sz.length){
+      html+='<div style="background:#EEEDFE;border-radius:var(--r2);padding:10px 14px;margin-top:8px;">';
+      html+='<div style="font-size:11px;font-weight:600;color:#3C3489;margin-bottom:6px;">📋 Coaching points — '+escH(_aiKResult.koncept)+'</div>';
+      html+='<div style="font-size:10px;color:#3C3489;line-height:1.8;">'+sz.slice(0,6).map(function(s){return '• '+escH(s);}).join('<br>')+'</div>';
+      html+='</div>';
+    }
+  }
+
+  resultEl.innerHTML=html;
+}
+
+function aiKApply(){
+  if(!_aiKResult)return;
+  var p=_aiKResult.parsed;
+
+  // Uruchom kreator i wypełnij dane
+  startK();
+  SP('kreator');
+
+  // Poczekaj chwilę aż kreator się załaduje
+  setTimeout(function(){
+    // Krok 1 — informacje podstawowe
+    var titleEl=document.getElementById('k-title');
+    if(titleEl){titleEl.value=p.title||'';if(document.getElementById('kr-t'))document.getElementById('kr-t').textContent=p.title||'Nowy konspekt';}
+    var teamEl=document.getElementById('k-team');
+    if(teamEl&&_aiKResult.team)teamEl.value=_aiKResult.team;
+    var durEl=document.getElementById('k-dur');
+    if(durEl)durEl.value=_aiKResult.dur||90;
+    var placeEl=document.getElementById('k-place');
+    if(placeEl&&_aiKResult.place)placeEl.value=_aiKResult.place;
+    var dateEl=document.getElementById('k-date');
+    if(dateEl&&_aiKResult.dateStr)dateEl.value=_aiKResult.dateStr;
+    var coachEl=document.getElementById('k-coach');
+    if(coachEl&&_aiKResult.coachName)coachEl.value=_aiKResult.coachName;
+    var goalEl=document.getElementById('k-goal');
+    if(goalEl)goalEl.value=p.goal||'';
+    var goalsEl=document.getElementById('k-goals');
+    if(goalsEl)goalsEl.value=p.goals||'';
+    // Faza i temat
+    var fazaEl=document.getElementById('k-faza');
+    if(fazaEl&&_aiKResult.faza){fazaEl.value=_aiKResult.faza;if(typeof onKF==='function')onKF();}
+    setTimeout(function(){
+      var tematEl=document.getElementById('k-temat');
+      if(tematEl&&_aiKResult.temat){tematEl.value=_aiKResult.temat;if(typeof onKT==='function')onKT();}
+    },100);
+
+    // Wstaw ćwiczenia do sekcji
+    ['warm','main','cool'].forEach(function(sec){
+      var exercises=p[sec]||[];
+      exercises.forEach(function(ex){
+        var dbEx=ex.db_id?EXS.find(function(e){return e.id===ex.db_id;}):null;
+        // Sprawdź czy jest w bazy lub dodaj ręcznie
+        if(dbEx){
+          addEToSection(dbEx,sec,ex.dur);
+        } else {
+          // Dodaj manualnie
+          var manualEx={n:ex.name,cz:String(ex.dur),o:ex.desc,z:ex.coaching,f:_aiKResult.faza,t:_aiKResult.temat,k:_aiKResult.koncept||''};
+          addEToSection(manualEx,sec,ex.dur);
+        }
+      });
+      rKT();
+    });
+
+    cM('mo-ai-konsp');
+    ST('✓ Konspekt wczytany do kreatora — sprawdź i zapisz!');
+  },300);
+}
+
+
 
 function genNextSeasonLabel(season){
   // '2025/26' → '2026/27'
@@ -11490,12 +11904,15 @@ function dlWzor(type){
     'druzyny':'wzor_druzyny_trenerzy.xlsx',
     'karty-trenerow':'wzor_karty_trenerow.xlsx'
   };
-  // Wzory są przechowywane w Supabase Storage pod ścieżką templates/
-  var supaUrl=SUPA_URL+'/storage/v1/object/public/game-models/templates/'+urls[type];
-  // Otwórz w nowej karcie — jeśli nie ma Supabase, poinformuj
-  var a=document.createElement('a');a.href=supaUrl;a.download=urls[type];a.target='_blank';
+  var fname=urls[type];
+  if(!fname)return;
+  // Pobierz z Supabase Storage z cache-busting (timestamp)
+  var supaUrl=SUPA_URL+'/storage/v1/object/public/game-models/templates/'+fname+'?t='+Date.now();
+  var a=document.createElement('a');
+  a.href=supaUrl;
+  a.download=fname;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
-  ST('Pobieranie wzoru… Jeśli nie działa, wgraj wzory do Supabase Storage (bucket: game-models/templates/)');
+  ST('Pobieranie wzoru…');
 }
 
 function oImportJSON(){
