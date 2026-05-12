@@ -633,7 +633,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- PLANOWANIE -->
 <div id="pg-plan" class="pg">
-  <div class="tb"><div><div class="t1">Planowanie</div><div class="t2" id="plan-sub">Sezon 2025/26</div></div><div class="tb-r"><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div></div></div>
+  <div class="tb"><div><div class="t1">Planowanie</div><div class="t2" id="plan-sub">Sezon 2025/26</div></div><div class="tb-r"><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#E6F1FB;border:1px solid #85B7EB;"></div>Makrocykl</div><div class="leg-item"><div class="leg-dot" style="background:#EEEDFE;border:1px solid #AFA9EC;"></div>Mezocykl</div><div class="leg-item"><div class="leg-dot" style="background:var(--lg);border:1px solid #5DCAA5;"></div>Mikrocykl</div></div><button class="btn" onclick="oSeries()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><rect x="2" y="3" width="4" height="10" rx="1"/><rect x="8" y="3" width="4" height="10" rx="1"/><path d="M6 8h2M14 6v4"/></svg>Generuj serię treningów</button></div></div>
   <div class="inner">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="display:flex;align-items:center;gap:10px;"><button onclick="chY(-1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2L4 6l4 4"/></svg></button><div id="yr-l" style="font-size:15px;font-weight:600;min-width:72px;text-align:center;">2025/26</div><button onclick="chY(1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></button></div><div style="font-size:11px;color:var(--txt2);">Przeciągnij myszką na osi aby narysować nowy okres</div></div>
     <div class="gw"><div class="ghdr"><div class="glc">Cykl</div><div class="mgr" id="m-hdr"></div></div><div id="g-rows"></div></div>
@@ -656,6 +656,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <button onclick="calNav(1)" style="width:28px;height:28px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2l4 4-4 4"/></svg></button>
       </div>
       <button class="btn pri" onclick="oAddTraining(null)"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj trening</button>
+      <button class="btn" onclick="oSeries()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><rect x="2" y="3" width="4" height="10" rx="1"/><rect x="8" y="3" width="4" height="10" rx="1"/><path d="M6 8h2M14 6v4"/></svg>Generuj serię</button>
       <button class="btn" onclick="oAddMatch(null,'mecz')" style="background:#E6F1FB;color:#0C447C;border-color:#85B7EB;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><circle cx="8" cy="8" r="6"/><path d="M8 2v12M2 8h12" stroke-width="1.2"/><path d="M4 4Q8 6 12 4M4 12Q8 10 12 12" stroke-width="1"/></svg>Dodaj mecz</button>
       <button class="btn" onclick="oAddMatch(null,'turniej')" style="background:#FFF8ED;color:#8A5F00;border-color:#E5A03B;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M4 2h8v5a4 4 0 01-8 0V2z"/><path d="M4 12h8M8 9v3"/><path d="M2 2h2M12 2h2"/></svg>Turniej</button>
     </div>
@@ -974,7 +975,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div><div class="t1">Kalendarz</div><div class="t2" id="dir-cal-sub">Wszystkie drużyny</div></div>
     <div class="tb-r">
       <select class="fsel-sm" id="dir-cal-team" onchange="rDirCal()" style="min-width:150px;"><option value="">Wszystkie drużyny</option></select>
-      <button class="btn pri" onclick="oAddMatch()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj mecz</button>
+      <button class="btn pri" onclick="oAddTraining(null)"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj trening</button>
+      <button class="btn" onclick="oSeries()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><rect x="2" y="3" width="4" height="10" rx="1"/><rect x="8" y="3" width="4" height="10" rx="1"/><path d="M6 8h2M14 6v4"/></svg>Generuj serię</button>
+      <button class="btn" onclick="oAddMatch(null,'mecz')" style="background:#E1F5EE;color:#085041;border-color:#5DCAA5;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><circle cx="8" cy="8" r="6"/><path d="M8 2v12M2 8h12" stroke-width="1.2"/></svg>Dodaj mecz</button>
     </div>
   </div>
   <!-- Legenda -->
@@ -1261,6 +1264,85 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="mbody" id="mo-tr-body"></div>
     <div class="mfs" id="mo-tr-foot"></div>
+  </div>
+</div>
+
+<!-- MODAL GENERATORA SERII TRENINGÓW -->
+<div class="mo" id="mo-series">
+  <div class="mbox wide" style="max-width:600px;">
+    <div class="mh">
+      <div class="mt2">Generator serii treningów</div>
+      <button class="mc2" onclick="cM('mo-series')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+    </div>
+    <div class="mbody" style="padding:16px;">
+      <div style="background:var(--lg);border-radius:var(--r2);padding:9px 12px;margin-bottom:14px;font-size:12px;color:var(--dg);">
+        📅 Podaj wzorzec jednego treningu — generator powieli go według wybranego rytmu i utworzy całą serię.
+      </div>
+
+      <!-- Wzorzec treningu -->
+      <div class="sh" style="margin-top:0;">Wzorzec treningu</div>
+      <div class="fr2">
+        <div><label class="fl">Drużyna *</label><select class="fsel" id="ser-team"></select></div>
+        <div><label class="fl">Prowadzący</label><select class="fsel" id="ser-coach"></select></div>
+      </div>
+      <div class="fr2">
+        <div><label class="fl">Godzina</label><input class="fi" id="ser-time" type="time" value="17:00"/></div>
+        <div><label class="fl">Miejsce</label><input class="fi" id="ser-place" placeholder="np. Boisko główne"/></div>
+      </div>
+      <div class="fr"><label class="fl">Notatki (dla wszystkich treningów serii)</label><textarea class="fta" id="ser-notes" style="min-height:50px;" placeholder="np. Trening taktyczny — stały element tygodniowy"></textarea></div>
+
+      <!-- Rytm -->
+      <div class="sh">Harmonogram</div>
+      <div class="fr2">
+        <div><label class="fl">Data pierwszego treningu *</label><input class="fi" id="ser-start" type="date"/></div>
+        <div><label class="fl">Data ostatniego treningu *</label><input class="fi" id="ser-end" type="date"/></div>
+      </div>
+
+      <div class="fr"><label class="fl">Rytm powtórzeń</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="ser-rhythm-btns">
+          <button onclick="setSERhythm(1)"  id="ser-r-1"  class="btn sm">Codziennie</button>
+          <button onclick="setSERhythm(2)"  id="ser-r-2"  class="btn sm">Co 2 dni</button>
+          <button onclick="setSERhythm(3)"  id="ser-r-3"  class="btn sm">Co 3 dni</button>
+          <button onclick="setSERhythm(7)"  id="ser-r-7"  class="btn sm" style="background:var(--lg);color:var(--dg);border-color:#5DCAA5;">Co tydzień</button>
+          <button onclick="setSERhythm(14)" id="ser-r-14" class="btn sm">Co 2 tygodnie</button>
+          <button onclick="setSERhythm(0)"  id="ser-r-0"  class="btn sm">Własny (dni)</button>
+        </div>
+      </div>
+
+      <!-- Własny rytm -->
+      <div id="ser-custom-wrap" style="display:none;margin-bottom:10px;">
+        <label class="fl">Co ile dni?</label>
+        <input class="fi" id="ser-custom-days" type="number" min="1" max="365" value="7" style="width:100px;" oninput="sePreview()"/>
+      </div>
+
+      <!-- Dni tygodnia (tylko dla rytmu tygodniowego) -->
+      <div id="ser-weekdays-wrap" style="display:none;margin-bottom:10px;">
+        <label class="fl">Dni tygodnia (wielokrotny wybór)</label>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;">
+          <button onclick="toggleSEDay(1)" id="se-d-1" class="btn sm">Pn</button>
+          <button onclick="toggleSEDay(2)" id="se-d-2" class="btn sm">Wt</button>
+          <button onclick="toggleSEDay(3)" id="se-d-3" class="btn sm">Śr</button>
+          <button onclick="toggleSEDay(4)" id="se-d-4" class="btn sm">Cz</button>
+          <button onclick="toggleSEDay(5)" id="se-d-5" class="btn sm">Pt</button>
+          <button onclick="toggleSEDay(6)" id="se-d-6" class="btn sm">So</button>
+          <button onclick="toggleSEDay(0)" id="se-d-0" class="btn sm">Nd</button>
+        </div>
+      </div>
+
+      <!-- Podgląd -->
+      <div id="ser-preview" style="display:none;margin-top:10px;">
+        <div class="sh">Podgląd serii</div>
+        <div id="ser-preview-body" style="max-height:180px;overflow-y:auto;border:1px solid var(--brd);border-radius:var(--r2);padding:8px;background:var(--sur2);font-size:11px;"></div>
+        <div id="ser-count" style="margin-top:6px;font-size:11px;color:var(--txt2);font-weight:500;"></div>
+      </div>
+    </div>
+    <div class="mfs">
+      <button class="btn" onclick="cM('mo-series')">Anuluj</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="sePreview()">👁 Podgląd</button>
+        <button class="btn pri" onclick="seGenerate()">⚡ Generuj serię</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1844,6 +1926,189 @@ function oDay(ds){
 }
 
 // ── DODAJ / EDYTUJ TRENING ──
+// ═══════════════ GENERATOR SERII TRENINGÓW ═══════════════
+var _seRhythm = 7;         // domyślnie co tydzień
+var _seWeekdays = new Set(); // wybrane dni tygodnia (0=Nd, 1=Pn..6=So)
+
+function oSeries(){
+  // Wypełnij drużyny i trenerów
+  var teamSel=document.getElementById('ser-team');
+  var coachSel=document.getElementById('ser-coach');
+  if(teamSel){
+    teamSel.innerHTML='<option value="">— wybierz —</option>'+
+      TEAMS.filter(t=>t.season===currentSeason).map(t=>'<option value="'+escH(t.name)+'">'+escH(t.name)+'</option>').join('');
+  }
+  if(coachSel){
+    coachSel.innerHTML='<option value="">— wybierz —</option>'+
+      COACHES.map(c=>'<option value="'+escH(c.name)+'">'+escH(c.name)+'</option>').join('');
+  }
+  // Domyślne daty — dziś i za miesiąc
+  var today=new Date();
+  var inMonth=new Date(today);
+  inMonth.setMonth(inMonth.getMonth()+1);
+  var startEl=document.getElementById('ser-start');
+  var endEl=document.getElementById('ser-end');
+  if(startEl&&!startEl.value) startEl.value=today.toISOString().slice(0,10);
+  if(endEl&&!endEl.value)     endEl.value=inMonth.toISOString().slice(0,10);
+
+  // Ustaw domyślny rytm
+  _seRhythm=7; _seWeekdays=new Set();
+  setSERhythm(7);
+
+  // Ukryj podgląd
+  var prev=document.getElementById('ser-preview');
+  if(prev)prev.style.display='none';
+
+  oM('mo-series');
+}
+
+function setSERhythm(r){
+  _seRhythm=r;
+  // Podświetl aktywny przycisk
+  [1,2,3,7,14,0].forEach(function(v){
+    var btn=document.getElementById('ser-r-'+v);
+    if(!btn)return;
+    if(v===r){
+      btn.style.background='var(--lg)';btn.style.color='var(--dg)';btn.style.borderColor='#5DCAA5';
+    } else {
+      btn.style.background='var(--sur)';btn.style.color='var(--txt2)';btn.style.borderColor='var(--brd)';
+    }
+  });
+  // Pokaż/ukryj pola pomocnicze
+  var customWrap=document.getElementById('ser-custom-wrap');
+  var weekWrap=document.getElementById('ser-weekdays-wrap');
+  if(customWrap) customWrap.style.display=(r===0)?'block':'none';
+  if(weekWrap)   weekWrap.style.display=(r===7)?'block':'none';
+  sePreview();
+}
+
+function toggleSEDay(d){
+  if(_seWeekdays.has(d)) _seWeekdays.delete(d);
+  else _seWeekdays.add(d);
+  var btn=document.getElementById('se-d-'+d);
+  if(btn){
+    if(_seWeekdays.has(d)){
+      btn.style.background='#1565C0';btn.style.color='#fff';btn.style.borderColor='#1565C0';
+    } else {
+      btn.style.background='var(--sur)';btn.style.color='var(--txt2)';btn.style.borderColor='var(--brd)';
+    }
+  }
+  sePreview();
+}
+
+function seGetDates(){
+  var startVal=(document.getElementById('ser-start')||{}).value||'';
+  var endVal=(document.getElementById('ser-end')||{}).value||'';
+  if(!startVal||!endVal)return[];
+
+  var start=new Date(startVal+'T12:00:00');
+  var end=new Date(endVal+'T12:00:00');
+  if(start>end)return[];
+
+  var dates=[];
+  var customDays=parseInt((document.getElementById('ser-custom-days')||{}).value)||7;
+  var rhythm=_seRhythm===0?customDays:_seRhythm;
+
+  if(_seRhythm===7&&_seWeekdays.size>0){
+    // Tryb dni tygodnia — iteruj dzień po dniu i zbieraj pasujące
+    var cur=new Date(start);
+    while(cur<=end){
+      var dow=cur.getDay(); // 0=Nd, 1=Pn...
+      if(_seWeekdays.has(dow)){
+        dates.push(new Date(cur));
+      }
+      cur.setDate(cur.getDate()+1);
+    }
+  } else {
+    // Tryb interwałowy — skocz o N dni
+    var cur2=new Date(start);
+    while(cur2<=end){
+      dates.push(new Date(cur2));
+      cur2.setDate(cur2.getDate()+rhythm);
+    }
+  }
+  return dates;
+}
+
+var DAY_NAMES=['Nd','Pn','Wt','Śr','Cz','Pt','So'];
+var MONTH_PL=['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+
+function sePreview(){
+  var dates=seGetDates();
+  var previewEl=document.getElementById('ser-preview');
+  var bodyEl=document.getElementById('ser-preview-body');
+  var countEl=document.getElementById('ser-count');
+  if(!previewEl||!bodyEl||!countEl)return;
+
+  if(!dates.length){
+    previewEl.style.display='none';return;
+  }
+  previewEl.style.display='block';
+
+  var time=(document.getElementById('ser-time')||{}).value||'17:00';
+  var team=(document.getElementById('ser-team')||{}).value||'—';
+
+  var html=dates.map(function(d,i){
+    var dow=DAY_NAMES[d.getDay()];
+    var label=d.getDate()+' '+MONTH_PL[d.getMonth()]+' '+d.getFullYear();
+    return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;'+(i<dates.length-1?'border-bottom:1px solid var(--brd)':'')+';">'
+      +'<div style="width:22px;text-align:center;font-size:10px;font-weight:600;color:#1565C0;flex-shrink:0;">'+(i+1)+'.</div>'
+      +'<div style="width:26px;font-size:10px;color:var(--txt3);flex-shrink:0;">'+dow+'</div>'
+      +'<div style="font-size:11px;color:var(--txt);flex:1;">'+label+'</div>'
+      +'<div style="font-size:10px;color:var(--txt2);">'+time+'</div>'
+      +'</div>';
+  }).join('');
+  bodyEl.innerHTML=html;
+
+  var existCount=dates.filter(function(d){
+    var ds=d.toISOString().slice(0,10);
+    return TRAININGS.some(function(t){return t.date===ds&&t.team===team;});
+  }).length;
+
+  var msg=dates.length+' treningów zostanie dodanych';
+  if(existCount>0) msg+=' · ⚠ '+existCount+' dat już ma trening tej drużyny';
+  countEl.textContent=msg;
+}
+
+function seGenerate(){
+  var team=(document.getElementById('ser-team')||{}).value||'';
+  if(!team){ST('Wybierz drużynę');return;}
+  var startVal=(document.getElementById('ser-start')||{}).value||'';
+  var endVal=(document.getElementById('ser-end')||{}).value||'';
+  if(!startVal||!endVal){ST('Podaj daty startu i końca');return;}
+
+  var dates=seGetDates();
+  if(!dates.length){ST('Brak dat do wygenerowania — sprawdź zakres i rytm');return;}
+
+  var time=(document.getElementById('ser-time')||{}).value||'17:00';
+  var coach=(document.getElementById('ser-coach')||{}).value||'';
+  var place=(document.getElementById('ser-place')||{}).value||'';
+  var notes=(document.getElementById('ser-notes')||{}).value||'';
+
+  if(!confirm('Wygenerować '+dates.length+' treningów dla drużyny '+team+'?'))return;
+
+  var added=0;
+  dates.forEach(function(d){
+    var ds=d.toISOString().slice(0,10);
+    TRAININGS.push({
+      id:genId(),
+      date:ds,
+      time:time,
+      team:team,
+      coach:coach,
+      place:place,
+      konspektId:null,
+      notes:notes
+    });
+    added++;
+  });
+
+  saveLS();
+  cM('mo-series');
+  rCal();
+  ST('✓ Dodano '+added+' treningów dla '+team);
+}
+
 function oAddTraining(dateStr){
   editTrainingIdx=null;
   renderTrainingForm({date:dateStr||new Date().toISOString().slice(0,10),time:'17:00'});
@@ -6569,7 +6834,7 @@ function rDirCal(){
     var evs=byDay[d2]||[];
     var trainings=evs.filter(e=>e.type==='training');
     var matches=evs.filter(e=>e.type==='match');
-    html+='<div class="cc2'+(isToday?' today':'')+'" onclick="dirCalDayClick('+d2+')" style="cursor:pointer;">';
+    html+='<div class="cc2'+(isToday?' today':'')+'" onclick="dirCalDayClick('+d2+')" style="cursor:pointer;" title="Kliknij aby zobaczyć / dodać wydarzenia">';
     html+='<div class="ccn'+(isToday?' today':'')+'">'+d2+'</div>';
     // Eventy (max 3 widoczne)
     var shown=0;
@@ -6610,6 +6875,7 @@ function rDirCal(){
     allEvs.forEach(({day,ev})=>{
       var isMatch=ev.type==='match';
       var obj=ev.obj;
+      var tidx=isMatch?-1:TRAININGS.indexOf(obj);
       html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd);">';
       html+='<div style="width:32px;height:32px;border-radius:var(--r2);background:'+(isMatch?'#E1F5EE':'#E6F1FB')+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+(isMatch?'#085041':'#0C447C')+';flex-shrink:0;">'+day+'</div>';
       html+='<div style="flex:1;min-width:0;">';
@@ -6618,9 +6884,14 @@ function rDirCal(){
         html+='<div style="font-size:12px;font-weight:600;">'+(isHome?'🏠':'✈️')+' '+escH(obj.opponent||'Mecz')+'</div>';
         html+='<div style="font-size:11px;color:var(--txt2);">'+escH(obj.team||'')+(obj.time?' · '+obj.time:'')+(obj.location?' · '+obj.location:'')+'</div>';
       } else {
-        html+='<div style="font-size:12px;font-weight:600;">⚽ Trening — '+escH(obj.team||'')+'</div>';
-        html+='<div style="font-size:11px;color:var(--txt2);">'+(obj.time||'')+(obj.location?' · '+obj.location:'')+(obj.konspekt?' · '+obj.konspekt:'')+'</div>';
+        html+='<div style="font-size:12px;font-weight:600;">📋 Trening — '+escH(obj.team||'')+'</div>';
+        html+='<div style="font-size:11px;color:var(--txt2);">'+(obj.time||'')+(obj.place?' · '+escH(obj.place):'')+(obj.coach?' · '+escH(obj.coach):'')+'</div>';
       }
+      html+='</div>';
+      // Przyciski akcji
+      html+='<div style="display:flex;gap:4px;flex-shrink:0;">';
+      if(!isMatch&&tidx>=0) html+='<button class="btn sm" onclick="oEditTraining('+tidx+')">✎</button>';
+      if(isMatch) html+='<button class="btn sm" onclick="oEditMatch(\''+obj.id+'\')">✎</button>';
       html+='</div>';
       html+='</div>';
     });
@@ -6630,26 +6901,127 @@ function rDirCal(){
 }
 
 function dirCalDayClick(d){
-  // Pokaż modal dnia z listą wydarzeń
-  var evs=(TRAININGS.filter(t=>{var dt=new Date(t.date||'');return dt.getDate()===d&&dt.getFullYear()===dirCalYear&&dt.getMonth()===dirCalMonth;}).map(t=>({type:'training',obj:t})))
-    .concat(MATCHES.filter(m=>{var dt=new Date(m.date||'');return dt.getDate()===d&&dt.getFullYear()===dirCalYear&&dt.getMonth()===dirCalMonth;}).map(m=>({type:'match',obj:m})));
-  if(!evs.length)return;
-  var html='<div class="sh" style="margin-top:0;">'+d+' '+MONTH_NAMES[dirCalMonth]+' '+dirCalYear+'</div>';
-  evs.forEach(ev=>{
-    var isMatch=ev.type==='match';
-    var obj=ev.obj;
-    html+='<div style="padding:10px;background:var(--sur2);border-radius:var(--r2);margin-bottom:8px;">';
-    html+='<div style="font-size:13px;font-weight:600;margin-bottom:4px;">'+(isMatch?'⚽ Mecz: '+escH(obj.opponent||'—'):'📋 Trening: '+escH(obj.team||'—'))+'</div>';
-    if(!isMatch)html+='<div style="font-size:11px;color:var(--txt2);">Drużyna: '+escH(obj.team||'—')+'</div>';
-    if(isMatch)html+='<div style="font-size:11px;color:var(--txt2);">Drużyna: '+escH(obj.team||'—')+(obj.score?' · Wynik: '+obj.score:'')+'</div>';
-    html+='</div>';
+  var dateStr=dirCalYear+'-'+String(dirCalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  var fTeam=(document.getElementById('dir-cal-team')||{}).value||'';
+
+  var dayTr=TRAININGS.filter(t=>{
+    if(!t.date)return false;
+    var dt=new Date(t.date+'T12:00:00');
+    return dt.getDate()===d&&dt.getFullYear()===dirCalYear&&dt.getMonth()===dirCalMonth&&(!fTeam||t.team===fTeam);
   });
-  var mo=document.getElementById('mo-generic-info');
-  if(!mo){mo=document.createElement('div');mo.className='mo';mo.id='mo-generic-info';mo.innerHTML='<div class="mbox"><div class="mh"><div class="mt2" id="mo-gi-ttl">Dzień</div><button class="mc2" onclick="cM(\'mo-generic-info\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-gi-body"></div><div class="mf"><button class="btn" onclick="cM(\'mo-generic-info\')">Zamknij</button></div></div>';mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});document.body.appendChild(mo);}
-  document.getElementById('mo-gi-ttl').textContent=d+' '+MONTH_NAMES[dirCalMonth]+' '+dirCalYear;
-  document.getElementById('mo-gi-body').innerHTML=html;
-  oM('mo-generic-info');
+  var dayM=MATCHES.filter(m=>{
+    if(!m.date)return false;
+    var dt=new Date(m.date+'T12:00:00');
+    return dt.getDate()===d&&dt.getFullYear()===dirCalYear&&dt.getMonth()===dirCalMonth&&(!fTeam||m.team===fTeam);
+  });
+
+  // Zbuduj lub pobierz modal
+  var mo=document.getElementById('mo-dir-day');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-dir-day';
+    mo.innerHTML='<div class="mbox" style="width:520px;max-height:90vh;display:flex;flex-direction:column;">'
+      +'<div class="mh"><div class="mt2" id="mo-dir-day-ttl">Dzień</div>'
+      +'<div style="display:flex;gap:6px;">'
+      +'<button class="btn sm" id="mo-dir-day-add-tr">+ Trening</button>'
+      +'<button class="btn sm" id="mo-dir-day-add-ser" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;">📅 Seria</button>'
+      +'<button class="btn sm" id="mo-dir-day-add-m" style="background:#E1F5EE;color:#085041;border-color:#5DCAA5;">⚽ Mecz</button>'
+      +'</div>'
+      +'<button class="mc2" onclick="cM(\'mo-dir-day\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
+      +'<div class="mbody" id="mo-dir-day-body" style="overflow-y:auto;"></div>'
+      +'<div class="mf"><button class="btn" onclick="cM(\'mo-dir-day\')">Zamknij</button></div>'
+      +'</div>';
+    mo.addEventListener('click',function(e){if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+
+  // Ustaw nagłówek i przyciski
+  var dt2=new Date(dateStr+'T12:00:00');
+  var DOW_PL=['Nd','Pn','Wt','Śr','Cz','Pt','So'];
+  document.getElementById('mo-dir-day-ttl').textContent=DOW_PL[dt2.getDay()]+', '+d+' '+MONTH_NAMES[dirCalMonth]+' '+dirCalYear;
+
+  var addTrBtn=document.getElementById('mo-dir-day-add-tr');
+  if(addTrBtn) addTrBtn.onclick=function(){cM('mo-dir-day');oAddTraining(dateStr);};
+  var addSerBtn=document.getElementById('mo-dir-day-add-ser');
+  if(addSerBtn) addSerBtn.onclick=function(){cM('mo-dir-day');oSeries();};
+  var addMBtn=document.getElementById('mo-dir-day-add-m');
+  if(addMBtn) addMBtn.onclick=function(){cM('mo-dir-day');oAddMatch(dateStr,'mecz');};
+
+  // Treść dnia
+  var bodyEl=document.getElementById('mo-dir-day-body');
+  var html='';
+
+  if(!dayTr.length&&!dayM.length){
+    html='<div style="text-align:center;padding:28px 20px;">'
+      +'<div style="font-size:32px;margin-bottom:10px;">📅</div>'
+      +'<div style="font-size:13px;color:var(--txt2);margin-bottom:12px;">Brak wydarzeń w tym dniu</div>'
+      +'<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">'
+      +'<button class="btn pri sm" onclick="cM(\'mo-dir-day\');oAddTraining(\''+dateStr+'\')">+ Trening</button>'
+      +'<button class="btn sm" onclick="cM(\'mo-dir-day\');oSeries()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;">📅 Seria</button>'
+      +'<button class="btn sm" onclick="cM(\'mo-dir-day\');oAddMatch(\''+dateStr+'\',\'mecz\')" style="background:#E1F5EE;color:#085041;border-color:#5DCAA5;">⚽ Mecz</button>'
+      +'</div></div>';
+  }
+
+  // Treningi
+  if(dayTr.length){
+    html+='<div class="sh" style="margin-top:0;">Treningi ('+dayTr.length+')</div>';
+    dayTr.forEach(function(tr){
+      var tidx=TRAININGS.indexOf(tr);
+      html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 12px;margin-bottom:8px;border-left:3px solid #1D9E75;">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
+      html+='<div style="flex:1;min-width:0;">';
+      html+='<div style="font-size:12px;font-weight:600;color:var(--txt);">📋 '+escH(tr.team||'Trening')+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);margin-top:2px;">'
+        +(tr.time?'⏰ '+tr.time+' · ':'')
+        +(tr.coach?'👤 '+escH(tr.coach)+' · ':'')
+        +(tr.place?'📍 '+escH(tr.place):'')
+        +'</div>';
+      if(tr.notes)html+='<div style="font-size:11px;color:var(--txt3);margin-top:2px;font-style:italic;">'+escH(tr.notes.substring(0,80))+(tr.notes.length>80?'...':'')+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;gap:4px;flex-shrink:0;">';
+      html+='<button class="btn sm" onclick="cM(\'mo-dir-day\');oEditTraining('+tidx+')">✎ Edytuj</button>';
+      html+='<button class="btn sm dan" onclick="dirDayDelTraining('+tidx+',\''+dateStr+'\')">×</button>';
+      html+='</div></div></div>';
+    });
+  }
+
+  // Mecze/Turnieje
+  if(dayM.length){
+    html+='<div class="sh">Mecze / Turnieje ('+dayM.length+')</div>';
+    dayM.forEach(function(m){
+      var midx=MATCHES.indexOf(m);
+      var isHome=!m.away;
+      var isTour=m.type==='turniej';
+      var icon=isTour?'🏆':(isHome?'🏠':'✈️');
+      html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 12px;margin-bottom:8px;border-left:3px solid #378ADD;">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
+      html+='<div style="flex:1;min-width:0;">';
+      html+='<div style="font-size:12px;font-weight:600;color:var(--txt);">'+icon+' '+escH(m.opponent||'Mecz')+'</div>';
+      html+='<div style="font-size:11px;color:var(--txt2);margin-top:2px;">'
+        +escH(m.team||'')
+        +(m.time?' · ⏰ '+m.time:'')
+        +(m.location?' · 📍 '+escH(m.location):'')
+        +(m.score?' · <b>'+escH(m.score)+'</b>':'')
+        +'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;gap:4px;flex-shrink:0;">';
+      html+='<button class="btn sm" onclick="cM(\'mo-dir-day\');oEditMatch(\''+m.id+'\')">✎ Edytuj</button>';
+      html+='</div></div></div>';
+    });
+  }
+
+  bodyEl.innerHTML=html;
+  oM('mo-dir-day');
 }
+
+function dirDayDelTraining(idx, dateStr){
+  if(!confirm('Usunąć ten trening?'))return;
+  TRAININGS.splice(idx,1);
+  saveLS();rDirCal();
+  cM('mo-dir-day');
+  ST('Trening usunięty');
+}
+
+
 
 // ── Przegląd akademii (wzbogacony) ──
 function rDirOverview(){
