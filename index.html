@@ -914,6 +914,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="inner" id="dir-dash-body"></div>
 </div>
 
+<!-- MODAL NOWEGO SEZONU -->
+<div class="mo" id="mo-new-season">
+  <div class="mbox" style="width:560px;max-height:90vh;display:flex;flex-direction:column;">
+    <div class="mh">
+      <div class="mt2" id="mo-ns-ttl">Nowy sezon</div>
+      <button class="mc2" onclick="cM('mo-new-season')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+    </div>
+    <div class="mbody" id="mo-ns-body" style="overflow-y:auto;"></div>
+    <div class="mfs">
+      <button class="btn" onclick="cM('mo-new-season')">Anuluj</button>
+      <button class="btn pri" onclick="doNewSeason()" id="mo-ns-confirm">✓ Utwórz nowy sezon</button>
+    </div>
+  </div>
+</div>
+
 <!-- DIR: KARTY TRENERÓW -->
 <div id="pg-dir-coaches" class="pg">
   <div class="tb">
@@ -8430,17 +8445,201 @@ function rTTList(players){
 
 // ── Podgląd składu w modalu drużyny (w module Akademii) ──
 
+// ═══════════════ ZARZĄDZANIE SEZONEM ═══════════════
+
+function genNextSeasonLabel(season){
+  // '2025/26' → '2026/27'
+  var parts=(season||'').split('/');
+  if(parts.length===2){
+    var y1=parseInt(parts[0]);
+    var y2=parseInt('20'+parts[1]);
+    if(!isNaN(y1)&&!isNaN(y2)){
+      var ny1=y1+1;
+      var ny2=y2+1;
+      return ny1+'/'+(String(ny2).slice(2));
+    }
+  }
+  return season;
+}
+
+function switchViewSeason(season){
+  if(!season)return;
+  currentSeason=season;
+  saveLS();
+  // Odśwież aktualną stronę
+  refreshCurrentPage();
+  rDirDash();
+  ST('Aktywny sezon: '+season);
+}
+
+function oNewSeason(){
+  var nextSeason=genNextSeasonLabel(currentSeason);
+  var srcTeams=TEAMS.filter(t=>t.season===currentSeason);
+  var srcPlayers=PLAYERS.filter(p=>srcTeams.some(t=>t.name===p.team));
+
+  var body=document.getElementById('mo-ns-body');
+  if(!body)return;
+  document.getElementById('mo-ns-ttl').textContent='Nowy sezon '+nextSeason;
+
+  var html='';
+
+  // Banner informacyjny
+  html+='<div style="background:var(--lg);border-radius:var(--r2);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--dg);">';
+  html+='<b>Poprzedni sezon '+escH(currentSeason)+' pozostaje w systemie.</b> Możesz do niego wrócić w każdej chwili przez selector sezonu na dashboardzie.';
+  html+='</div>';
+
+  // Co zostanie skopiowane
+  html+='<div class="sh" style="margin-top:0;">Co zostanie skopiowane do sezonu '+escH(nextSeason)+'?</div>';
+
+  // Drużyny
+  html+='<div style="margin-bottom:12px;">';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">';
+  html+='<input type="checkbox" id="ns-copy-teams" checked style="width:16px;height:16px;">';
+  html+='<label for="ns-copy-teams" style="font-size:13px;font-weight:600;cursor:pointer;">Drużyny ('+srcTeams.length+')</label></div>';
+  html+='<div style="margin-left:24px;display:flex;flex-wrap:wrap;gap:5px;">';
+  srcTeams.forEach(t=>{
+    html+='<span style="font-size:10px;padding:2px 8px;background:var(--sur2);border-radius:10px;border:1px solid var(--brd);">'+escH(t.name)+'</span>';
+  });
+  if(!srcTeams.length)html+='<span style="font-size:11px;color:var(--txt3);">Brak drużyn w sezonie '+escH(currentSeason)+'</span>';
+  html+='</div></div>';
+
+  // Zawodnicy
+  html+='<div style="margin-bottom:12px;">';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">';
+  html+='<input type="checkbox" id="ns-copy-players" checked style="width:16px;height:16px;">';
+  html+='<label for="ns-copy-players" style="font-size:13px;font-weight:600;cursor:pointer;">Zawodnicy ('+srcPlayers.length+')</label></div>';
+  html+='<div style="margin-left:24px;font-size:11px;color:var(--txt2);">Zawodnicy zostaną skopiowani z zachowaniem pozycji, ocen i danych. Ich przypisanie do drużyn pozostanie takie samo.</div>';
+  if(srcPlayers.length){
+    html+='<div style="margin-left:24px;margin-top:4px;font-size:10px;color:var(--txt3);">Przykłady: '+srcPlayers.slice(0,5).map(p=>escH(p.name)).join(', ')+(srcPlayers.length>5?' i '+(srcPlayers.length-5)+' więcej':'')+'</div>';
+  }
+  html+='</div>';
+
+  // Czego NIE kopiuje
+  html+='<div class="sh">Co NIE zostaje przeniesione</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px;">';
+  [
+    ['Treningi','Każdy sezon ma własny kalendarz treningów'],
+    ['Mecze i turnieje','Historia meczów pozostaje przy poprzednim sezonie'],
+    ['Konspekty','Konspekty są wspólne dla wszystkich sezonów (baza wiedzy)'],
+    ['Ćwiczenia','Baza ćwiczeń jest wspólna'],
+    ['Plany sezonowe (Gantt)','Cykle planowania tworzy się od nowa'],
+  ].forEach(([item,desc])=>{
+    html+='<div style="display:flex;gap:8px;align-items:flex-start;padding:4px 0;border-bottom:1px solid var(--brd);">';
+    html+='<div style="width:14px;height:14px;border-radius:50%;background:var(--lred);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px;">✕</div>';
+    html+='<div><div style="font-size:12px;font-weight:500;">'+escH(item)+'</div><div style="font-size:11px;color:var(--txt3);">'+escH(desc)+'</div></div>';
+    html+='</div>';
+  });
+  html+='</div>';
+
+  // Wynik po zmianie
+  html+='<div style="background:#EEEDFE;border-radius:var(--r2);padding:10px 14px;border-left:3px solid #AFA9EC;">';
+  html+='<div style="font-size:12px;font-weight:600;color:#3C3489;margin-bottom:4px;">Po kliknięciu „Utwórz nowy sezon":</div>';
+  html+='<div style="font-size:11px;color:#3C3489;">';
+  html+='• Aktywny sezon zmieni się na <b>'+escH(nextSeason)+'</b><br>';
+  html+='• Drużyny i zawodnicy zostaną skopiowani do nowego sezonu<br>';
+  html+='• Dane z sezonu <b>'+escH(currentSeason)+'</b> są w pełni bezpieczne — możesz do nich wrócić<br>';
+  html+='• Trenerzy i konspekty są wspólne — nie wymagają kopiowania';
+  html+='</div></div>';
+
+  body.innerHTML=html;
+  oM('mo-new-season');
+}
+
+function doNewSeason(){
+  var nextSeason=genNextSeasonLabel(currentSeason);
+  var copyTeams=(document.getElementById('ns-copy-teams')||{}).checked!==false;
+  var copyPlayers=(document.getElementById('ns-copy-players')||{}).checked!==false;
+
+  if(!confirm('Utworzyć sezon '+nextSeason+' i przełączyć na niego?'))return;
+
+  var srcTeams=TEAMS.filter(t=>t.season===currentSeason);
+  var newTeamNames=new Set();
+  var added=0;
+
+  // Kopiuj drużyny
+  if(copyTeams){
+    srcTeams.forEach(t=>{
+      // Sprawdź czy drużyna już istnieje w nowym sezonie
+      if(TEAMS.some(x=>x.season===nextSeason&&x.name===t.name))return;
+      var newT=Object.assign({},t,{id:genId(),season:nextSeason});
+      TEAMS.push(newT);
+      newTeamNames.add(t.name);
+      added++;
+    });
+  }
+
+  // Kopiuj zawodników
+  var addedPlayers=0;
+  if(copyPlayers){
+    var srcPlayers=PLAYERS.filter(p=>srcTeams.some(t=>t.name===p.team));
+    srcPlayers.forEach(p=>{
+      // Sprawdź czy zawodnik już istnieje (po imieniu + drużynie) w nowym sezonie
+      var alreadyExists=PLAYERS.some(x=>x.name===p.name&&x.team===p.team&&x.season===nextSeason);
+      if(alreadyExists)return;
+      var newP=Object.assign({},p,{id:genId(),season:nextSeason});
+      PLAYERS.push(newP);
+      addedPlayers++;
+    });
+  }
+
+  // Przełącz sezon
+  currentSeason=nextSeason;
+  saveLS();
+  cM('mo-new-season');
+  rDirDash();
+  refreshCurrentPage();
+
+  ST('✓ Sezon '+nextSeason+' utworzony · '+added+' drużyn · '+addedPlayers+' zawodników');
+}
+
 function rDirDash(){
   var body=document.getElementById('dir-dash-body');if(!body)return;
   var totalCoaches=COACH_PROFILES.length;
   var totalTeams=TEAMS.filter(t=>t.season===currentSeason).length;
-  var totalPlayers=PLAYERS.length;
+  var totalPlayers=PLAYERS.filter(p=>TEAMS.filter(t=>t.season===currentSeason).some(t=>t.name===p.team)).length;
   var totalMatches=MATCHES.filter(m=>(!m.type||m.type==='mecz')).length;
   var html='';
+
+  // ── WIDGET SEZONU ──
+  var allSeasons=[...new Set(TEAMS.map(t=>t.season).filter(Boolean))].sort().reverse();
+  if(!allSeasons.includes(currentSeason))allSeasons.unshift(currentSeason);
+  var prevSeason=allSeasons.find(s=>s!==currentSeason);
+  var nextSeasonLabel=genNextSeasonLabel(currentSeason);
+  var hasNextAlready=TEAMS.some(t=>t.season===nextSeasonLabel);
+
+  html+='<div style="background:linear-gradient(135deg,#085041 0%,#1D9E75 100%);border-radius:var(--r2);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
+  html+='<div style="display:flex;align-items:center;gap:12px;">';
+  html+='<div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg viewBox="0 0 16 16" style="width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.8;"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg></div>';
+  html+='<div><div style="font-size:16px;font-weight:700;color:#fff;">Aktywny sezon: '+escH(currentSeason)+'</div>';
+  html+='<div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">'+totalTeams+' drużyn · '+(PLAYERS.length)+' zawodników</div>';
+  // Selector sezonu
+  html+='<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">';
+  html+='<span style="font-size:10px;color:rgba(255,255,255,0.7);">Przeglądaj:</span>';
+  html+='<select style="padding:3px 7px;border-radius:4px;font-size:11px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;" onchange="switchViewSeason(this.value)">';
+  allSeasons.forEach(s=>{html+='<option value="'+escH(s)+'"'+(s===currentSeason?' selected':'')+' style="color:#000;">'+escH(s)+'</option>';});
+  html+='</select></div></div></div>';
+
+  // Przycisk nowy sezon
+  html+='<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">';
+  if(!hasNextAlready){
+    html+='<button class="btn" onclick="oNewSeason()" style="background:#fff;color:#085041;border-color:#fff;font-weight:600;white-space:nowrap;">'
+      +'<svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:#085041;fill:none;stroke-width:2;"><path d="M8 3v10M3 8h10"/></svg>'
+      +'Przejdź do sezonu '+escH(nextSeasonLabel)+'</button>';
+  } else {
+    html+='<button class="btn" onclick="switchViewSeason(\''+escH(nextSeasonLabel)+'\')" style="background:#fff;color:#085041;border-color:#fff;font-weight:600;white-space:nowrap;">'
+      +'Przełącz na '+escH(nextSeasonLabel)+' →</button>';
+  }
+  if(prevSeason){
+    html+='<div style="font-size:10px;color:rgba(255,255,255,0.6);text-align:right;cursor:pointer;" onclick="switchViewSeason(\''+escH(prevSeason)+'\')">'
+      +'↩ Poprzedni: '+escH(prevSeason)+'</div>';
+  }
+  html+='</div></div>';
+
+  // KPI
   html+='<div class="stats" style="grid-template-columns:repeat(4,1fr);">';
   html+='<div class="sc"><div class="sl">Karty trenerów</div><div class="sv">'+totalCoaches+'</div><div class="sd">w bazie dyrektorskiej</div></div>';
   html+='<div class="sc"><div class="sl">Drużyny</div><div class="sv">'+totalTeams+'</div><div class="sd">sezon '+currentSeason+'</div></div>';
-  html+='<div class="sc"><div class="sl">Zawodnicy</div><div class="sv">'+totalPlayers+'</div><div class="sd">w bazie</div></div>';
+  html+='<div class="sc"><div class="sl">Zawodnicy</div><div class="sv">'+totalPlayers+'</div><div class="sd">sezon '+currentSeason+'</div></div>';
   html+='<div class="sc"><div class="sl">Mecze</div><div class="sv">'+totalMatches+'</div><div class="sd">rozegranych</div></div>';
   html+='</div>';
 
