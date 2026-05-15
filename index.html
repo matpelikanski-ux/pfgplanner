@@ -22,6 +22,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ni:hover{background:var(--sur2);}
 .ni.active{background:var(--lg);color:var(--dg);font-weight:500;}
 .ni svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;}
+/* ── Drzewo nawigacji dyrektora ── */
+.ni-group{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r2);cursor:pointer;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;user-select:none;}
+.ni-group:hover{background:var(--sur2);}
+.ni-group svg.ni-g-ico{width:14px;height:14px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;}
+.ni-chevron{margin-left:auto;width:10px;height:10px;stroke:var(--txt3);fill:none;stroke-width:2;transition:transform .18s;flex-shrink:0;}
+.ni-group.open .ni-chevron{transform:rotate(90deg);}
+.ni-children{overflow:hidden;max-height:0;transition:max-height .22s ease;}
+.ni-children.open{max-height:400px;}
+.ni-child{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 28px;border-radius:var(--r2);cursor:pointer;font-size:12px;color:var(--txt2);position:relative;}
+.ni-child::before{content:'';position:absolute;left:16px;top:50%;width:5px;height:5px;border-radius:50%;background:var(--brd);transform:translateY(-50%);}
+.ni-child:hover{background:var(--sur2);}
+.ni-child.active{color:var(--dg);font-weight:500;}
+.ni-child.active::before{background:var(--g);}
+.ni-child svg{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;}
 .sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--brd);display:flex;align-items:center;gap:9px;}
 .av{width:28px;height:28px;border-radius:50%;background:var(--lg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--dg);}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
@@ -264,9 +278,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sk-row{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s;}
 .sk-row:hover{border-color:var(--pu);}
 .sk-priority-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700;}
-.sk-p-high{background:#FFF8ED;color:#8A5F00;}
+.sk-p-high{background:#E1F5EE;color:#085041;}
 .sk-p-mid{background:var(--sur2);color:var(--txt2);}
-.sk-p-low{background:var(--sur2);color:var(--txt3);}
+.sk-p-low{background:#FAECE7;color:#712B13;}
 .sk-status{display:inline-flex;align-items:center;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;}
 .sk-s-new{background:#EEEDFE;color:#3C3489;}
 .sk-s-obs{background:#E6F1FB;color:#0C447C;}
@@ -551,44 +565,118 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <!-- SIDEBAR TRENER -->
   <div id="sb-role-trener">
     <div class="sb-s">
-      <div class="sb-lbl">Główne</div>
+      <div class="sb-lbl">Moduł trenerski</div>
+
+      <!-- 1. Przegląd -->
       <div class="ni active" id="ni-dash" onclick="SP('dash')"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Przegląd</div>
-      <div class="ni" id="ni-plan" onclick="SP('plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
+
+      <!-- 2. Kalendarz -->
       <div class="ni" id="ni-cal" onclick="SP('cal')"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>Kalendarz</div>
-    </div>
-    <div class="sb-s">
-      <div class="sb-lbl">Trening</div>
-      <div class="ni" id="ni-ex" onclick="SP('ex')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Baza ćwiczeń</div>
-      <div class="ni" id="ni-konsp" onclick="SP('konsp')"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/></svg>Konspekty</div>
-      <div class="ni" id="ni-teams" onclick="SP('teams')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 11c1 0 2 .8 2 2"/></svg>Drużyny</div>
-      <div class="ni" id="ni-ioz" onclick="SP('ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M11 9l1.5 1.5M12.5 10.5L14 12"/><circle cx="12.5" cy="11.5" r="2.5" fill="none"/></svg>Karty zawodników</div>
-      <div class="ni" id="ni-tests" onclick="SP('tests')"><svg viewBox="0 0 16 16"><path d="M4 2h8v12H4z"/><path d="M7 6h4M7 9h4M4 6h1M4 9h1"/><path d="M6 12.5l1 1 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Testy motoryczne</div>
-      <div class="ni" id="ni-gamemodel" onclick="SP('gamemodel')"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/><path d="M4 4l8 8M12 4L4 12" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>Model gry</div>
-      <div class="ni" id="ni-import" onclick="SP('import')"><svg viewBox="0 0 16 16"><path d="M8 2v9M4 8l4 4 4-4"/><path d="M2 13h12"/></svg>Import Excel</div>
-      <div class="ni" id="ni-stats" onclick="SP('stats')"><svg viewBox="0 0 16 16"><path d="M2 12V8h3v4zM6.5 12V5h3v7zM11 12V2h3v10z"/></svg>Statystyki</div>
+
+      <!-- 3. Drużyny -->
+      <div class="ni-group" id="ng-druzyny" onclick="toggleNavGroup('ng-druzyny')">
+        <svg class="ni-g-ico" viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 11c1 0 2 .8 2 2"/></svg>
+        Drużyny
+        <svg class="ni-chevron" viewBox="0 0 10 10"><path d="M3 2l4 3-4 3"/></svg>
+      </div>
+      <div class="ni-children" id="nc-druzyny">
+        <div class="ni-child" id="ni-teams" onclick="SP('teams')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 11c1 0 2 .8 2 2"/></svg>Drużyny</div>
+        <div class="ni-child" id="ni-ioz" onclick="SP('ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M11 9l1.5 1.5M12.5 10.5L14 12"/><circle cx="12.5" cy="11.5" r="2.5" fill="none"/></svg>Karty zawodników</div>
+        <div class="ni-child" id="ni-tests" onclick="SP('tests')"><svg viewBox="0 0 16 16"><path d="M4 2h8v12H4z"/><path d="M7 6h4M7 9h4M4 6h1M4 9h1"/><path d="M6 12.5l1 1 2.5-2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Testy motoryczne</div>
+        <div class="ni-child" id="ni-trainings" onclick="SP('trainings')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h8"/><circle cx="13" cy="12" r="2.5"/><path d="M12 11l1 1 2-2" stroke-linecap="round" stroke-linejoin="round"/></svg>Treningi</div>
+        <div class="ni-child" id="ni-matches" onclick="SP('matches')"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M5 5l6 6M11 5L5 11" stroke-width="1"/><circle cx="8" cy="8" r="2.5" fill="none"/></svg>Rozgrywki</div>
+      </div>
+
+      <!-- 4. Szkolenie -->
+      <div class="ni-group" id="ng-szkolenie-tr" onclick="toggleNavGroup('ng-szkolenie-tr')">
+        <svg class="ni-g-ico" viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8v3c0 1 2.7 2 6 2s6-1 6-2V8"/></svg>
+        Szkolenie
+        <svg class="ni-chevron" viewBox="0 0 10 10"><path d="M3 2l4 3-4 3"/></svg>
+      </div>
+      <div class="ni-children" id="nc-szkolenie-tr">
+        <div class="ni-child" id="ni-plan" onclick="SP('plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
+        <div class="ni-child" id="ni-konsp" onclick="SP('konsp')"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/></svg>Konspekty</div>
+        <div class="ni-child" id="ni-gamemodel" onclick="SP('gamemodel')"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/><path d="M4 4l8 8M12 4L4 12" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>Model gry</div>
+        <div class="ni-child" id="ni-ex" onclick="SP('ex')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Baza ćwiczeń</div>
+        <div class="ni-child" id="ni-stats" onclick="SP('stats')"><svg viewBox="0 0 16 16"><path d="M2 12V8h3v4zM6.5 12V5h3v7zM11 12V2h3v10z"/></svg>Statystyki</div>
+      </div>
+
+      <!-- 5. Inne -->
+      <div class="ni-group" id="ng-inne-tr" onclick="toggleNavGroup('ng-inne-tr')">
+        <svg class="ni-g-ico" viewBox="0 0 16 16"><circle cx="4" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>
+        Inne
+        <svg class="ni-chevron" viewBox="0 0 10 10"><path d="M3 2l4 3-4 3"/></svg>
+      </div>
+      <div class="ni-children" id="nc-inne-tr">
+        <div class="ni-child" id="ni-import" onclick="SP('import')"><svg viewBox="0 0 16 16"><path d="M8 2v9M4 8l4 4 4-4"/><path d="M2 13h12"/></svg>Import Excel</div>
+      </div>
+
     </div>
   </div>
-  <!-- SIDEBAR DYREKTOR -->
+    <!-- SIDEBAR DYREKTOR -->
   <div id="sb-role-dyrektor" style="display:none;">
     <div class="sb-s">
-      <div class="sb-lbl">Zarząd</div>
-      <div class="ni active" id="ni-dir-dash" onclick="SP('dir-dash')"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Przegląd</div>
-      <div class="ni" id="ni-dir-overview" onclick="SP('dir-overview')"><svg viewBox="0 0 16 16"><circle cx="4" cy="12" r="2"/><circle cx="8" cy="6" r="2"/><circle cx="12" cy="9" r="2"/><path d="M4 10V5M8 4V2M12 7V3" stroke-width="1.2"/></svg>Akademia+</div>
+      <div class="sb-lbl">Moduł dyrektorski</div>
+
+      <!-- 1. Przegląd -->
+      <div class="ni" id="ni-dir-dash" onclick="SP('dir-dash')"><svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Przegląd</div>
+
+      <!-- 2. Kalendarz -->
       <div class="ni" id="ni-dir-cal" onclick="SP('dir-cal')"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/></svg>Kalendarz</div>
-      <div class="ni" id="ni-dir-plan" onclick="SP('dir-plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
-      <div class="ni" id="ni-dir-ioz" onclick="SP('dir-ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Zawodnicy</div>
-      <div class="ni" id="ni-dir-talent" onclick="SP('dir-talent')"><svg viewBox="0 0 16 16"><polygon points="8,2 10,6 14,6.5 11,9.5 11.8,14 8,11.8 4.2,14 5,9.5 2,6.5 6,6"/></svg>Top Talent</div>
-      <div class="ni" id="ni-dir-coaches" onclick="SP('dir-coaches')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M13 7l2 2-4 4-2-2"/></svg>Karty trenerów</div>
-      <div class="ni" id="ni-dir-academy" onclick="SP('dir-academy')"><svg viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8v4c0 1 2.7 2 6 2s6-1 6-2V8"/><path d="M14 5v4"/></svg>Akademia</div>
-      <div class="ni" id="ni-dir-skauting" onclick="SP('dir-skauting')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4"/><path d="M10 10l4 4"/><path d="M6 3v6M3 6h6"/></svg>Skauting</div>
-      <div class="ni" id="ni-dir-skladki" onclick="SP('dir-skladki')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><path d="M4 10h2M8 10h4"/><circle cx="5" cy="5.5" r=".8" fill="currentColor" stroke="none"/></svg>Składki</div>
-      <div class="ni" id="ni-dir-finanse" onclick="SP('dir-finanse')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><circle cx="5" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M8 9h4M8 11h3"/></svg>Finanse</div>
-      <div class="ni" id="ni-dir-gamemodel" onclick="SP('dir-gamemodel')"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/><path d="M4 4l8 8M12 4L4 12" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>Model gry</div>
-      <div class="ni" id="ni-dir-settings" onclick="SP('dir-settings')"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"/></svg>Ustawienia</div>
-      <div class="ni" id="ni-dir-users" onclick="SP('dir-users')"><svg viewBox="0 0 16 16"><circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 12c.5-0.7.9-1.6.9-2.5 0-1.9-1.3-3-2.9-3"/><path d="M11 14h4"/><path d="M13 12v4"/></svg>Użytkownicy</div>
+
+      <!-- 3. Szkolenie -->
+      <div class="ni-group" id="ng-szkolenie" onclick="toggleNavGroup('ng-szkolenie')">
+        <svg class="ni-g-ico" viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8v3c0 1 2.7 2 6 2s6-1 6-2V8"/></svg>
+        Szkolenie
+        <svg class="ni-chevron" viewBox="0 0 10 10"><path d="M3 2l4 3-4 3"/></svg>
+      </div>
+      <div class="ni-children" id="nc-szkolenie">
+        <div class="ni-child" id="ni-dir-plan" onclick="SP('dir-plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
+        <div class="ni-child" id="ni-dir-overview" onclick="SP('dir-overview')"><svg viewBox="0 0 16 16"><circle cx="4" cy="12" r="2"/><circle cx="8" cy="6" r="2"/><circle cx="12" cy="9" r="2"/><path d="M4 10V5M8 4V2M12 7V3" stroke-width="1.2"/></svg>Akademia+</div>
+        <div class="ni-child" id="ni-dir-ex" onclick="SP('dir-ex')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Baza ćwiczeń</div>
+        <div class="ni-child" id="ni-dir-talent" onclick="SP('dir-talent')"><svg viewBox="0 0 16 16"><polygon points="8,2 10,6 14,6.5 11,9.5 11.8,14 8,11.8 4.2,14 5,9.5 2,6.5 6,6"/></svg>Top Talent</div>
+        <div class="ni-child" id="ni-dir-coaches" onclick="SP('dir-coaches')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M13 7l2 2-4 4-2-2"/></svg>Karty trenerów</div>
+        <div class="ni-child" id="ni-dir-gamemodel" onclick="SP('dir-gamemodel')"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/><path d="M4 4l8 8M12 4L4 12" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>Model gry</div>
+      </div>
+
+      <!-- 4. Akademia -->
+      <div class="ni-group" id="ng-akademia" onclick="toggleNavGroup('ng-akademia')">
+        <svg class="ni-g-ico" viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        Akademia
+        <svg class="ni-chevron" viewBox="0 0 10 10"><path d="M3 2l4 3-4 3"/></svg>
+      </div>
+      <div class="ni-children" id="nc-akademia">
+        <div class="ni-child" id="ni-dir-academy" onclick="SP('dir-academy')"><svg viewBox="0 0 16 16"><path d="M8 2l6 3-6 3-6-3 6-3z"/><path d="M2 8v4c0 1 2.7 2 6 2s6-1 6-2V8"/><path d="M14 5v4"/></svg>Drużyny</div>
+        <div class="ni-child" id="ni-dir-ioz" onclick="SP('dir-ioz')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Zawodnicy</div>
+        <div class="ni-child" id="ni-dir-skauting" onclick="SP('dir-skauting')"><svg viewBox="0 0 16 16"><circle cx="6" cy="6" r="4"/><path d="M10 10l4 4"/><path d="M6 3v6M3 6h6"/></svg>Skauting</div>
+      </div>
+
+      <!-- 5. Finanse -->
+      <div class="ni-group" id="ng-finanse" onclick="toggleNavGroup('ng-finanse')">
+        <svg class="ni-g-ico" viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><circle cx="5" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M8 9h4M8 11h3"/></svg>
+        Finanse
+        <svg class="ni-chevron" viewBox="0 0 10 10"><path d="M3 2l4 3-4 3"/></svg>
+      </div>
+      <div class="ni-children" id="nc-finanse">
+        <div class="ni-child" id="ni-dir-skladki" onclick="SP('dir-skladki')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><path d="M4 10h2M8 10h4"/><circle cx="5" cy="5.5" r=".8" fill="currentColor" stroke="none"/></svg>Opłaty</div>
+        <div class="ni-child" id="ni-dir-finanse" onclick="SP('dir-finanse')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><circle cx="5" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M8 9h4M8 11h3"/></svg>Budżet</div>
+      </div>
+
+      <!-- 6. Ustawienia -->
+      <div class="ni-group" id="ng-ustawienia" onclick="toggleNavGroup('ng-ustawienia')">
+        <svg class="ni-g-ico" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"/></svg>
+        Ustawienia
+        <svg class="ni-chevron" viewBox="0 0 10 10"><path d="M3 2l4 3-4 3"/></svg>
+      </div>
+      <div class="ni-children" id="nc-ustawienia">
+        <div class="ni-child" id="ni-dir-users" onclick="SP('dir-users')"><svg viewBox="0 0 16 16"><circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 12c.5-0.7.9-1.6.9-2.5 0-1.9-1.3-3-2.9-3"/><path d="M11 14h4"/><path d="M13 12v4"/></svg>Użytkownicy</div>
+        <div class="ni-child" id="ni-dir-season" onclick="SP('dir-season')"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/><path d="M5 10h2M9 10h2"/></svg>Ustawienia sezonu</div>
+        <div class="ni-child" id="ni-dir-settings" onclick="SP('dir-settings')"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.2 3.2l1.4 1.4M11.4 11.4l1.4 1.4M3.2 12.8l1.4-1.4M11.4 4.6l1.4-1.4"/></svg>Ustawienia systemu</div>
+      </div>
+
     </div>
   </div>
-  <div class="sb-bot">
+    <div class="sb-bot">
     <div class="av" id="sb-av">??</div>
     <div style="flex:1;min-width:0;">
       <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="sb-user-name">—</div>
@@ -1028,6 +1116,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- TRENINGI -->
+<div id="pg-trainings" class="pg">
+  <div class="tb">
+    <div><div class="t1">Treningi</div><div class="t2" id="trainings-sub">Zestawienie treningów</div></div>
+    <div class="tb-r">
+      <select class="fsel-sm" id="trainings-team-sel" style="min-width:140px;"><option value="">Wszystkie drużyny</option></select>
+    </div>
+  </div>
+  <div class="inner" id="trainings-body">
+    <div class="empty">
+      <div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h8"/><circle cx="13" cy="12" r="2.5"/><path d="M12 11l1 1 2-2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Treningi drużyny</div>
+      <div style="font-size:12px;color:var(--txt2);">Moduł w przygotowaniu — zestawienie wszystkich treningów wybranej drużyny.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ROZGRYWKI -->
+<div id="pg-matches" class="pg">
+  <div class="tb">
+    <div><div class="t1">Rozgrywki</div><div class="t2" id="matches-sub">Zestawienie meczów</div></div>
+    <div class="tb-r">
+      <select class="fsel-sm" id="matches-team-sel" style="min-width:140px;"><option value="">Wszystkie drużyny</option></select>
+    </div>
+  </div>
+  <div class="inner" id="matches-body">
+    <div class="empty">
+      <div class="ei2"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M5 5l6 6M11 5L5 11" stroke-width="1"/><circle cx="8" cy="8" r="2.5" fill="none"/></svg></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Rozgrywki drużyny</div>
+      <div style="font-size:12px;color:var(--txt2);">Moduł w przygotowaniu — zestawienie wszystkich meczów wybranej drużyny.</div>
+    </div>
+  </div>
+</div>
+
 <!-- DIR: KARTY TRENERÓW -->
 <div id="pg-dir-coaches" class="pg">
   <div class="tb">
@@ -1293,11 +1415,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <option value="Do kontaktu">Do kontaktu</option>
       <option value="Odrzucony">Odrzucony</option>
     </select>
-    <select class="fsel-sm" id="sk-f-priority" onchange="rSkauting()" style="min-width:120px;">
+    <select class="fsel-sm" id="sk-f-priority" onchange="rSkauting()" style="min-width:165px;">
       <option value="">Każdy priorytet</option>
-      <option value="Wysoki">⭐ Wysoki</option>
-      <option value="Średni">◆ Średni</option>
-      <option value="Niski">▽ Niski</option>
+      <option value="Do ściągnięcia">🎯 Do ściągnięcia</option>
+      <option value="Do dalszej obserwacji">👁 Do dalszej obserwacji</option>
+      <option value="Za słaby">✕ Za słaby</option>
     </select>
     <button class="btn sm" onclick="resetSkautingFilters()">Resetuj filtry</button>
     <div style="margin-left:auto;font-size:11px;color:var(--txt3);" id="sk-count"></div>
@@ -1338,6 +1460,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
   <div class="inner" id="users-body"></div>
+</div>
+
+<!-- DIR: BAZA ĆWICZEŃ (read-only) -->
+<div id="pg-dir-ex" class="pg">
+  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="dir-ex-lbl">0 ćwiczeń</div></div></div>
+  <div class="inner">
+    <div style="display:flex;gap:8px;margin-bottom:10px;"><input class="fi" id="dir-ex-s" placeholder="Szukaj po nazwie lub opisie..." oninput="rDirEX()" style="flex:1;"/></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Faza</div><select class="fsel-sm" id="dir-ex-ff" onchange="dirFFC()"><option value="">Wszystkie fazy</option><option>Atakowanie</option><option>Bronienie</option><option>Umiejętności</option><option>Motoryka</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Temat</div><select class="fsel-sm" id="dir-ex-ft" onchange="dirFTC()" disabled><option value="">Wszystkie tematy</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Koncept</div><select class="fsel-sm" id="dir-ex-fk" onchange="rDirEX()" disabled><option value="">Wszystkie koncepty</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Intensywność</div><select class="fsel-sm" id="dir-ex-fi" onchange="rDirEX()"><option value="">Każda</option><option>Niska</option><option>Średnia</option><option>Wysoka</option></select></div>
+      <div style="font-size:11px;color:var(--g);cursor:pointer;padding:6px 0;" onclick="dirExCF()">Wyczyść ×</div>
+    </div>
+    <div id="dir-ex-grid" class="exg"></div>
+  </div>
+</div>
+
+<!-- DIR: USTAWIENIA SEZONU -->
+<div id="pg-dir-season" class="pg">
+  <div class="tb"><div><div class="t1">Ustawienia sezonu</div><div class="t2">Zarządzanie sezonami akademii</div></div></div>
+  <div class="inner" id="dir-season-body">
+    <div class="empty">
+      <div class="ei2"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/><path d="M5 10h2M9 10h2"/></svg></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Ustawienia sezonu</div>
+      <div style="font-size:12px;color:var(--txt2);">Moduł w przygotowaniu — tutaj będziesz zarządzać sezonami, datami i konfiguracją rozgrywek.</div>
+    </div>
+  </div>
 </div>
 
 <!-- DIR: USTAWIENIA -->
@@ -1636,12 +1786,44 @@ function fd(ds){if(!ds)return'';var p=ds.split('-');return p[2]+'.'+p[1]+'.'+p[0
 function wr(tx,mc){var ls=[];(tx||'').split('\n').forEach(p2=>{var ws=p2.split(' '),cur='';ws.forEach(w=>{if(cur.length+w.length+(cur?1:0)<=mc)cur+=(cur?' ':'')+w;else{if(cur)ls.push(cur);cur=w;}});if(cur)ls.push(cur);});return ls;}
 
 // ═══════════════ NAWIGACJA ═══════════════
+// Mapa: strona → id grupy nawigacyjnej (dla auto-expand)
+var DIR_NAV_GROUPS={
+  // Dyrektor
+  'dir-plan':'ng-szkolenie','dir-overview':'ng-szkolenie','dir-ex':'ng-szkolenie',
+  'dir-talent':'ng-szkolenie','dir-coaches':'ng-szkolenie','dir-gamemodel':'ng-szkolenie',
+  'dir-academy':'ng-akademia','dir-ioz':'ng-akademia','dir-skauting':'ng-akademia',
+  'dir-skladki':'ng-finanse','dir-finanse':'ng-finanse',
+  'dir-users':'ng-ustawienia','dir-season':'ng-ustawienia','dir-settings':'ng-ustawienia',
+  // Trener
+  'teams':'ng-druzyny','ioz':'ng-druzyny','tests':'ng-druzyny',
+  'trainings':'ng-druzyny','matches':'ng-druzyny',
+  'plan':'ng-szkolenie-tr','konsp':'ng-szkolenie-tr','gamemodel':'ng-szkolenie-tr',
+  'ex':'ng-szkolenie-tr','stats':'ng-szkolenie-tr',
+  'import':'ng-inne-tr'
+};
+function toggleNavGroup(id){
+  var grp=document.getElementById(id);
+  var children=document.getElementById(id.replace('ng-','nc-'));
+  if(!grp||!children)return;
+  var isOpen=grp.classList.contains('open');
+  grp.classList.toggle('open',!isOpen);
+  children.classList.toggle('open',!isOpen);
+}
+function openNavGroup(id){
+  var grp=document.getElementById(id);
+  var children=document.getElementById(id.replace('ng-','nc-'));
+  if(grp)grp.classList.add('open');
+  if(children)children.classList.add('open');
+}
 function SP(n){
   document.querySelectorAll('.pg').forEach(p=>{p.classList.remove('act');});
-  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni,.ni-child').forEach(x=>x.classList.remove('active'));
   var pg=document.getElementById('pg-'+n);
   if(pg)pg.classList.add('act');
   var ni=document.getElementById('ni-'+n);if(ni)ni.classList.add('active');
+  // Auto-aperta grupę jeśli aktywna podstrona jest w grupie
+  var grpId=DIR_NAV_GROUPS[n];
+  if(grpId)openNavGroup(grpId);
   if(n==='plan'){rYL();rG();}
   if(n==='cal')rCal();
   if(n==='ex')RE();
@@ -1651,6 +1833,7 @@ function SP(n){
   if(n==='ioz')rIOZ();
   if(n==='tests')rTests();
   if(n==='gamemodel')rGameModelReadonly();
+  if(n==='dir-ex')rDirEX();
 }
 function oM(id){document.getElementById(id).classList.add('op');}
 function cM(id){document.getElementById(id).classList.remove('op');}
@@ -4017,7 +4200,9 @@ function refreshCurrentPage(){
     'pg-dir-cal':'dir-cal','pg-dir-overview':'dir-overview','pg-dir-talent':'dir-talent',
     'pg-dir-plan':'dir-plan','pg-dir-ioz':'dir-ioz',
     'pg-dir-academy':'dir-academy','pg-dir-skauting':'dir-skauting',
-    'pg-dir-finanse':'dir-finanse','pg-dir-gamemodel':'dir-gamemodel'
+    'pg-dir-finanse':'dir-finanse','pg-dir-gamemodel':'dir-gamemodel',
+    'pg-dir-ex':'dir-ex','pg-dir-season':'dir-season',
+    'pg-trainings':'trainings','pg-matches':'matches'
   };
   var name=pageMap[id];
   if(name)SP(name);
@@ -6771,6 +6956,72 @@ function promoteCoachToDir(coachId){
 // Sprawdź czy trener ma już kartę
 function coachHasProfile(coachId){return !!COACH_PROFILES.find(p=>p.coachId===coachId);}
 
+// ── WIDOK DIR: BAZA ĆWICZEŃ (read-only) ──
+function rDirEX(){
+  var q=(document.getElementById('dir-ex-s')||{value:''}).value.toLowerCase();
+  var f=(document.getElementById('dir-ex-ff')||{value:''}).value;
+  var t=(document.getElementById('dir-ex-ft')||{value:''}).value;
+  var k=(document.getElementById('dir-ex-fk')||{value:''}).value;
+  var i=(document.getElementById('dir-ex-fi')||{value:''}).value;
+  var fil=EXS.filter(e=>(!q||e.n.toLowerCase().includes(q)||(e.o||'').toLowerCase().includes(q))&&(!f||e.f===f)&&(!t||e.t===t)&&(!k||e.k===k)&&(!i||e.i===i));
+  var lbl=document.getElementById('dir-ex-lbl');
+  if(lbl)lbl.textContent=EXS.length+' ćwiczeń'+(fil.length!==EXS.length?' ('+fil.length+' wyników)':'');
+  var g=document.getElementById('dir-ex-grid');
+  if(!g)return;
+  var oe=document.getElementById('dir-eex');if(oe)oe.remove();
+  if(!fil.length){
+    g.innerHTML='';
+    g.insertAdjacentHTML('beforebegin','<div id="dir-eex" class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(EXS.length?'Brak wyników':'Baza ćwiczeń jest pusta')+'</div><div style="font-size:12px;color:var(--txt2);">'+(EXS.length?'Zmień kryteria wyszukiwania.':'Trener nie dodał jeszcze żadnych ćwiczeń.')+'</div></div>');
+    return;
+  }
+  g.innerHTML=fil.map(e=>{
+    var c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'};
+    var ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};
+    return '<div class="ec" onclick="dirViewEX('+EXS.indexOf(e)+')">'
+      +((e.img||e.imgUrl)?'<img src="'+(e.img||e.imgUrl)+'" alt="'+e.n+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;" onerror="this.style.display=\'none\'">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')
+      +'<div class="en">'+e.n+'</div>'
+      +'<div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div>'
+      +'<div class="ed">'+(e.o||'Brak opisu')+'</div>'
+      +'<div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+function dirViewEX(idx){
+  // Otwiera modal podglądu trenera (rEV) w trybie read-only — bez przycisku Edytuj
+  var e=EXS[idx];if(!e)return;
+  EI=idx;IMG=e.img||null;IMN=e.imn||null;
+  rEV(e,idx);
+  // Schowaj przycisk Edytuj — dyrektor tylko przegląda
+  var eb=document.getElementById('ex-eb');
+  if(eb)eb.innerHTML='<span class="bdg" style="background:var(--sur2);color:var(--txt2);">👁 Tylko podgląd</span>';
+  oM('mo-ex');
+}
+function dirFFC(){
+  var f=(document.getElementById('dir-ex-ff')||{value:''}).value;
+  var ft=document.getElementById('dir-ex-ft');
+  var fk=document.getElementById('dir-ex-fk');
+  if(!ft||!fk)return;
+  ft.innerHTML='<option value="">Wszystkie tematy</option>'+GT(f).map(t=>'<option>'+t+'</option>').join('');
+  ft.disabled=!f;fk.innerHTML='<option value="">Wszystkie koncepty</option>';fk.disabled=true;
+  rDirEX();
+}
+function dirFTC(){
+  var f=(document.getElementById('dir-ex-ff')||{value:''}).value;
+  var t=(document.getElementById('dir-ex-ft')||{value:''}).value;
+  var fk=document.getElementById('dir-ex-fk');if(!fk)return;
+  fk.innerHTML='<option value="">Wszystkie koncepty</option>'+GK(f,t).map(k=>'<option>'+k+'</option>').join('');
+  fk.disabled=!t;rDirEX();
+}
+function dirExCF(){
+  ['dir-ex-s','dir-ex-ff','dir-ex-ft','dir-ex-fk','dir-ex-fi'].forEach(id=>{
+    var el=document.getElementById(id);if(!el)return;
+    if(el.tagName==='INPUT')el.value='';else{el.selectedIndex=0;}
+  });
+  var ft=document.getElementById('dir-ex-ft');var fk=document.getElementById('dir-ex-fk');
+  if(ft)ft.disabled=true;if(fk)fk.disabled=true;
+  rDirEX();
+}
+
 // ── WIDOK DIR: PRZEGLĄD ──
 // ── Planowanie dyrektora (readonly) ──
 function rDirPlan(){
@@ -7170,7 +7421,7 @@ function rDirOverview(){
 
   html+='<div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">';
   html+='<div class="sc"><div class="sl">Konspekty</div><div class="sv">'+totalKonsp+'</div><div class="sd" style="cursor:pointer;color:var(--g);" onclick="toggleViewMode();SP(\'konsp\')">→ Konspekty</div></div>';
-  html+='<div class="sc"><div class="sl">Ćwiczenia</div><div class="sv">'+totalEX+'</div><div class="sd" style="cursor:pointer;color:var(--g);" onclick="toggleViewMode();SP(\'ex\')">→ Baza ćwiczeń</div></div>';
+  html+='<div class="sc"><div class="sl">Ćwiczenia</div><div class="sv">'+totalEX+'</div><div class="sd" style="cursor:pointer;color:var(--g);" onclick="SP(\'dir-ex\')">→ Baza ćwiczeń</div></div>';
   html+='<div class="sc"><div class="sl">Trenerzy</div><div class="sv">'+COACHES.length+'</div><div class="sd" style="cursor:pointer;color:var(--g);" onclick="SP(\'dir-coaches\')">→ Karty trenerów</div></div>';
   html+='<div class="sc"><div class="sl">Karty</div><div class="sv">'+COACH_PROFILES.length+'</div><div class="sd">dyrektorskie</div></div>';
   html+='</div>';
@@ -10527,30 +10778,75 @@ function oViewGameModel(i){
 }
 // ═══════════════ FINANSE ═══════════════
 var MONTHS_SHORT=['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
-var FIN_SECTION_PRESETS=[
-  {name:'DOCHÓD',type:'przychod',rows:['Składki członkowskie','Dotacje','Sponsorzy','Opłaty wpisowe','Inne przychody']},
-  {name:'WYNAGRODZENIA',type:'koszt',rows:['Menadżer Akademii','Trenerzy']},
-  {name:'OBSŁUGA MECZOWA',type:'koszt',rows:['Obsługa medyczna','Obsługa sędziowska']},
-  {name:'TRANSPORT',type:'koszt',rows:['Transport na mecze','Transport na turnieje']},
-  {name:'SPRZĘT TRENINGOWY',type:'koszt',rows:['Piłki','Wyposażenie magazynu','Stroje meczowe','Bramki']},
-  {name:'TURNIEJE',type:'koszt',rows:['Opłaty wpisowe turnieje']},
-  {name:'UBEZPIECZENIE',type:'koszt',rows:['Ubezpieczenie zawodników','Ubezpieczenie klubu']},
-  {name:'WYNAJEM OBIEKTÓW',type:'koszt',rows:['Hale sportowe','Boiska']},
-  {name:'MARKETING',type:'koszt',rows:['Reklama','Projekty graficzne','Materiały promocyjne']},
-  {name:'SZKOLENIE',type:'koszt',rows:['Kursy trenerskie','Konferencje/Warsztaty']},
-  {name:'ADMINISTRACJA',type:'koszt',rows:['Księgowość','System zarządzania','Wyposażenie biura']},
-  {name:'USŁUGI DODATKOWE',type:'koszt',rows:['Fizjoterapeuta','Inne']},
-  {name:'INNE',type:'koszt',rows:['Koszty bankowe','Pozostałe']}
-];
+var FIN_PRESETS={
+  sezonowy:[
+    {name:'DOCHÓD',type:'przychod',rows:['Składki członkowskie','Dotacje','Sponsorzy','Opłaty wpisowe','Inne przychody']},
+    {name:'WYNAGRODZENIA',type:'koszt',rows:['Menadżer Akademii','Trenerzy']},
+    {name:'OBSŁUGA MECZOWA',type:'koszt',rows:['Obsługa medyczna','Obsługa sędziowska']},
+    {name:'TRANSPORT',type:'koszt',rows:['Transport na mecze','Transport na turnieje']},
+    {name:'SPRZĘT TRENINGOWY',type:'koszt',rows:['Piłki','Wyposażenie magazynu','Stroje meczowe','Bramki']},
+    {name:'TURNIEJE',type:'koszt',rows:['Opłaty wpisowe turnieje']},
+    {name:'UBEZPIECZENIE',type:'koszt',rows:['Ubezpieczenie zawodników','Ubezpieczenie klubu']},
+    {name:'WYNAJEM OBIEKTÓW',type:'koszt',rows:['Hale sportowe','Boiska']},
+    {name:'MARKETING',type:'koszt',rows:['Reklama','Projekty graficzne','Materiały promocyjne']},
+    {name:'SZKOLENIE',type:'koszt',rows:['Kursy trenerskie','Konferencje/Warsztaty']},
+    {name:'ADMINISTRACJA',type:'koszt',rows:['Księgowość','System zarządzania','Wyposażenie biura']},
+    {name:'USŁUGI DODATKOWE',type:'koszt',rows:['Fizjoterapeuta','Inne']},
+    {name:'INNE',type:'koszt',rows:['Koszty bankowe','Pozostałe']}
+  ],
+  druzyny:[
+    {name:'DOCHÓD DRUŻYNY',type:'przychod',rows:['Składki zawodników','Dopłaty rodziców','Dofinansowanie klubu','Inne przychody']},
+    {name:'WYNAGRODZENIE TRENERA',type:'koszt',rows:['Trener główny','Asystent trenera']},
+    {name:'SPRZĘT I STROJE',type:'koszt',rows:['Stroje meczowe','Stroje treningowe','Piłki','Wyposażenie dodatkowe']},
+    {name:'TRANSPORT',type:'koszt',rows:['Dojazdy na mecze','Dojazdy na turnieje','Inne dojazdy']},
+    {name:'TURNIEJE I ROZGRYWKI',type:'koszt',rows:['Opłaty startowe turnieje','Wpisowe ligowe','Opłaty sędziowskie']},
+    {name:'WYNAJEM OBIEKTÓW',type:'koszt',rows:['Hale sportowe','Boiska treningowe']},
+    {name:'UBEZPIECZENIE',type:'koszt',rows:['Ubezpieczenie zawodników']},
+    {name:'INNE',type:'koszt',rows:['Opieka medyczna / fizjoterapia','Pozostałe']}
+  ],
+  wydarzenie:[] // specjalny format — własna struktura płaskich wierszy
+};
+// Alias dla backward compat (emptyBudget bez typu korzysta z sezonowego)
+var FIN_SECTION_PRESETS=FIN_PRESETS.sezonowy;
+
+var BUDGET_TYPE_CFG={
+  sezonowy:{label:'Sezonowy',icon:'📅',bg:'#E6F1FB',tc:'#0C447C',brd:'#93C2EE'},
+  druzyny: {label:'Drużyny',icon:'👥',bg:'#E1F5EE',tc:'#085041',brd:'#5DCAA5'},
+  wydarzenie:{label:'Wydarzenie',icon:'🏆',bg:'#EEEDFE',tc:'#3C3489',brd:'#AFA9EC'}
+};
+
 var currentBudgetId=null;
 var editBudgetSectionIdx=null;
 var editBudgetRowIdx=null;
 
-function emptyBudget(name,year){
+function emptyBudget(name,year,budgetType,meta){
+  var bt=budgetType||'sezonowy';
+  if(bt==='wydarzenie'){
+    return {
+      id:genId(),name,year:parseInt(year)||new Date().getFullYear(),
+      saldoStart:0,budgetType:'wydarzenie',meta:meta||{},
+      // Płaskie wiersze kalkulatora
+      evRows:[
+        {id:genId(),name:'Opieka - trenerzy',kwotaPlan:0,liczbaPlan:1,kwotaReal:null,liczbaReal:null,note:''},
+        {id:genId(),name:'Transport',kwotaPlan:0,liczbaPlan:1,kwotaReal:null,liczbaReal:null,note:''},
+        {id:genId(),name:'Wyżywienie',kwotaPlan:0,liczbaPlan:1,kwotaReal:null,liczbaReal:null,note:''},
+        {id:genId(),name:'Ubezpieczenie',kwotaPlan:0,liczbaPlan:1,kwotaReal:null,liczbaReal:null,note:''},
+        {id:genId(),name:'Wynajem obiektów',kwotaPlan:0,liczbaPlan:1,kwotaReal:null,liczbaReal:null,note:''},
+        {id:genId(),name:'Inne',kwotaPlan:0,liczbaPlan:1,kwotaReal:null,liczbaReal:null,note:''}
+      ],
+      evIncome:0,  // przychód (np. wpłaty uczestników)
+      evPlanUcz:meta&&meta.planUczestnicy?meta.planUczestnicy:1,
+      evRealUcz:null,
+      sections:[] // pusty — format miesięczny nieużywany
+    };
+  }
+  var presets=FIN_PRESETS[bt]||FIN_PRESETS.sezonowy;
   return {
     id:genId(),name,year:parseInt(year)||new Date().getFullYear(),
     saldoStart:0,
-    sections:FIN_SECTION_PRESETS.map(ps=>({
+    budgetType:bt,
+    meta:meta||{},
+    sections:presets.map(ps=>({
       id:genId(),name:ps.name,type:ps.type,
       rows:ps.rows.map(rn=>({id:genId(),name:rn,vals:Array(12).fill(null).map(()=>({budzet:0,aktualny:null}))}))
     }))
@@ -10570,35 +10866,92 @@ function rFinanse(){
     body.innerHTML='<div class="inner"><div class="empty">'
       +'<div class="ei2"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/></svg></div>'
       +'<div style="font-size:14px;font-weight:600;margin-bottom:6px;">Brak budżetów</div>'
-      +'<div style="font-size:12px;color:var(--txt2);margin-bottom:14px;">Utwórz pierwszy budżet klubu — zostanie zbudowany na wzór Twojej kalkulacji rocznej.</div>'
+      +'<div style="font-size:12px;color:var(--txt2);margin-bottom:14px;">Utwórz pierwszy budżet — wybierz typ: sezonowy, drużyny lub wydarzenie.</div>'
       +'<button class="btn pri" onclick="oAddBudget()">+ Nowy budżet</button></div></div>';
     return;
   }
-  var html='<div class="inner"><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">';
-  BUDGETS.forEach((b,bi)=>{
+  // Filtr po typie
+  var fType=(document.getElementById('fin-ftype')||{value:''}).value||'';
+  var filtered=BUDGETS.filter(b=>!fType||(b.budgetType||'sezonowy')===fType);
+  var html='<div class="inner">';
+  // Toolbar filtrów
+  html+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">';
+  html+='<div style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;margin-right:2px;">Typ:</div>';
+  [{v:'',l:'Wszystkie'},{v:'sezonowy',l:'📅 Sezonowy'},{v:'druzyny',l:'👥 Drużyny'},{v:'wydarzenie',l:'🏆 Wydarzenie'}].forEach(opt=>{
+    var active=(fType===opt.v);
+    html+='<button onclick="document.getElementById(\'fin-ftype\').value=\''+opt.v+'\';rFinanse()" style="font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1px solid '+(active?'var(--g)':'var(--brd)')+';background:'+(active?'var(--g)':'var(--sur2)')+';color:'+(active?'#fff':'var(--txt2)')+';">'+opt.l+'</button>';
+  });
+  html+='<input type="hidden" id="fin-ftype" value="'+fType+'">';
+  if(filtered.length!==BUDGETS.length)html+='<span style="font-size:11px;color:var(--txt2);margin-left:4px;">'+filtered.length+' z '+BUDGETS.length+'</span>';
+  html+='</div>';
+  if(!filtered.length){
+    html+='<div class="empty" style="margin-top:20px;"><div class="ei2"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/></svg></div><div style="font-size:13px;font-weight:600;margin-bottom:4px;">Brak budżetów tego typu</div></div></div>';
+    body.innerHTML=html;return;
+  }
+  html+='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">';
+  filtered.forEach(function(b){
+    var bi=BUDGETS.indexOf(b);
+    var bt=b.budgetType||'sezonowy';
+    var btc=BUDGET_TYPE_CFG[bt]||BUDGET_TYPE_CFG.sezonowy;
     var totalBudget=0,totalActual=0;
     b.sections.filter(s=>s.type==='przychod').forEach(s=>s.rows.forEach(r=>r.vals.forEach(v=>{totalBudget+=v.budzet||0;if(v.aktualny!==null)totalActual+=v.aktualny||0;})));
     var kosztBudget=0,kosztActual=0;
     b.sections.filter(s=>s.type==='koszt').forEach(s=>s.rows.forEach(r=>r.vals.forEach(v=>{kosztBudget+=v.budzet||0;if(v.aktualny!==null)kosztActual+=v.aktualny||0;})));
     var netBudget=totalBudget-kosztBudget;var netActual=totalActual-kosztActual;
-    html+='<div class="fin-budget-card" onclick="oViewBudget(\''+b.id+'\')">';
-    html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">';
-    html+='<div><div style="font-size:15px;font-weight:700;">'+escH(b.name)+'</div>';
-    html+='<div style="font-size:11px;color:var(--txt2);">'+b.year+' · saldo startowe: <b>'+fPLN(b.saldoStart)+'</b></div></div>';
-    html+='<div style="display:flex;gap:5px;">';
+    // Metadane kontekstowe
+    var metaLine='';
+    if(bt==='sezonowy')metaLine=b.year+' · saldo startowe: <b>'+fPLN(b.saldoStart)+'</b>';
+    else if(bt==='druzyny')metaLine=(b.meta&&b.meta.team?'<b>'+escH(b.meta.team)+'</b> · ':'')+b.year;
+    else if(bt==='wydarzenie'){
+      var evType=b.meta&&b.meta.eventType?{mecz:'Mecz',turniej:'Turniej',oboz:'Obóz',inne:'Inne'}[b.meta.eventType]||b.meta.eventType:'';
+      metaLine=(evType?evType+' · ':'')+(b.meta&&b.meta.eventDate?b.meta.eventDate+' · ':'')+b.year;
+    }
+    html+='<div class="fin-budget-card" onclick="oViewBudget(\''+b.id+'\')">'; 
+    html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">';
+    html+='<div style="flex:1;min-width:0;">';
+    html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">';
+    html+='<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:'+btc.bg+';color:'+btc.tc+';border:1px solid '+btc.brd+';white-space:nowrap;">'+btc.icon+' '+btc.label+'</span>';
+    html+='</div>';
+    html+='<div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(b.name)+'</div>';
+    html+='<div style="font-size:11px;color:var(--txt2);margin-top:2px;">'+metaLine+'</div>';
+    html+='</div>';
+    html+='<div style="display:flex;gap:5px;flex-shrink:0;margin-left:8px;">';
     html+='<button class="btn sm" onclick="event.stopPropagation();oEditBudgetMeta('+bi+')">Edytuj</button>';
     html+='<button class="btn sm dan" onclick="event.stopPropagation();delBudget('+bi+')">Usuń</button>';
     html+='</div></div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">';
-    [{l:'Przychód (B)',v:totalBudget,c:'#0C447C',bg:'#E6F1FB'},{l:'Koszty (B)',v:kosztBudget,c:kosztBudget>totalBudget?'var(--red)':'var(--txt)',bg:'var(--sur2)'},{l:'Netto (B)',v:netBudget,c:netBudget>=0?'var(--dg)':'var(--red)',bg:netBudget>=0?'var(--lg)':'var(--lred)'}].forEach(kpi=>{
-      html+='<div style="background:'+kpi.bg+';border-radius:var(--r2);padding:7px 10px;text-align:center;">';
-      html+='<div style="font-size:14px;font-weight:700;color:'+kpi.c+';">'+fPLN(kpi.v)+'</div>';
-      html+='<div style="font-size:9px;color:var(--txt3);text-transform:uppercase;font-weight:600;">'+kpi.l+'</div>';
+    if(bt==='wydarzenie'){
+      var evRows=b.evRows||[];
+      var evKosztPlan=0;
+      evRows.forEach(function(r){evKosztPlan+=(r.kwotaPlan||0)*(r.liczbaPlan||0);});
+      var evPlanUcz=b.evPlanUcz||(b.meta&&b.meta.planUczestnicy)||1;
+      var evIncome=b.evIncome||0;
+      var evZysk=evIncome-evKosztPlan;
+      var cenaPlan=evPlanUcz>0?evKosztPlan/evPlanUcz:0;
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">';
+      [{l:'Koszt planowany',v:fPLN(evKosztPlan),c:'#0C447C',bg:'#E6F1FB'},
+       {l:'Uczestników (plan)',v:String(evPlanUcz),c:'var(--txt)',bg:'var(--sur2)'},
+       {l:'Koszt / uczestnik',v:cenaPlan>0?fPLN2(cenaPlan):'—',c:'#085041',bg:'#E1F5EE'}
+      ].forEach(function(kpi){
+        html+='<div style="background:'+kpi.bg+';border-radius:var(--r2);padding:7px 10px;text-align:center;">';
+        html+='<div style="font-size:13px;font-weight:700;color:'+kpi.c+';">'+kpi.v+'</div>';
+        html+='<div style="font-size:9px;color:var(--txt3);text-transform:uppercase;font-weight:600;">'+kpi.l+'</div>';
+        html+='</div>';
+      });
       html+='</div>';
-    });
-    html+='</div>';
-    if(totalActual||kosztActual){
-      html+='<div style="font-size:11px;color:var(--txt2);">Wykonanie: Przychody <b style="color:'+(totalActual>=0?'var(--g)':'var(--red)')+'">'+fPLN(totalActual)+'</b> · Koszty <b>'+fPLN(kosztActual)+'</b></div>';
+      if(evIncome>0){html+='<div style="font-size:11px;color:var(--txt2);">Przychód: <b>'+fPLN(evIncome)+'</b> · Zysk: <b style="color:'+(evZysk>=0?'var(--dg)':'var(--red)')+'">'+fPLN(evZysk)+'</b></div>';}
+      else{html+='<div style="font-size:11px;color:var(--txt3);">'+evRows.length+' pozycji · '+fPLN(evKosztPlan)+' łącznie</div>';}
+    } else {
+      html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">';
+      [{l:'Przychód (B)',v:totalBudget,c:'#0C447C',bg:'#E6F1FB'},{l:'Koszty (B)',v:kosztBudget,c:kosztBudget>totalBudget?'var(--red)':'var(--txt)',bg:'var(--sur2)'},{l:'Netto (B)',v:netBudget,c:netBudget>=0?'var(--dg)':'var(--red)',bg:netBudget>=0?'var(--lg)':'var(--lred)'}].forEach(function(kpi){
+        html+='<div style="background:'+kpi.bg+';border-radius:var(--r2);padding:7px 10px;text-align:center;">';
+        html+='<div style="font-size:14px;font-weight:700;color:'+kpi.c+';">'+fPLN(kpi.v)+'</div>';
+        html+='<div style="font-size:9px;color:var(--txt3);text-transform:uppercase;font-weight:600;">'+kpi.l+'</div>';
+        html+='</div>';
+      });
+      html+='</div>';
+      if(totalActual||kosztActual){
+        html+='<div style="font-size:11px;color:var(--txt2);">Wykonanie: Przychody <b style="color:'+(totalActual>=0?'var(--g)':'var(--red)')+'">'+fPLN(totalActual)+'</b> · Koszty <b>'+fPLN(kosztActual)+'</b></div>';
+      }
     }
     html+='</div>';
   });
@@ -10622,11 +10975,14 @@ function oAddBudget(){
   var mo=document.getElementById('mo-budget-meta');
   if(!mo){mo=_createBudgetMetaModal();}
   document.getElementById('bm-ttl').textContent='Nowy budżet';
-  document.getElementById('bm-name').value='Budżet '+new Date().getFullYear();
+  document.getElementById('bm-name').value='';
   document.getElementById('bm-year').value=new Date().getFullYear();
-  document.getElementById('bm-saldo').value='100';
+  document.getElementById('bm-saldo').value='0';
   document.getElementById('bm-del').style.display='none';
+  // Reset type
+  var typeInp=document.getElementById('bm-type');if(typeInp)typeInp.value='sezonowy';
   mo._editIdx=null;
+  _updateBudgetTypeFields('sezonowy',null);
   oM('mo-budget-meta');
 }
 function oEditBudgetMeta(bi){
@@ -10638,22 +10994,103 @@ function oEditBudgetMeta(bi){
   document.getElementById('bm-year').value=b.year;
   document.getElementById('bm-saldo').value=b.saldoStart;
   document.getElementById('bm-del').style.display='';
+  var bt=b.budgetType||'sezonowy';
+  var typeInp=document.getElementById('bm-type');if(typeInp)typeInp.value=bt;
   mo._editIdx=bi;
+  _updateBudgetTypeFields(bt,b.meta||{});
   oM('mo-budget-meta');
 }
 function _createBudgetMetaModal(){
   var mo=document.createElement('div');mo.className='mo';mo.id='mo-budget-meta';
-  mo.innerHTML='<div class="mbox" style="width:420px;"><div class="mh"><div class="mt2" id="bm-ttl">Nowy budżet</div><button class="mc2" onclick="cM(\'mo-budget-meta\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
-    +'<div class="mbody"><div class="sh" style="margin-top:0;">Dane budżetu</div>'
+  mo.innerHTML=''
+    +'<div class="mbox" style="width:460px;">'
+    +'<div class="mh"><div class="mt2" id="bm-ttl">Nowy budżet</div>'
+    +'<button class="mc2" onclick="cM(\'mo-budget-meta\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
+    +'<div class="mbody">'
+    +'<div class="sh" style="margin-top:0;">Typ budżetu</div>'
+    +'<div id="bm-type-btns" style="display:flex;gap:8px;margin-bottom:14px;">'
+      +'<button onclick="_setBudgetType(\'sezonowy\')" id="bmt-sezonowy" style="flex:1;padding:8px;border-radius:var(--r2);border:2px solid #93C2EE;background:#E6F1FB;color:#0C447C;font-weight:600;cursor:pointer;font-size:12px;">📅<br><span style=\'font-size:11px;\'>Sezonowy</span></button>'
+      +'<button onclick="_setBudgetType(\'druzyny\')" id="bmt-druzyny" style="flex:1;padding:8px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur2);color:var(--txt2);cursor:pointer;font-size:12px;">👥<br><span style=\'font-size:11px;\'>Drużyny</span></button>'
+      +'<button onclick="_setBudgetType(\'wydarzenie\')" id="bmt-wydarzenie" style="flex:1;padding:8px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur2);color:var(--txt2);cursor:pointer;font-size:12px;">🏆<br><span style=\'font-size:11px;\'>Wydarzenie</span></button>'
+    +'</div>'
+    +'<input type="hidden" id="bm-type" value="sezonowy">'
+    +'<div class="sh">Dane budżetu</div>'
     +'<div class="fr"><label class="fl">Nazwa budżetu *</label><input class="fi" id="bm-name" placeholder="np. Budżet roczny 2025"/></div>'
-    +'<div class="fr2"><div><label class="fl">Rok</label><input class="fi" id="bm-year" type="number" min="2020" max="2030"/></div>'
-    +'<div><label class="fl">Saldo startowe (zł)</label><input class="fi" id="bm-saldo" type="number" step="0.01"/></div></div>'
-    +'</div><div class="mfs"><button class="btn dan sm" id="bm-del" onclick="delBudgetFromMeta()">Usuń budżet</button>'
+    +'<div id="bm-type-fields"></div>'
+    +'<div class="fr2">'
+      +'<div><label class="fl">Rok</label><input class="fi" id="bm-year" type="number" min="2020" max="2035"/></div>'
+      +'<div id="bm-saldo-wrap"><label class="fl">Saldo startowe (zł)</label><input class="fi" id="bm-saldo" type="number" step="0.01"/></div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="mfs">'
+    +'<button class="btn dan sm" id="bm-del" onclick="delBudgetFromMeta()">Usuń budżet</button>'
     +'<div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-budget-meta\')">Anuluj</button>'
-    +'<button class="btn pri" onclick="saveBudgetMeta()">Zapisz</button></div></div></div>';
+    +'<button class="btn pri" onclick="saveBudgetMeta()">Zapisz</button></div></div>'
+    +'</div>';
   mo.addEventListener('click',e=>{if(e.target===mo)mo.classList.remove('op');});
   document.body.appendChild(mo);
   return mo;
+}
+function _setBudgetType(bt){
+  var typeInp=document.getElementById('bm-type');if(typeInp)typeInp.value=bt;
+  // Highlight active button
+  ['sezonowy','druzyny','wydarzenie'].forEach(t=>{
+    var btn=document.getElementById('bmt-'+t);if(!btn)return;
+    var cfg=BUDGET_TYPE_CFG[t];
+    if(t===bt){btn.style.border='2px solid '+cfg.brd;btn.style.background=cfg.bg;btn.style.color=cfg.tc;btn.style.fontWeight='600';}
+    else{btn.style.border='1px solid var(--brd)';btn.style.background='var(--sur2)';btn.style.color='var(--txt2)';btn.style.fontWeight='400';}
+  });
+  _updateBudgetTypeFields(bt,null);
+}
+function _updateBudgetTypeFields(bt,meta){
+  // Sync button highlight
+  ['sezonowy','druzyny','wydarzenie'].forEach(t=>{
+    var btn=document.getElementById('bmt-'+t);if(!btn)return;
+    var cfg=BUDGET_TYPE_CFG[t];
+    if(t===bt){btn.style.border='2px solid '+cfg.brd;btn.style.background=cfg.bg;btn.style.color=cfg.tc;btn.style.fontWeight='600';}
+    else{btn.style.border='1px solid var(--brd)';btn.style.background='var(--sur2)';btn.style.color='var(--txt2)';btn.style.fontWeight='400';}
+  });
+  var wrap=document.getElementById('bm-type-fields');if(!wrap)return;
+  var saldoWrap=document.getElementById('bm-saldo-wrap');
+  if(bt==='sezonowy'){
+    wrap.innerHTML='';
+    if(saldoWrap)saldoWrap.style.display='';
+  } else if(bt==='druzyny'){
+    var teams=TEAMS.map(t=>t.name).filter(Boolean);
+    var curTeam=meta&&meta.team?meta.team:'';
+    wrap.innerHTML='<div class="fr"><label class="fl">Drużyna / Kategoria *</label>'
+      +'<select class="fi" id="bm-team" style="height:36px;">'
+      +'<option value="">— wybierz drużynę —</option>'
+      +teams.map(tn=>'<option value="'+escH(tn)+'"'+(tn===curTeam?' selected':'')+'>'+escH(tn)+'</option>').join('')
+      +'<option value="__custom__">Inna (wpisz ręcznie)</option>'
+      +'</select></div>'
+      +'<div class="fr" id="bm-team-custom-wrap" style="display:none;"><label class="fl">Nazwa drużyny</label><input class="fi" id="bm-team-custom" value="'+(curTeam&&!teams.includes(curTeam)?escH(curTeam):'')+'"/></div>';
+    if(saldoWrap)saldoWrap.style.display='none';
+    var sel=document.getElementById('bm-team');
+    if(sel){
+      if(curTeam&&!teams.includes(curTeam)){sel.value='__custom__';}
+      sel.onchange=function(){
+        var cw=document.getElementById('bm-team-custom-wrap');
+        if(cw)cw.style.display=this.value==='__custom__'?'':'none';
+      };
+    }
+  } else if(bt==='wydarzenie'){
+    var evDate=meta&&meta.eventDate?meta.eventDate:'';
+    var evType=meta&&meta.eventType?meta.eventType:'turniej';
+    var planUcz=meta&&meta.planUczestnicy?meta.planUczestnicy:1;
+    wrap.innerHTML='<div class="fr2">'
+      +'<div><label class="fl">Typ wydarzenia</label>'
+      +'<select class="fi" id="bm-ev-type" style="height:36px;">'
+      +['mecz','turniej','oboz','inne'].map(v=>'<option value="'+v+'"'+(v===evType?' selected':'')+'>'+{mecz:'Mecz',turniej:'Turniej',oboz:'Obóz',inne:'Inne'}[v]+'</option>').join('')
+      +'</select></div>'
+      +'<div><label class="fl">Data wydarzenia</label><input class="fi" id="bm-ev-date" type="date" value="'+evDate+'"/></div>'
+      +'</div>'
+      +'<div class="fr"><label class="fl">Planowana liczba uczestników *</label>'
+      +'<input class="fi" id="bm-ev-ucz" type="number" min="1" value="'+planUcz+'" placeholder="np. 75"/>'
+      +'<div style="font-size:10px;color:var(--txt3);margin-top:3px;">Służy do obliczenia kosztu na uczestnika</div>'
+      +'</div>';
+    if(saldoWrap)saldoWrap.style.display='none';
+  }
 }
 function saveBudgetMeta(){
   var mo=document.getElementById('mo-budget-meta');
@@ -10661,27 +11098,267 @@ function saveBudgetMeta(){
   if(!name.trim()){ST('Podaj nazwę budżetu');return;}
   var year=parseInt((document.getElementById('bm-year')||{}).value)||new Date().getFullYear();
   var saldo=parseFloat((document.getElementById('bm-saldo')||{}).value)||0;
+  var bt=(document.getElementById('bm-type')||{}).value||'sezonowy';
+  // Zbierz meta
+  var meta={};
+  if(bt==='druzyny'){
+    var tSel=document.getElementById('bm-team');
+    var tVal=tSel?tSel.value:'';
+    if(tVal==='__custom__'){var tc=document.getElementById('bm-team-custom');tVal=tc?tc.value.trim():'';}
+    if(!tVal){ST('Wybierz drużynę');return;}
+    meta.team=tVal;
+  } else if(bt==='wydarzenie'){
+    var evTypeSel=document.getElementById('bm-ev-type');
+    meta.eventType=evTypeSel?evTypeSel.value:'inne';
+    var evDateInp=document.getElementById('bm-ev-date');
+    meta.eventDate=evDateInp?evDateInp.value:'';
+    var evUczInp=document.getElementById('bm-ev-ucz');
+    var evUcz=parseInt(evUczInp?evUczInp.value:1)||1;
+    if(evUcz<1){ST('Podaj liczbę uczestników');return;}
+    meta.planUczestnicy=evUcz;
+  }
   if(mo._editIdx===null){
-    var b=emptyBudget(name.trim(),year);b.saldoStart=saldo;
+    var b=emptyBudget(name.trim(),year,bt,meta);
+    b.saldoStart=saldo;
+    if(bt==='wydarzenie')b.evPlanUcz=meta.planUczestnicy||1;
     BUDGETS.push(b);
+    ST('Budżet utworzony');
   } else {
-    BUDGETS[mo._editIdx].name=name.trim();BUDGETS[mo._editIdx].year=year;BUDGETS[mo._editIdx].saldoStart=saldo;
+    var eb=BUDGETS[mo._editIdx];
+    eb.name=name.trim();eb.year=year;eb.saldoStart=saldo;
+    eb.budgetType=bt;eb.meta=meta;
+    if(bt==='wydarzenie')eb.evPlanUcz=meta.planUczestnicy||eb.evPlanUcz||1;
+    ST('Zaktualizowany');
   }
   saveLS();cM('mo-budget-meta');rFinanse();
-  ST(mo._editIdx===null?'Budżet utworzony':'Zaktualizowany');
 }
 function delBudget(bi){if(!confirm('Usunąć budżet "'+BUDGETS[bi].name+'"?'))return;BUDGETS.splice(bi,1);saveLS();rFinanse();ST('Budżet usunięty');}
 function delBudgetFromMeta(){var mo=document.getElementById('mo-budget-meta');if(mo._editIdx===null)return;delBudget(mo._editIdx);cM('mo-budget-meta');}
 function finBack(){currentBudgetId=null;rFinanse();}
 
-// ── Widok budżetu (tabela roczna) ──
 function oViewBudget(budgetId){
   currentBudgetId=budgetId;
   var b=BUDGETS.find(x=>x.id===budgetId);if(!b)return;
-  document.getElementById('fin-sub').textContent=b.name+' · '+b.year;
+  var bt=b.budgetType||'sezonowy';
+  var btc=BUDGET_TYPE_CFG[bt]||BUDGET_TYPE_CFG.sezonowy;
+  var metaStr='';
+  if(bt==='druzyny'&&b.meta&&b.meta.team)metaStr=' · '+b.meta.team;
+  else if(bt==='wydarzenie'&&b.meta){
+    var evLabel={mecz:'Mecz',turniej:'Turniej',oboz:'Obóz',inne:'Inne'}[b.meta.eventType]||'';
+    if(evLabel)metaStr=' · '+evLabel;
+    if(b.meta.eventDate)metaStr+=' '+b.meta.eventDate;
+  }
+  document.getElementById('fin-sub').textContent=b.name+' · '+b.year+metaStr;
   document.getElementById('fin-back-btn').style.display='';
   document.getElementById('fin-new-btn').style.display='none';
-  renderBudgetTable(b);
+  if(bt==='wydarzenie'){renderEventBudget(b);}
+  else{renderBudgetTable(b);}
+}
+
+// ══════════════════════════════════════════════
+// ── KALKULATOR BUDŻETU WYDARZENIA ──
+// ══════════════════════════════════════════════
+function renderEventBudget(b){
+  var body=document.getElementById('fin-body');if(!body)return;
+  if(!b.evRows)b.evRows=[];
+  var planUcz=b.evPlanUcz||1;
+  var realUcz=b.evRealUcz;
+
+  // ─ Oblicz sumy ─
+  var totalKosztPlan=0,totalKosztReal=0,hasReal=false;
+  b.evRows.forEach(r=>{
+    totalKosztPlan+=(r.kwotaPlan||0)*(r.liczbaPlan||0);
+    if(r.kwotaReal!==null&&r.kwotaReal!==undefined){
+      totalKosztReal+=(r.kwotaReal||0)*(r.liczbaReal!==null&&r.liczbaReal!==undefined?r.liczbaReal:r.liczbaPlan||0);
+      hasReal=true;
+    }
+  });
+  var income=b.evIncome||0;
+  var zyskPlan=income-totalKosztPlan;
+  var zyskReal=hasReal?income-totalKosztReal:null;
+  var cenaNaUczPlan=planUcz>0?totalKosztPlan/planUcz:0;
+  var cenaNaUczReal=(realUcz&&realUcz>0&&hasReal)?totalKosztReal/realUcz:null;
+
+  var html='';
+
+  // ─ Toolbar ─
+  html+='<div style="display:flex;gap:8px;align-items:center;padding:12px 18px;background:var(--sur);border-bottom:1px solid var(--brd);flex-wrap:wrap;">';
+  html+='<button class="btn sm pri" onclick="evAddRow(\''+b.id+'\')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M8 3v10M3 8h10"/></svg> Dodaj wiersz</button>';
+  html+='<div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
+  html+='<div style="font-size:11px;color:var(--txt2);">Planowana l. uczestników: <input id="ev-plan-ucz" type="number" min="1" value="'+planUcz+'" style="width:64px;font-size:11px;border:1px solid var(--brd);border-radius:4px;padding:2px 5px;background:var(--sur2);" onchange="evSetPlanUcz(\''+b.id+'\',this.value)" onblur="evSetPlanUcz(\''+b.id+'\',this.value)"/></div>';
+  html+='<div style="font-size:11px;color:var(--txt2);">Realna l. uczestników: <input id="ev-real-ucz" type="number" min="0" value="'+(realUcz!==null&&realUcz!==undefined?realUcz:'')+'" placeholder="—" style="width:64px;font-size:11px;border:1px solid var(--brd);border-radius:4px;padding:2px 5px;background:var(--sur2);" onchange="evSetRealUcz(\''+b.id+'\',this.value)" onblur="evSetRealUcz(\''+b.id+'\',this.value)"/></div>';
+  html+='</div></div>';
+
+  // ─ Tabela ─
+  html+='<div style="overflow:auto;max-height:calc(100vh - 260px);">';
+  html+='<table style="border-collapse:collapse;width:100%;min-width:820px;">';
+
+  // Nagłówek
+  html+='<thead style="position:sticky;top:0;z-index:5;">';
+  html+='<tr>';
+  html+='<th style="text-align:left;padding:7px 10px;background:#3C3489;color:#fff;font-size:11px;min-width:200px;border:1px solid #4a3aaa;">Koszt / Pozycja</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#3C3489;color:#fff;font-size:11px;min-width:90px;border:1px solid #4a3aaa;">Kwota planow.</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#3C3489;color:#fff;font-size:11px;min-width:80px;border:1px solid #4a3aaa;">Liczba planow.</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#085041;color:#fff;font-size:11px;min-width:100px;border:1px solid #0d6b52;">Pełny koszt plan.</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#085041;color:#aef;font-size:11px;min-width:90px;border:1px solid #0d6b52;">Koszt / uczestnik</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#C0392B;color:#fff;font-size:11px;min-width:90px;border:1px solid #a0291b;">Kwota realna</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#C0392B;color:#fff;font-size:11px;min-width:80px;border:1px solid #a0291b;">Liczba realna</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#922B21;color:#fff;font-size:11px;min-width:100px;border:1px solid #7b241c;">Pełny koszt real.</th>';
+  html+='<th style="text-align:right;padding:7px 8px;background:#922B21;color:#ffd;font-size:11px;min-width:90px;border:1px solid #7b241c;">Koszt / uczestnik</th>';
+  html+='<th style="text-align:center;padding:7px 6px;background:var(--sur2);color:var(--txt3);font-size:10px;width:36px;border:1px solid var(--brd);">✕</th>';
+  html+='</tr></thead>';
+
+  html+='<tbody>';
+  b.evRows.forEach(function(row,ri){
+    var pelnyPlan=(row.kwotaPlan||0)*(row.liczbaPlan||0);
+    var kosztNaUczPlan=planUcz>0?pelnyPlan/planUcz:0;
+    var hasRowReal=row.kwotaReal!==null&&row.kwotaReal!==undefined;
+    var lReal=hasRowReal?(row.liczbaReal!==null&&row.liczbaReal!==undefined?row.liczbaReal:row.liczbaPlan||0):null;
+    var pelnyReal=hasRowReal?(row.kwotaReal||0)*lReal:null;
+    var rUcz=realUcz!==null&&realUcz!==undefined?realUcz:planUcz;
+    var kosztNaUczReal=(pelnyReal!==null&&rUcz>0)?pelnyReal/rUcz:null;
+    var rowBg=ri%2===0?'var(--sur)':'var(--sur2)';
+
+    html+='<tr style="background:'+rowBg+';">';
+    // Nazwa
+    html+='<td style="padding:4px 6px;border:1px solid var(--brd);">'
+      +'<input value="'+escH(row.name||'')+'" style="width:100%;font-size:12px;border:none;background:transparent;color:var(--txt);outline:none;padding:2px 0;" '
+      +'onchange="evSetField(\''+b.id+'\',\''+row.id+'\',\'name\',this.value)" '
+      +'onblur="evSetField(\''+b.id+'\',\''+row.id+'\',\'name\',this.value)"/>'
+      +'</td>';
+    // Kwota plan
+    html+='<td style="padding:4px 6px;border:1px solid var(--brd);text-align:right;">'
+      +'<input type="number" value="'+(row.kwotaPlan||'')+'" placeholder="0" style="width:80px;font-size:12px;border:none;background:transparent;color:#0C447C;font-weight:600;text-align:right;outline:none;" '
+      +'onchange="evSetField(\''+b.id+'\',\''+row.id+'\',\'kwotaPlan\',+this.value)" '
+      +'onblur="evRerender(\''+b.id+'\')" oninput="evSetField(\''+b.id+'\',\''+row.id+'\',\'kwotaPlan\',+this.value)"/>'
+      +'</td>';
+    // Liczba plan
+    html+='<td style="padding:4px 6px;border:1px solid var(--brd);text-align:right;">'
+      +'<input type="number" value="'+(row.liczbaPlan||'')+'" placeholder="1" style="width:70px;font-size:12px;border:none;background:transparent;color:var(--txt);text-align:right;outline:none;" '
+      +'onchange="evSetField(\''+b.id+'\',\''+row.id+'\',\'liczbaPlan\',+this.value)" '
+      +'onblur="evRerender(\''+b.id+'\')" oninput="evSetField(\''+b.id+'\',\''+row.id+'\',\'liczbaPlan\',+this.value)"/>'
+      +'</td>';
+    // Pełny koszt plan (obliczony)
+    html+='<td style="padding:4px 8px;border:1px solid var(--brd);text-align:right;font-weight:700;color:#0C447C;background:#EEF4FF;">'+fPLN(pelnyPlan)+'</td>';
+    // Koszt na uczestnika plan
+    html+='<td style="padding:4px 8px;border:1px solid var(--brd);text-align:right;color:#085041;font-size:11px;background:#EEF4FF;">'+(pelnyPlan>0?fPLN2(kosztNaUczPlan):'—')+'</td>';
+    // Kwota realna
+    html+='<td style="padding:4px 6px;border:1px solid var(--brd);text-align:right;">'
+      +'<input type="number" value="'+(hasRowReal?(row.kwotaReal||''):'')+'" placeholder="—" style="width:80px;font-size:12px;border:none;background:transparent;color:#C0392B;font-weight:600;text-align:right;outline:none;" '
+      +'onchange="evSetField(\''+b.id+'\',\''+row.id+'\',\'kwotaReal\',this.value===\'\'?null:+this.value)" '
+      +'onblur="evRerender(\''+b.id+'\')" oninput="evSetFieldNoRerender(\''+b.id+'\',\''+row.id+'\',\'kwotaReal\',this.value===\'\'?null:+this.value)"/>'
+      +'</td>';
+    // Liczba realna
+    html+='<td style="padding:4px 6px;border:1px solid var(--brd);text-align:right;">'
+      +'<input type="number" value="'+(row.liczbaReal!==null&&row.liczbaReal!==undefined?row.liczbaReal:'')+'" placeholder="jak plan" style="width:70px;font-size:12px;border:none;background:transparent;color:var(--txt);text-align:right;outline:none;" '
+      +'onchange="evSetField(\''+b.id+'\',\''+row.id+'\',\'liczbaReal\',this.value===\'\'?null:+this.value)" '
+      +'onblur="evRerender(\''+b.id+'\')" oninput="evSetFieldNoRerender(\''+b.id+'\',\''+row.id+'\',\'liczbaReal\',this.value===\'\'?null:+this.value)"/>'
+      +'</td>';
+    // Pełny koszt realny (obliczony)
+    html+='<td style="padding:4px 8px;border:1px solid var(--brd);text-align:right;font-weight:700;color:#C0392B;background:#FEF0EE;">'+(pelnyReal!==null?fPLN(pelnyReal):'—')+'</td>';
+    // Koszt na uczestnika realny
+    html+='<td style="padding:4px 8px;border:1px solid var(--brd);text-align:right;font-size:11px;color:#922B21;background:#FEF0EE;">'+(kosztNaUczReal!==null?fPLN2(kosztNaUczReal):'—')+'</td>';
+    // Usuń
+    html+='<td style="padding:4px 6px;border:1px solid var(--brd);text-align:center;">'
+      +'<button onclick="evDelRow(\''+b.id+'\',\''+row.id+'\')" style="background:none;border:none;cursor:pointer;color:var(--txt3);font-size:14px;line-height:1;" title="Usuń">×</button>'
+      +'</td>';
+    html+='</tr>';
+  });
+
+  // ─ Wiersz sumy kosztów ─
+  html+='<tr style="font-weight:700;">';
+  html+='<td style="padding:6px 10px;background:#3C3489;color:#fff;border:1px solid #4a3aaa;font-size:12px;">ŁĄCZNE KOSZTY</td>';
+  html+='<td colspan="2" style="border:1px solid #4a3aaa;background:#3C3489;"></td>';
+  html+='<td style="padding:6px 8px;text-align:right;background:#3C3489;color:#fff;border:1px solid #4a3aaa;">'+fPLN(totalKosztPlan)+'</td>';
+  html+='<td style="padding:6px 8px;text-align:right;background:#085041;color:#aef;border:1px solid #0d6b52;font-size:11px;">'+(planUcz>0?fPLN2(totalKosztPlan/planUcz):'—')+'</td>';
+  html+='<td colspan="2" style="border:1px solid #a0291b;background:#C0392B;"></td>';
+  html+='<td style="padding:6px 8px;text-align:right;background:#C0392B;color:#fff;border:1px solid #a0291b;">'+(hasReal?fPLN(totalKosztReal):'—')+'</td>';
+  html+='<td style="padding:6px 8px;text-align:right;background:#922B21;color:#ffd;border:1px solid #7b241c;font-size:11px;">'+(cenaNaUczReal!==null?fPLN2(cenaNaUczReal):'—')+'</td>';
+  html+='<td style="border:1px solid var(--brd);background:var(--sur2);"></td>';
+  html+='</tr>';
+  html+='</tbody></table></div>';
+
+  // ─ Panel podsumowania (prawa strona) ─
+  html+='<div style="padding:14px 18px;display:flex;gap:16px;flex-wrap:wrap;border-top:2px solid var(--brd);background:var(--sur);">';
+
+  // Przychód
+  html+='<div style="min-width:160px;">';
+  html+='<div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;margin-bottom:4px;">Przychód (wpłaty)</div>';
+  html+='<input type="number" id="ev-income" value="'+(income||'')+'" placeholder="0 zł" '
+    +'style="width:140px;font-size:16px;font-weight:700;color:var(--dg);border:1px solid var(--brd);border-radius:var(--r2);padding:5px 8px;background:var(--sur2);" '
+    +'onchange="evSetIncome(\''+b.id+'\',this.value)" onblur="evSetIncome(\''+b.id+'\',this.value)"/>';
+  html+='</div>';
+
+  // KPI kafelki
+  var kpis=[
+    {l:'Pełny koszt planowy',v:fPLN(totalKosztPlan),bg:'#E6F1FB',tc:'#0C447C'},
+    {l:'Pełny koszt realny',v:hasReal?fPLN(totalKosztReal):'—',bg:'#FEF0EE',tc:'#C0392B'},
+    {l:'Planow. l. uczestników',v:planUcz,bg:'var(--sur2)',tc:'var(--txt)'},
+    {l:'Realna l. uczestników',v:realUcz!==null&&realUcz!==undefined?realUcz:'—',bg:'var(--sur2)',tc:'var(--txt)'},
+    {l:'Cena usługi (plan)',v:planUcz>0?fPLN2(totalKosztPlan/planUcz):'—',bg:'#E1F5EE',tc:'#085041'},
+    {l:'Cena usługi (real)',v:cenaNaUczReal!==null?fPLN2(cenaNaUczReal):'—',bg:'#E1F5EE',tc:'#085041'},
+    {l:'Zysk planowany',v:fPLN(zyskPlan),bg:zyskPlan>=0?'var(--lg)':'var(--lred)',tc:zyskPlan>=0?'var(--dg)':'var(--red)'},
+    {l:'Zysk realny',v:zyskReal!==null?fPLN(zyskReal):'—',bg:zyskReal!==null&&zyskReal>=0?'var(--lg)':'var(--lred)',tc:zyskReal!==null&&zyskReal>=0?'var(--dg)':'var(--red)'}
+  ];
+  kpis.forEach(k=>{
+    html+='<div style="min-width:120px;background:'+k.bg+';border-radius:var(--r2);padding:8px 12px;">';
+    html+='<div style="font-size:16px;font-weight:700;color:'+k.tc+';">'+k.v+'</div>';
+    html+='<div style="font-size:9px;color:var(--txt3);text-transform:uppercase;font-weight:600;margin-top:2px;">'+k.l+'</div>';
+    html+='</div>';
+  });
+  html+='</div>'; // end panel
+
+  body.innerHTML=html;
+}
+
+function fPLN2(v){
+  if(v===null||v===undefined||isNaN(v))return '—';
+  return v.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2})+' zł';
+}
+
+function evAddRow(bid){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  if(!b.evRows)b.evRows=[];
+  b.evRows.push({id:genId(),name:'Nowa pozycja',kwotaPlan:0,liczbaPlan:1,kwotaReal:null,liczbaReal:null,note:''});
+  saveLS();renderEventBudget(b);
+}
+function evDelRow(bid,rid){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b||!b.evRows)return;
+  if(!confirm('Usunąć wiersz?'))return;
+  b.evRows=b.evRows.filter(r=>r.id!==rid);
+  saveLS();renderEventBudget(b);
+}
+function evSetField(bid,rid,field,val){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b||!b.evRows)return;
+  var row=b.evRows.find(r=>r.id===rid);if(!row)return;
+  row[field]=val;saveLS();
+  // Rerender tylko przy polach obliczeniowych
+  if(field!=='name'&&field!=='note')renderEventBudget(b);
+}
+function evSetFieldNoRerender(bid,rid,field,val){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b||!b.evRows)return;
+  var row=b.evRows.find(r=>r.id===rid);if(!row)return;
+  row[field]=val;saveLS();
+}
+function evRerender(bid){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  renderEventBudget(b);
+}
+function evSetPlanUcz(bid,val){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  b.evPlanUcz=Math.max(1,parseInt(val)||1);
+  if(b.meta)b.meta.planUczestnicy=b.evPlanUcz;
+  saveLS();renderEventBudget(b);
+}
+function evSetRealUcz(bid,val){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  b.evRealUcz=val===''||val===null?null:(Math.max(0,parseInt(val)||0));
+  saveLS();renderEventBudget(b);
+}
+function evSetIncome(bid,val){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  b.evIncome=parseFloat(val)||0;
+  saveLS();renderEventBudget(b);
 }
 
 function renderBudgetTable(b){
@@ -10932,7 +11609,7 @@ function renameBudgetSection(bid,sid){
 
 // ═══════════════ SKAUTING ═══════════════
 var SCOUT_STATUS=['Nowy','W obserwacji','Do kontaktu','Odrzucony'];
-var SCOUT_PRIORITY=['Wysoki','Średni','Niski'];
+var SCOUT_PRIORITY=['Do ściągnięcia','Do dalszej obserwacji','Za słaby'];
 var editScoutIdx=null;
 
 function syncScoutFromMatch(matchIdx){
@@ -10951,7 +11628,7 @@ function syncScoutFromMatch(matchIdx){
     id:genId(),matchId:m.id,sourceText:text,name:text,nameEdited:false,
     opponent:m.opponent||'',ourTeam:m.team||'',date:m.date||'',
     position:'',age:'',foot:'',height:'',notes:'',
-    status:'Nowy',priority:'Wysoki',
+    status:'Nowy',priority:'Do ściągnięcia',
     addedAt:new Date().toISOString().slice(0,10)
   });
   saveLS();
@@ -10979,7 +11656,7 @@ function rSkauting(){
     if(fPriority&&s.priority!==fPriority)return false;
     return true;
   }).sort((a,b)=>{
-    var po={Wysoki:0,Średni:1,Niski:2};
+    var po={'Do ściągnięcia':0,'Do dalszej obserwacji':1,'Za słaby':2};
     var so={Nowy:0,'W obserwacji':1,'Do kontaktu':2,Odrzucony:3};
     return (po[a.priority]||1)-(po[b.priority]||1)||(so[a.status]||0)-(so[b.status]||0)||(a.date<b.date?1:-1);
   });
@@ -11001,8 +11678,8 @@ function rSkauting(){
   var html='';
   filtered.forEach(s=>{
     var si=SCOUT_PLAYERS.indexOf(s);
-    var priCls=s.priority==='Wysoki'?'sk-p-high':s.priority==='Niski'?'sk-p-low':'sk-p-mid';
-    var priIcon=s.priority==='Wysoki'?'⭐':s.priority==='Niski'?'▽':'◆';
+    var priCls=s.priority==='Do ściągnięcia'?'sk-p-high':s.priority==='Za słaby'?'sk-p-low':'sk-p-mid';
+    var priIcon=s.priority==='Do ściągnięcia'?'🎯':s.priority==='Za słaby'?'✕':'👁';
     var stCls=s.status==='Nowy'?'sk-s-new':s.status==='W obserwacji'?'sk-s-obs':s.status==='Do kontaktu'?'sk-s-contact':'sk-s-rej';
     var col2=playerColor(s.id);var ini2=playerInitials(s.name);
     html+='<div class="sk-row">';
@@ -11045,7 +11722,7 @@ function resetSkautingFilters(){
 function quickScoutStatus(idx,val){SCOUT_PLAYERS[idx].status=val;saveLS();rSkauting();ST('Status: '+val);}
 function delScout(idx){if(!confirm('Usunąć zawodnika z bazy skautingu?'))return;SCOUT_PLAYERS.splice(idx,1);saveLS();rSkauting();ST('Usunięto');}
 
-function oAddScout(){editScoutIdx=null;_openScoutForm({name:'',opponent:'',ourTeam:'',date:'',position:'',age:'',foot:'',height:'',notes:'',status:'Nowy',priority:'Wysoki'});oM('mo-scout');}
+function oAddScout(){editScoutIdx=null;_openScoutForm({name:'',opponent:'',ourTeam:'',date:'',position:'',age:'',foot:'',height:'',notes:'',status:'Nowy',priority:'Do ściągnięcia'});oM('mo-scout');}
 function oEditScout(idx){editScoutIdx=idx;_openScoutForm(SCOUT_PLAYERS[idx]);oM('mo-scout');}
 
 function _openScoutForm(s){
@@ -11093,7 +11770,7 @@ function saveScout(){
     foot:(document.getElementById('sk-foot')||{}).value||'',
     height:(document.getElementById('sk-height')||{}).value||'',
     status:(document.getElementById('sk-status')||{}).value||'Nowy',
-    priority:(document.getElementById('sk-priority')||{}).value||'Średni',
+    priority:(document.getElementById('sk-priority')||{}).value||'Do dalszej obserwacji',
     notes:(document.getElementById('sk-notes')||{}).value||''
   };
   if(isNew)SCOUT_PLAYERS.push(s);else SCOUT_PLAYERS[editScoutIdx]=s;
@@ -11486,8 +12163,9 @@ SP=function(n){
   if(n==='dir-users')rDirUsers();
   if(n==='dir-settings')rDirSettings();
   if(n.startsWith('dir-')){
-    document.querySelectorAll('#sb-role-dyrektor .ni').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('#sb-role-dyrektor .ni, #sb-role-dyrektor .ni-child').forEach(x=>x.classList.remove('active'));
     var ni=document.getElementById('ni-'+n);if(ni)ni.classList.add('active');
+    var grpId=DIR_NAV_GROUPS[n];if(grpId)openNavGroup(grpId);
   }
 };
 
