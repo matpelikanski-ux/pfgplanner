@@ -447,49 +447,231 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* MODALS */
 
 /* PWA / Mobile */
+/* ═══════════════════════════════════════
+   MOBILE — dolny pasek + szuflada boczna
+   ═══════════════════════════════════════ */
 @media (max-width: 768px) {
-  body { overflow: auto; }
-  .shell { flex-direction: column; height: 100dvh; }
-  .sb { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; padding-bottom: env(safe-area-inset-bottom); flex-shrink: 0; overflow-x: auto; }
-  .sb-logo { padding: 8px 12px; border-bottom: none; border-right: 1px solid var(--brd); flex-shrink: 0; }
-  .sb-s { display: contents; }
-  .sb-lbl { display: none; }
-  .ni { padding: 8px 10px; font-size: 11px; flex-direction: column; gap: 2px; min-width: 52px; flex-shrink: 0; }
-  .ni svg { width: 18px; height: 18px; }
-  #sb-role-trener, #sb-role-dyrektor { display: flex !important; flex-direction: row; overflow-x: auto; flex: 1; }
+
+  /* === LAYOUT === */
+  body { overflow: hidden; }
+  .shell { flex-direction: column; height: 100dvh; position: relative; }
+
+  /* === SIDEBAR UKRYTY — zastąpiony szufladą === */
+  .sb { display: none !important; }
+
+  /* === GŁÓWNA TREŚĆ === */
+  .main {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+  .pg { overflow-y: auto; -webkit-overflow-scrolling: touch; height: 100%; }
+
+  /* === TOOLBAR === */
+  .tb { padding: 10px 14px; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+  .t1 { font-size: 15px; }
+  .t2 { font-size: 11px; }
+  .tb-r { flex-wrap: wrap; gap: 5px; }
+  .tb-r .btn { font-size: 11px; padding: 6px 10px; }
+
+  /* === MOBILE TOP BAR === */
+  #mob-topbar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    padding: 0 14px;
+    padding-top: env(safe-area-inset-top);
+    background: var(--sur);
+    border-bottom: 1px solid var(--brd);
+    flex-shrink: 0;
+    z-index: 50;
+  }
+  #mob-topbar-title { font-size: 15px; font-weight: 600; color: var(--txt); }
+  #mob-topbar-sub { font-size: 11px; color: var(--txt3); }
+  #mob-hamburger {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: none; cursor: pointer;
+    border-radius: var(--r2);
+    color: var(--txt2);
+  }
+  #mob-hamburger:active { background: var(--sur2); }
+  #mob-topbar-right { display: flex; align-items: center; gap: 6px; }
+  #mob-role-badge {
+    font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 20px;
+    background: var(--lg); color: var(--dg);
+  }
+
+  /* === DOLNY PASEK NAWIGACJI === */
+  #mob-tabbar {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: calc(56px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--sur);
+    border-top: 1px solid var(--brd);
+    z-index: 100;
+    box-shadow: 0 -2px 12px rgba(0,0,0,.06);
+  }
+  .mob-tab {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px;
+    font-size: 9px; font-weight: 500;
+    color: var(--txt3);
+    cursor: pointer;
+    border: none; background: none;
+    padding: 0; min-width: 0;
+    transition: color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; transition: stroke .15s; }
+  .mob-tab.active { color: var(--g); }
+  .mob-tab.active svg { stroke: var(--g); }
+  .mob-tab-more svg { width: 20px; height: 20px; }
+
+  /* === SZUFLADA BOCZNA (DRAWER) === */
+  #mob-drawer-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 200;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  #mob-drawer-overlay.open { display: block; }
+  #mob-drawer {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    background: var(--sur);
+    z-index: 201;
+    display: flex; flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+    box-shadow: 4px 0 24px rgba(0,0,0,.15);
+  }
+  #mob-drawer.open { transform: translateX(0); }
+
+  #mob-drawer-head {
+    display: flex; align-items: center;
+    padding: 16px 14px 12px;
+    padding-top: calc(16px + env(safe-area-inset-top));
+    border-bottom: 1px solid var(--brd);
+    gap: 10px;
+  }
+  #mob-drawer-head .sb-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
+  #mob-drawer-close {
+    margin-left: auto; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: none; cursor: pointer;
+    color: var(--txt3); border-radius: var(--r2); flex-shrink: 0;
+  }
+  #mob-drawer-close:active { background: var(--sur2); }
+
+  #mob-drawer-scroll { flex: 1; overflow-y: auto; padding: 8px 0 16px; }
+  .mob-drawer-lbl {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--txt3);
+    padding: 8px 18px 4px;
+  }
+  .mob-drawer-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 18px;
+    font-size: 13px; color: var(--txt2);
+    cursor: pointer; border: none; background: none;
+    width: 100%; text-align: left;
+    transition: background .1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-drawer-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+  .mob-drawer-item:active, .mob-drawer-item.active { background: var(--lg); color: var(--dg); }
+  .mob-drawer-item.active { font-weight: 500; }
+  .mob-drawer-sep { height: 1px; background: var(--brd); margin: 6px 14px; }
+
+  #mob-drawer-foot {
+    padding: 10px 14px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--brd);
+    display: flex; align-items: center; gap: 10px;
+  }
+  #mob-drawer-av { width: 32px; height: 32px; border-radius: 50%; background: var(--g); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  #mob-drawer-username { font-size: 12px; font-weight: 500; }
+  #mob-drawer-role { font-size: 11px; color: var(--txt3); }
+  #mob-drawer-logout { margin-left: auto; border: none; background: none; cursor: pointer; color: var(--txt3); padding: 6px; }
+  #mob-drawer-logout:active { color: var(--red); }
+
+  /* === KAFELKI / KARTY === */
+  .inner { padding: 12px 14px; }
+  .card { padding: 12px; }
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .sc { padding: 10px 12px; }
+  .sv { font-size: 22px; }
+  .fr2 { grid-template-columns: 1fr; }
+  .fr3 { grid-template-columns: 1fr; }
+
+  /* === MODALS — otwierają się od dołu === */
+  .mo { align-items: flex-end; padding: 0; }
+  .mbox {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh;
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mbox.wide { width: 100% !important; }
+  .mh { border-radius: 20px 20px 0 0; padding: 14px 16px 12px; }
+
+  /* Drag handle dla modali */
+  .mh::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: var(--brd);
+    border-radius: 2px;
+    margin: 0 auto 10px;
+  }
+
+  /* === TABELE SKŁADEK === */
+  #fin-scroll-wrap { max-height: calc(100dvh - 200px); }
+
+  /* === LOGIN === */
+  .login-box { width: 94%; padding: 24px 18px; }
+  .login-wrap { padding: 16px; }
+
+  /* === MISC === */
   .sb-bot { display: none; }
   #sb-view-switcher { display: none !important; }
   #sync-status { display: none; }
-  .main { flex: 1; min-height: 0; overflow: hidden; }
-  .pg { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .inner { padding: 12px; }
-  .tb { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
-  .t1 { font-size: 14px; }
-  .tb-r { flex-wrap: wrap; gap: 5px; }
-  .tb-r .btn { font-size: 11px; padding: 5px 8px; }
-  .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .fr2 { grid-template-columns: 1fr; }
-  .fr3 { grid-template-columns: 1fr; }
-  .mbox { width: 96% !important; max-height: 92dvh; margin: 4px; }
-  .mbox.wide { width: 96% !important; }
-  .mo { align-items: flex-end; padding-bottom: env(safe-area-inset-bottom); }
-  .mbox { border-radius: 16px 16px 0 0; }
-  .card { padding: 12px; }
-  /* Tabela składek mobilna */
-  #fin-scroll-wrap { max-height: calc(100dvh - 160px); }
-  /* Login mobilny */
-  .login-box { width: 92%; padding: 24px 20px; }
+  #mobile-view-fab { display: none !important; }
+
+  /* Ukryj stary FAB */
+  #mobile-view-fab { display: none !important; }
+
+  /* Dashboard grid — jedna kolumna */
+  #pg-dash .inner > div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
 }
+
 @media (max-width: 480px) {
-  .ni { font-size: 9px; padding: 6px 8px; min-width: 44px; }
-  .ni svg { width: 16px; height: 16px; }
-  .sb-nm { font-size: 11px; }
-  .sb-cl { font-size: 9px; }
+  .t1 { font-size: 14px; }
+  .mob-tab { font-size: 8px; }
+  .mob-tab svg { width: 20px; height: 20px; }
+  #mob-drawer { width: 260px; }
 }
-/* iOS notch safe area */
-@supports (padding: env(safe-area-inset-top)) {
-  .sb { padding-top: env(safe-area-inset-top); }
-  .main { padding-bottom: 0; }
+
+/* iOS notch safe area — desktop */
+@media (min-width: 769px) {
+  @supports (padding: env(safe-area-inset-top)) {
+    .sb { padding-top: env(safe-area-inset-top); }
+  }
 }
 </style>
 <meta name="theme-color" content="#1D9E75"/>
@@ -557,6 +739,56 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <div class="shell" id="app-shell" style="display:none;">
+
+<!-- ═══ MOBILE TOP BAR ═══ -->
+<div id="mob-topbar" style="display:none;">
+  <button id="mob-hamburger" onclick="mobDrawerOpen()">
+    <svg viewBox="0 0 16 16" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+  </button>
+  <div style="flex:1;text-align:center;">
+    <div id="mob-topbar-title">Przegląd</div>
+    <div id="mob-topbar-sub" style="font-size:10px;color:var(--txt3);">MKS Iskra Pszczyna</div>
+  </div>
+  <div id="mob-topbar-right">
+    <span id="mob-role-badge">Trener</span>
+  </div>
+</div>
+
+<!-- ═══ DRAWER OVERLAY ═══ -->
+<div id="mob-drawer-overlay" onclick="mobDrawerClose()"></div>
+
+<!-- ═══ SZUFLADA BOCZNA ═══ -->
+<div id="mob-drawer">
+  <div id="mob-drawer-head">
+    <div class="sb-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2v12M2 8h12" stroke-width="1.2"/><path d="M4 4Q8 6 12 4M4 12Q8 10 12 12" stroke-width="1"/></svg></div>
+    <div>
+      <div style="font-size:13px;font-weight:600;">PFG Planner</div>
+      <div style="font-size:11px;color:var(--txt3);" id="mob-drawer-clubname">MKS Iskra Pszczyna</div>
+    </div>
+    <button id="mob-drawer-close" onclick="mobDrawerClose()">
+      <svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 3l10 10M13 3L3 13"/></svg>
+    </button>
+  </div>
+  <div id="mob-drawer-scroll">
+    <!-- zawartość wypełniana przez mobBuildDrawer() -->
+  </div>
+  <div id="mob-drawer-foot">
+    <div id="mob-drawer-av">??</div>
+    <div>
+      <div id="mob-drawer-username">—</div>
+      <div id="mob-drawer-role" style="font-size:11px;color:var(--txt3);">—</div>
+    </div>
+    <button id="mob-drawer-logout" onclick="doLogout()" title="Wyloguj">
+      <svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M6 8h7M10 5l3 3-3 3"/><path d="M9 3H3v10h6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ DOLNY PASEK NAWIGACJI ═══ -->
+<div id="mob-tabbar" style="display:none;">
+  <!-- wypełniany dynamicznie przez mobBuildTabBar() -->
+</div>
+
 <div class="sb">
   <div class="sb-logo">
     <div class="sb-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2v12M2 8h12" stroke-width="1.2"/><path d="M4 4Q8 6 12 4M4 12Q8 10 12 12" stroke-width="1"/></svg></div>
@@ -1824,6 +2056,15 @@ function SP(n){
   // Auto-aperta grupę jeśli aktywna podstrona jest w grupie
   var grpId=DIR_NAV_GROUPS[n];
   if(grpId)openNavGroup(grpId);
+  // Aktualizuj tytuł mobile topbar
+  if(isMobile()){
+    var allDrawerItems = (MOB_ROLE==='dyrektor'?MOB_DRAWER_DYREKTOR:MOB_DRAWER_TRENER).filter(function(i){return i.id;});
+    var mItem = allDrawerItems.find(function(i){return i.id===n;});
+    var titleEl = document.getElementById('mob-topbar-title');
+    if(titleEl && mItem) titleEl.textContent = mItem.label;
+    MOB_CUR_PAGE = n;
+    mobBuildTabBar();
+  }
   if(n==='plan'){rYL();rG();}
   if(n==='cal')rCal();
   if(n==='ex')RE();
@@ -1838,6 +2079,197 @@ function SP(n){
 function oM(id){document.getElementById(id).classList.add('op');}
 function cM(id){document.getElementById(id).classList.remove('op');}
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('op');}));
+
+// ═══════════════════════════════════════
+// MOBILE NAVIGATION
+// ═══════════════════════════════════════
+var MOB_ACTIVE = false;
+
+function isMobile(){ return window.innerWidth <= 768; }
+
+// Konfiguracja dolnego paska — 4 główne + "Więcej"
+var MOB_TABS_TRENER = [
+  { id:'dash',  label:'Przegląd', svg:'<path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/>' },
+  { id:'cal',   label:'Kalendarz', svg:'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/>' },
+  { id:'teams', label:'Drużyny', svg:'<circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 11c1 0 2 .8 2 2"/>' },
+  { id:'ex',    label:'Ćwiczenia', svg:'<path d="M2 4h12M2 8h8M2 12h10"/>' },
+  { id:'_more', label:'Więcej', svg:'<circle cx="4" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="8" r="1.5" fill="currentColor" stroke="none"/>' }
+];
+var MOB_TABS_DYREKTOR = [
+  { id:'dir-dash',   label:'Przegląd', svg:'<path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/>' },
+  { id:'dir-cal',    label:'Kalendarz', svg:'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/>' },
+  { id:'dir-academy',label:'Akademia', svg:'<circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 11c1 0 2 .8 2 2"/>' },
+  { id:'dir-finanse', label:'Finanse', svg:'<rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M2 7h12"/><circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"/>' },
+  { id:'_more', label:'Więcej', svg:'<circle cx="4" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="8" r="1.5" fill="currentColor" stroke="none"/>' }
+];
+
+// Konfiguracja szuflady — pełne menu
+var MOB_DRAWER_TRENER = [
+  { lbl: 'Główne' },
+  { id:'dash',      label:'Przegląd',    svg:'<path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/>' },
+  { id:'cal',       label:'Kalendarz',   svg:'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/>' },
+  { lbl: 'Drużyny' },
+  { id:'teams',     label:'Drużyny',             svg:'<circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/><path d="M14 11c1 0 2 .8 2 2"/>' },
+  { id:'ioz',       label:'Karty zawodników',     svg:'<path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>' },
+  { id:'tests',     label:'Testy motoryczne',     svg:'<path d="M4 2h8v12H4z"/><path d="M7 6h4M7 9h4M4 6h1M4 9h1"/>' },
+  { id:'trainings', label:'Treningi',             svg:'<path d="M2 4h12M2 8h12M2 12h8"/>' },
+  { id:'matches',   label:'Rozgrywki',            svg:'<circle cx="8" cy="8" r="6"/><path d="M5 5l6 6M11 5L5 11" stroke-width="1"/>' },
+  { lbl: 'Szkolenie' },
+  { id:'plan',      label:'Planowanie',           svg:'<path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/>' },
+  { id:'konsp',     label:'Konspekty',            svg:'<path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/>' },
+  { id:'gamemodel', label:'Model gry',            svg:'<rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/>' },
+  { id:'ex',        label:'Baza ćwiczeń',         svg:'<path d="M2 4h12M2 8h8M2 12h10"/>' },
+  { id:'stats',     label:'Statystyki',           svg:'<path d="M2 12V8h3v4zM6.5 12V5h3v7zM11 12V2h3v10z"/>' },
+  { lbl: 'Inne' },
+  { id:'import',    label:'Import Excel',         svg:'<path d="M8 2v9M4 8l4 4 4-4"/><path d="M2 13h12"/>' }
+];
+var MOB_DRAWER_DYREKTOR = [
+  { lbl: 'Główne' },
+  { id:'dir-dash',     label:'Przegląd',      svg:'<path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/>' },
+  { id:'dir-cal',      label:'Kalendarz',     svg:'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 2v2M11 2v2M2 7h12"/>' },
+  { lbl: 'Szkolenie' },
+  { id:'dir-plan',     label:'Planowanie',    svg:'<path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/>' },
+  { id:'dir-ex',       label:'Baza ćwiczeń',  svg:'<path d="M2 4h12M2 8h8M2 12h10"/>' },
+  { id:'dir-gamemodel',label:'Model gry',     svg:'<rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/>' },
+  { id:'dir-coaches',  label:'Karty trenerów',svg:'<circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>' },
+  { lbl: 'Akademia' },
+  { id:'dir-academy',  label:'Drużyny',       svg:'<circle cx="6" cy="6" r="2.5"/><path d="M1 13c0-2.2 2-3.5 5-3.5s5 1.3 5 3.5"/><circle cx="12" cy="5" r="2"/>' },
+  { id:'dir-ioz',      label:'Zawodnicy',     svg:'<path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>' },
+  { id:'dir-skauting', label:'Skauting',      svg:'<circle cx="8" cy="8" r="5"/><path d="M8 5v3l2 2"/>' },
+  { lbl: 'Finanse' },
+  { id:'dir-skladki',  label:'Opłaty',        svg:'<rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M2 7h12"/>' },
+  { id:'dir-finanse',  label:'Budżet',        svg:'<path d="M2 12V8h3v4zM6.5 12V5h3v7zM11 12V2h3v10z"/>' },
+  { lbl: 'Ustawienia' },
+  { id:'dir-users',    label:'Użytkownicy',   svg:'<circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/>' },
+  { id:'dir-season',   label:'Ustawienia sezonu', svg:'<circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/>' }
+];
+
+var MOB_CUR_PAGE = 'dash';
+var MOB_ROLE = 'trener'; // 'trener' | 'dyrektor'
+
+function mobInit(){
+  if(!isMobile()) return;
+  MOB_ACTIVE = true;
+  document.getElementById('mob-topbar').style.display='flex';
+  document.getElementById('mob-tabbar').style.display='flex';
+  mobSyncRole();
+  mobBuildTabBar();
+  mobBuildDrawer();
+}
+
+function mobSyncRole(){
+  // Synchronizuj z aktualną rolą
+  var isDyr = document.getElementById('sb-role-dyrektor') &&
+              document.getElementById('sb-role-dyrektor').style.display !== 'none';
+  MOB_ROLE = isDyr ? 'dyrektor' : 'trener';
+  var badge = document.getElementById('mob-role-badge');
+  if(badge) badge.textContent = MOB_ROLE === 'dyrektor' ? 'Dyrektor' : 'Trener';
+  // Aktualizuj informacje użytkownika
+  var un = document.getElementById('sb-user-name');
+  var ur = document.getElementById('sb-user-role');
+  var uav = document.getElementById('sb-av');
+  if(un) document.getElementById('mob-drawer-username').textContent = un.textContent;
+  if(ur) document.getElementById('mob-drawer-role').textContent = ur.textContent;
+  if(uav) document.getElementById('mob-drawer-av').textContent = uav.textContent;
+}
+
+function mobBuildTabBar(){
+  var tabs = MOB_ROLE === 'dyrektor' ? MOB_TABS_DYREKTOR : MOB_TABS_TRENER;
+  var bar = document.getElementById('mob-tabbar');
+  if(!bar) return;
+  bar.innerHTML = tabs.map(t => {
+    var isActive = t.id === MOB_CUR_PAGE ? ' active' : '';
+    return '<button class="mob-tab'+isActive+'" onclick="'+(t.id==='_more'?'mobDrawerOpen()':'mobNav(\''+t.id+'\')')+'">'
+      +'<svg viewBox="0 0 16 16">'+t.svg+'</svg>'
+      +'<span>'+t.label+'</span>'
+      +'</button>';
+  }).join('');
+}
+
+function mobBuildDrawer(){
+  var items = MOB_ROLE === 'dyrektor' ? MOB_DRAWER_DYREKTOR : MOB_DRAWER_TRENER;
+  var scroll = document.getElementById('mob-drawer-scroll');
+  if(!scroll) return;
+  // Przycisk przełączenia roli (jeśli admin/dyrektor)
+  var switchBtn = '';
+  var vsw = document.getElementById('sb-view-switcher');
+  if(vsw && vsw.style.display !== 'none'){
+    var lbl = document.getElementById('sb-view-label');
+    switchBtn = '<div style="padding:8px 14px;">'
+      +'<button onclick="toggleViewMode();mobDrawerClose();" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur2);cursor:pointer;font-size:12px;font-weight:600;color:var(--txt2);">'
+      +'<svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M2 4h12M2 8h8M2 12h10"/></svg>'
+      +(lbl ? lbl.textContent : 'Przełącz panel')
+      +'</button></div>'
+      +'<div class="mob-drawer-sep"></div>';
+  }
+  scroll.innerHTML = switchBtn + items.map(item => {
+    if(item.lbl) return '<div class="mob-drawer-lbl">'+item.lbl+'</div>';
+    var isActive = item.id === MOB_CUR_PAGE ? ' active' : '';
+    return '<button class="mob-drawer-item'+isActive+'" onclick="mobNav(\''+item.id+'\')">'
+      +'<svg viewBox="0 0 16 16">'+item.svg+'</svg>'
+      +item.label
+      +'</button>';
+  }).join('');
+}
+
+function mobNav(pageId){
+  MOB_CUR_PAGE = pageId;
+  SP(pageId);
+  mobDrawerClose();
+  // Aktualizuj tytuł topbara
+  var allItems = (MOB_ROLE==='dyrektor'?MOB_DRAWER_DYREKTOR:MOB_DRAWER_TRENER).filter(i=>i.id);
+  var item = allItems.find(i=>i.id===pageId);
+  var titleEl = document.getElementById('mob-topbar-title');
+  if(titleEl && item) titleEl.textContent = item.label;
+  // Aktualizuj tab bar
+  mobBuildTabBar();
+  // Aktualizuj drawer active states
+  document.querySelectorAll('.mob-drawer-item').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('onclick').includes("'"+pageId+"'"));
+  });
+}
+
+function mobDrawerOpen(){
+  mobSyncRole();
+  mobBuildDrawer();
+  document.getElementById('mob-drawer-overlay').classList.add('open');
+  document.getElementById('mob-drawer').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function mobDrawerClose(){
+  document.getElementById('mob-drawer-overlay').classList.remove('open');
+  document.getElementById('mob-drawer').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// Reinit po zmianie roli
+var _origToggleViewMode = typeof toggleViewMode === 'function' ? toggleViewMode : null;
+function mobOnRoleChange(){
+  setTimeout(()=>{
+    mobSyncRole();
+    mobBuildTabBar();
+    mobBuildDrawer();
+    // Reset do strony przeglądu nowej roli
+    var startPage = MOB_ROLE==='dyrektor' ? 'dir-dash' : 'dash';
+    MOB_CUR_PAGE = startPage;
+    var titleEl = document.getElementById('mob-topbar-title');
+    if(titleEl) titleEl.textContent = 'Przegląd';
+    mobBuildTabBar();
+  }, 50);
+}
+
+// Obsługa resize — init/deinit mobile
+window.addEventListener('resize', ()=>{
+  if(isMobile() && !MOB_ACTIVE){ mobInit(); }
+  if(!isMobile() && MOB_ACTIVE){
+    MOB_ACTIVE = false;
+    document.getElementById('mob-topbar').style.display='none';
+    document.getElementById('mob-tabbar').style.display='none';
+    mobDrawerClose();
+  }
+});
+
 
 // ═══════════════ DASHBOARD ═══════════════
 function uD(){
@@ -2528,7 +2960,7 @@ function RE(){
   var lbl=document.getElementById('ex-lbl');if(lbl)lbl.textContent=EXS.length+' ćwiczeń'+(fil.length!==EXS.length?' ('+fil.length+' wyników)':'');
   var g=document.getElementById('ex-grid');var oe=document.getElementById('eex');if(oe)oe.remove();
   if(!fil.length){g.innerHTML='';g.insertAdjacentHTML('beforebegin','<div id="eex" class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(EXS.length?'Brak wyników':'Baza ćwiczeń jest pusta')+'</div><div style="font-size:12px;color:var(--txt2);">'+(EXS.length?'Zmień kryteria wyszukiwania.':'Kliknij "+ Dodaj ćwiczenie" aby zacząć.')+'</div></div>');return;}
-  g.innerHTML=fil.map(e=>{var idx=EXS.indexOf(e),c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'},ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div class="ec" onclick="oVE('+idx+')">'+((e.img||e.imgUrl)?'<img src="'+(e.img||e.imgUrl)+'" alt="'+e.n+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;" onerror="this.style.display=\"none\"">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')+'<div class="en">'+e.n+'</div><div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div><div class="ed">'+(e.o||'Brak opisu')+'</div><div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div></div>';}).join('');
+  g.innerHTML=fil.map(e=>{var idx=EXS.indexOf(e),c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'},ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};return '<div class="ec" onclick="oVE('+idx+')">'+((e.img||e.imgUrl)?'<img src="'+(e.img||e.imgUrl)+'" alt="'+e.n+'" style="width:100%;max-height:180px;object-fit:contain;border-radius:6px;margin-bottom:10px;background:var(--sur2);" onerror="this.style.display=\"none\"">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')+'<div class="en">'+e.n+'</div><div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div><div class="ed">'+(e.o||'Brak opisu')+'</div><div class="ef">'+(e.cz?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);">'+e.cz+' min</span>':'')+(e.i?'<span class="bdg" style="background:'+ic2.bg+';color:'+ic2.tc+';">'+e.i+'</span>':'')+'</div></div>';}).join('');
 }
 
 function oAE(){EI=null;IMG=null;IMN=null;rEF({},true);oM('mo-ex');}
@@ -2597,7 +3029,7 @@ function rEV(e,idx){
   var imgSrc = e.img || e.imgUrl || null;
   if(imgSrc){
     b+='<div style="position:relative;margin-bottom:14px;">';
-    b+='<img src="'+escH(imgSrc)+'" alt="'+escH(e.imn||e.n)+'" style="width:100%;max-height:220px;object-fit:cover;border-radius:var(--r2);" onerror="this.style.display=\'none\'">';
+    b+='<img src="'+escH(imgSrc)+'" alt="'+escH(e.imn||e.n)+'" style="width:100%;max-height:320px;object-fit:contain;border-radius:var(--r2);background:var(--sur2);" onerror="this.style.display=\'none\'">';
     if(e.imn)b+='<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);color:#fff;font-size:10px;padding:4px 8px;border-radius:0 0 var(--r2) var(--r2);">'+escH(e.imn)+'</div>';
     b+='</div>';
   }
@@ -6529,6 +6961,8 @@ async function doLogin(){
       if(_viewMode==='trener'){sT('macro');rYL();rCal();rTeams();rIOZ();uD();}
       else{SP('dir-dash');setTimeout(renderNotifBadge,200);}
       startRealtimeSync();
+      // Mobile init
+      if(isMobile()) mobInit();
     });
   }catch(e){
     errEl.textContent='Błąd połączenia: '+e.message;errEl.style.display='';
@@ -6647,6 +7081,7 @@ function toggleViewMode(){
     setTimeout(renderNotifBadge,200);
   }
   ST(_viewMode==='trener'?'Widok: Panel trenera':'Widok: Panel dyrektora');
+  if(typeof mobOnRoleChange === 'function') mobOnRoleChange();
 }
 
 var _supaSession=null;
@@ -6978,7 +7413,7 @@ function rDirEX(){
     var c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'};
     var ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};
     return '<div class="ec" onclick="dirViewEX('+EXS.indexOf(e)+')">'
-      +((e.img||e.imgUrl)?'<img src="'+(e.img||e.imgUrl)+'" alt="'+e.n+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:10px;" onerror="this.style.display=\'none\'">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')
+      +((e.img||e.imgUrl)?'<img src="'+(e.img||e.imgUrl)+'" alt="'+e.n+'" style="width:100%;max-height:180px;object-fit:contain;border-radius:6px;margin-bottom:10px;background:var(--sur2);" onerror="this.style.display=\'none\'">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')
       +'<div class="en">'+e.n+'</div>'
       +'<div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div>'
       +'<div class="ed">'+(e.o||'Brak opisu')+'</div>'
