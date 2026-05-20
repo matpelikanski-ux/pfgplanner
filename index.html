@@ -7189,7 +7189,7 @@ function checkAutoLogin(){
         return;
       }
     }
-  }catch(e){}
+  }catch(e){ showLoginScreen(); }
   showLoginScreen();
 }
 
@@ -7207,6 +7207,7 @@ function _initUserSession(profile, token){
     if(_viewMode==='trener'){sT('macro');rYL();rCal();rTeams();rIOZ();uD();}
     else{SP('dir-dash');setTimeout(renderNotifBadge,200);}
     startRealtimeSync();
+    if(isMobile()) mobInit();
   });
 }
 
@@ -7215,8 +7216,10 @@ function _initOfflineSession(s){
   loadFromLocal();
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app-shell').style.display='flex';
+  applyRole();
   showSyncStatus('offline');
   ST('⚠ Tryb offline — dane mogą być nieaktualne');
+  if(isMobile()) mobInit();
 }
 
 function showLoginScreen(){
