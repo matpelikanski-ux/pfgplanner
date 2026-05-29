@@ -4522,15 +4522,28 @@ async function supaSet(storeName,data,visibleTo){
   }
 }
 
-// BUG FIX #3: granularny zapis — tylko EXS lub tylko KONSP
-// Podpiety do sE/delE i saveK/delK zeby nie zapisywac wszystkich 16 stores
+// Granularny zapis — tylko EXS lub tylko KONSP (szybka sciezka, z dirty-tracking)
 async function supaSetEXS(){
   if(!_supaReady)return;
-  try{await supaSet('EXS',EXS,'all');}catch(e){console.warn('supaSetEXS error:',e);}
+  showSyncStatus('saving');
+  try{
+    await supaSet('EXS',EXS,'all');
+    showSyncStatus('saved');
+  }catch(e){
+    console.warn('supaSetEXS error:',e);
+    showSyncStatus('error');
+  }
 }
 async function supaSetKONSP(){
   if(!_supaReady)return;
-  try{await supaSet('KONSP',KONSP,'all');}catch(e){console.warn('supaSetKONSP error:',e);}
+  showSyncStatus('saving');
+  try{
+    await supaSet('KONSP',KONSP,'all');
+    showSyncStatus('saved');
+  }catch(e){
+    console.warn('supaSetKONSP error:',e);
+    showSyncStatus('error');
+  }
 }
 
 // Mapowanie store → visible_to
@@ -4545,7 +4558,10 @@ var STORE_VISIBILITY={
 
 // ── SAVE — zapis do Supabase + localStorage fallback ──
 var _saveTimer=null;
-function saveLS(){
+// saveLS(storeName?) — opcjonalny argument informuje ktory store sie zmienil
+function saveLS(storeName){
+  // Dirty tracking — zaznacz ktore store sie zmienilo
+  if(storeName){markDirty(storeName);}
   // Zawsze zapisz lokalnie jako fallback
   try{
     localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason}));
@@ -4555,23 +4571,29 @@ function saveLS(){
   _saveTimer=setTimeout(saveToSupabase,800);
 }
 
+// Dirty-tracking — pamieta ktore store'y sie zmienily od ostatniego zapisu
+var _dirtyStores=new Set();
+function markDirty(storeName){_dirtyStores.add(storeName);}
+
 async function saveToSupabase(){
   if(!_supaReady)return;
-  var stores={EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason};
-  // Filtruj wg roli — dyrektor zapisuje wszystko, trener tylko swoje
   var role=currentUser?currentUser.role:'trener';
-  try{
-    var promises=Object.entries(stores).map(([name,val])=>{
-      var vis=STORE_VISIBILITY[name]||'all';
-      if(vis==='dyrektor'&&role!=='dyrektor')return Promise.resolve(); // trener nie nadpisuje dyrektorskich
-      return supaSet(name,val,vis);
-    });
-    await Promise.all(promises);
-    showSyncStatus('saved');
-  }catch(e){
-    console.warn('Supabase save error:',e);
-    showSyncStatus('error');
+  var allStores={EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason};
+  // Zapisz tylko to co sie zmienilo; jesli _dirtyStores pusty — zapisz wszystko (pierwsza inicjalizacja)
+  var toSave=_dirtyStores.size>0
+    ? Object.fromEntries(Object.entries(allStores).filter(([k])=>_dirtyStores.has(k)))
+    : allStores;
+  _dirtyStores.clear();
+  showSyncStatus('saving');
+  var errors=0;
+  for(var [name,val] of Object.entries(toSave)){
+    var vis=STORE_VISIBILITY[name]||'all';
+    if(vis==='dyrektor'&&role!=='dyrektor')continue;
+    try{await supaSet(name,val,vis);}
+    catch(e){console.warn('supaSet error ['+name+']:',e);errors++;}
   }
+  if(errors===0){showSyncStatus('saved');}
+  else{showSyncStatus('error');}
 }
 
 // ── LOAD — ładowanie z Supabase ──
@@ -4589,28 +4611,54 @@ async function loadFromSupabase(){
     var byName={};
     rows.forEach(row=>{byName[row.store_name]=row;});
 
-    // Hydratuj zmienne stanu
-    if(byName.EXS)EXS=byName.EXS.data||[];
-    if(byName.CYC)CYC=byName.CYC.data||[];
-    if(byName.KONSP)KONSP=byName.KONSP.data||[];
-    if(byName.TEAMS)TEAMS=byName.TEAMS.data&&byName.TEAMS.data.length?byName.TEAMS.data:getDefaultTeams();
-    if(byName.COACHES)COACHES=byName.COACHES.data&&byName.COACHES.data.length?byName.COACHES.data:getDefaultCoaches();
-    if(byName.PLAYERS)PLAYERS=byName.PLAYERS.data||[];
-    if(byName.TRAININGS)TRAININGS=byName.TRAININGS.data||[];
-    if(byName.MATCHES)MATCHES=byName.MATCHES.data||[];
-    if(byName.TESTS)TESTS=byName.TESTS.data||[];
-    if(byName.currentSeason&&byName.currentSeason.data)currentSeason=byName.currentSeason.data;
-    // Dane dyrektorskie (tylko dyrektor lub trener może czytać GAME_MODELS)
-    if(byName.COACH_PROFILES)COACH_PROFILES=byName.COACH_PROFILES.data||[];
-    if(byName.GAME_MODELS)GAME_MODELS=byName.GAME_MODELS.data||[];
-    if(byName.SCOUT_PLAYERS)SCOUT_PLAYERS=byName.SCOUT_PLAYERS.data||[];
-    if(byName.BUDGETS)BUDGETS=byName.BUDGETS.data||[];
-    if(byName.SKLADKI_DEF)SKLADKI_DEF=byName.SKLADKI_DEF.data||[];
-    if(byName.SKLADKI_WPL)SKLADKI_WPL=byName.SKLADKI_WPL.data||[];
+    // Wczytaj lokalny backup zanim nadpiszemy — merge: wygrywa ten kto ma wiecej danych
+    var _local={};
+    try{var _ld=localStorage.getItem(LS_KEY);if(_ld)_local=JSON.parse(_ld);}catch(e){}
 
-    // Zapisz też lokalnie
+    // Helper: weź dane z Supabase jeśli ma rekordy, inaczej zachowaj lokalne
+    function _pick(storeName, localFallback){
+      var remote=byName[storeName]?byName[storeName].data:null;
+      var local=_local[storeName]||localFallback||[];
+      // Jeśli Supabase ma dane — ufaj Supabase (jest source of truth po sync)
+      // Jeśli Supabase pusty/brak wiersza — zachowaj lokalne (user jeszcze nie zapisał)
+      if(remote&&Array.isArray(remote)&&remote.length>0) return remote;
+      if(remote&&!Array.isArray(remote)&&remote) return remote; // np. currentSeason (string)
+      return local;
+    }
+
+    // Hydratuj zmienne stanu — merge Supabase + localStorage
+    EXS=_pick('EXS',[]);
+    CYC=_pick('CYC',[]);
+    KONSP=_pick('KONSP',[]);
+    TEAMS=_pick('TEAMS',getDefaultTeams());
+    COACHES=_pick('COACHES',getDefaultCoaches());
+    PLAYERS=_pick('PLAYERS',[]);
+    TRAININGS=_pick('TRAININGS',[]);
+    MATCHES=_pick('MATCHES',[]);
+    TESTS=_pick('TESTS',[]);
+    currentSeason=(_local.currentSeason&&!byName.currentSeason)?_local.currentSeason:(byName.currentSeason&&byName.currentSeason.data?byName.currentSeason.data:currentSeason);
+    COACH_PROFILES=_pick('COACH_PROFILES',[]);
+    GAME_MODELS=_pick('GAME_MODELS',[]);
+    SCOUT_PLAYERS=_pick('SCOUT_PLAYERS',[]);
+    BUDGETS=_pick('BUDGETS',[]);
+    SKLADKI_DEF=_pick('SKLADKI_DEF',[]);
+    SKLADKI_WPL=_pick('SKLADKI_WPL',[]);
+
+    // Jeśli lokalnie były dane których nie ma w Supabase — wyślij je teraz
+    var _needsUpload=false;
+    ['EXS','KONSP','TEAMS','COACHES','PLAYERS','TRAININGS','MATCHES','TESTS','CYC'].forEach(function(k){
+      var loc=_local[k]||[];
+      var rem=byName[k]?byName[k].data:null;
+      if(loc.length>0&&(!rem||!rem.length)){_needsUpload=true;markDirty(k);}
+    });
+
+    // Zapisz aktualny stan lokalnie
     try{localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason}));}catch(e){}
+
+    // Wyślij lokalne dane do Supabase jeśli były niezsynconizowane
+    if(_needsUpload){setTimeout(saveToSupabase,2000);}
     _supaReady=true;
+    _lastSyncTime=Date.now(); // reset — nie traktuj wlasnie zaladowanych danych jako "zmiany z zewnatrz"
     showSyncStatus('ok');
     return true;
   }catch(e){
@@ -4629,9 +4677,131 @@ function loadFromLocal(){
 }
 function loadLS(){loadFromLocal();} // zachowany dla kompatybilności
 
-// ── REAL-TIME SYNC przez Supabase Realtime (polling co 15s jako fallback) ──
+// ── REAL-TIME SYNC: Supabase Realtime (WebSocket) + polling fallback ──
+var _lastSyncTime=Date.now();
+var _realtimeWS=null;
+var _pollTimer=null;
+var _pageVisible=!document.hidden;
+
+// Supabase Realtime — subskrypcja zmian tabeli pfg_store przez WebSocket
+function startRealtimeChannel(){
+  if(_realtimeWS){try{_realtimeWS.close();}catch(e){}}
+  var wsUrl=SUPA_URL.replace('https://','wss://').replace('http://','ws://')+'/realtime/v1/websocket?apikey='+SUPA_KEY+'&vsn=1.0.0';
+  try{
+    _realtimeWS=new WebSocket(wsUrl);
+    _realtimeWS.onopen=function(){
+      // Dołącz do kanału pfg_store z filtrem club_key
+      var joinMsg=JSON.stringify({topic:'realtime:public:pfg_store:club_key=eq.'+CLUB_KEY,event:'phx_join',payload:{config:{broadcast:{self:false},postgres_changes:[{event:'*',schema:'public',table:'pfg_store',filter:'club_key=eq.'+CLUB_KEY}]}},ref:'1'});
+      _realtimeWS.send(joinMsg);
+    };
+    _realtimeWS.onmessage=async function(msg){
+      try{
+        var d=JSON.parse(msg.data);
+        // Heartbeat
+        if(d.event==='phx_reply'||d.event==='heartbeat')return;
+        var pl=d.payload;
+        if(!pl||!pl.data)return;
+        var rec=pl.data.record||pl.data.new;
+        if(!rec)return;
+        // Ignoruj własne zmiany
+        if(rec.updated_by===_deviceId)return;
+        _lastSyncTime=Date.now();
+        await _handleRemoteChange(rec.store_name, rec.data);
+      }catch(e){}
+    };
+    _realtimeWS.onerror=function(){startPollingFallback();};
+    _realtimeWS.onclose=function(){
+      // Automatyczny reconnect po 5s
+      setTimeout(function(){if(_supaReady&&currentUser)startRealtimeChannel();},5000);
+    };
+    // Heartbeat co 25s (Supabase wymaga)
+    setInterval(function(){
+      if(_realtimeWS&&_realtimeWS.readyState===1){
+        _realtimeWS.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:'hb'}));
+      }
+    },25000);
+  }catch(e){
+    // WebSocket niedostepny — przejdz na polling
+    startPollingFallback();
+  }
+}
+
+// Obsłuż zmianę jednego store'a z zewnątrz
+async function _handleRemoteChange(storeName, data){
+  if(!storeName||data===undefined)return;
+  // Zaktualizuj tylko ten store
+  var map={
+    EXS:function(d){EXS=d||[];},
+    KONSP:function(d){KONSP=d||[];},
+    CYC:function(d){CYC=d||[];},
+    TEAMS:function(d){if(d&&d.length)TEAMS=d;},
+    COACHES:function(d){if(d&&d.length)COACHES=d;},
+    PLAYERS:function(d){PLAYERS=d||[];},
+    TRAININGS:function(d){TRAININGS=d||[];},
+    MATCHES:function(d){MATCHES=d||[];},
+    TESTS:function(d){TESTS=d||[];},
+    currentSeason:function(d){if(d)currentSeason=d;},
+    COACH_PROFILES:function(d){COACH_PROFILES=d||[];},
+    GAME_MODELS:function(d){GAME_MODELS=d||[];},
+    SCOUT_PLAYERS:function(d){SCOUT_PLAYERS=d||[];},
+    BUDGETS:function(d){BUDGETS=d||[];},
+    SKLADKI_DEF:function(d){SKLADKI_DEF=d||[];},
+    SKLADKI_WPL:function(d){SKLADKI_WPL=d||[];}
+  };
+  if(map[storeName]){
+    map[storeName](data);
+    // Odswież localStorage
+    try{localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason}));}catch(e){}
+    // Odswież aktualną stronę — tylko jeśli dotyczy wyświetlanego modułu
+    _smartRefresh(storeName);
+    showSyncStatus('synced');
+  }
+}
+
+// Inteligentny refresh — tylko dotknięta strona
+function _smartRefresh(storeName){
+  var storeToPage={
+    EXS:'ex',KONSP:'konsp',CYC:'plan',
+    TEAMS:'teams',COACHES:'teams',
+    PLAYERS:'ioz',TRAININGS:'trainings',MATCHES:'matches',
+    TESTS:'tests',COACH_PROFILES:'dir-coaches',
+    GAME_MODELS:'gamemodel',SCOUT_PLAYERS:'dir-skauting',
+    BUDGETS:'dir-finanse',SKLADKI_DEF:'dir-finanse',SKLADKI_WPL:'dir-finanse'
+  };
+  var targetPage=storeToPage[storeName];
+  var active=document.querySelector('.pg.act');
+  if(!active||!targetPage)return;
+  var currentId=active.id.replace('pg-','');
+  if(currentId===targetPage||active.id==='pg-'+targetPage){
+    refreshCurrentPage();
+  }
+}
+
+// Polling fallback — gdy WebSocket niedostępny (np. corporate firewall)
+function startPollingFallback(){
+  if(_pollTimer)return; // już działa
+  _pollTimer=setInterval(async function(){
+    if(!_supaReady||!currentUser||!_pageVisible)return;
+    try{
+      var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,updated_at,updated_by,data',{
+        headers:_supaHeaders()
+      });
+      if(!r.ok)return;
+      var rows=await r.json();
+      for(var row of rows){
+        if(row.updated_by===_deviceId)continue;
+        var ts=new Date(row.updated_at).getTime();
+        if(ts>_lastSyncTime){
+          _lastSyncTime=Date.now();
+          await _handleRemoteChange(row.store_name, row.data);
+        }
+      }
+    }catch(e){}
+  },10000);
+}
+
 function startRealtimeSync(){
-  // Auto-refresh tokena co 45 minut (token ważny 60 min)
+  // 1. Auto-refresh tokena co 45 minut (token wazny 60 min)
   setInterval(async function(){
     if(!currentUser)return;
     try{
@@ -4647,30 +4817,33 @@ function startRealtimeSync(){
       }
     }catch(e){}
   }, 45*60*1000);
-  // Polling — bezpieczny fallback bez WebSocket dependency
-  setInterval(async function(){
-    if(!_supaReady||!currentUser)return;
-    try{
-      var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,updated_at,updated_by',{
-        headers:_supaHeaders()
-      });
-      if(!r.ok)return;
-      var rows=await r.json();
-      var needsRefresh=rows.some(row=>{
-        if(row.updated_by===_deviceId)return false; // nasze własne zmiany z tego urządzenia — pomijamy
-        var ts=new Date(row.updated_at).getTime();
-        return ts>_lastSyncTime;
-      });
-      if(needsRefresh){
-        _lastSyncTime=Date.now();
-        await loadFromSupabase();
+
+  // 2. Supabase Realtime WebSocket
+  startRealtimeChannel();
+
+  // 3. Page Visibility API — pauza gdy karta w tle, sync gdy wraca
+  document.addEventListener('visibilitychange',function(){
+    _pageVisible=!document.hidden;
+    if(!document.hidden&&_supaReady&&currentUser){
+      // Karta wróciła na front — odswież dane
+      loadFromSupabase().then(refreshCurrentPage);
+    }
+  });
+
+  // 4. Obsługa online/offline
+  window.addEventListener('online',function(){
+    if(_supaReady&&currentUser){
+      showSyncStatus('loading');
+      loadFromSupabase().then(function(){
         refreshCurrentPage();
-        showSyncStatus('synced');
-      }
-    }catch(e){}
-  },8000);
+        startRealtimeChannel(); // reconnect WebSocket
+      });
+    }
+  });
+  window.addEventListener('offline',function(){
+    showSyncStatus('offline');
+  });
 }
-var _lastSyncTime=Date.now();
 
 function refreshCurrentPage(){
   var active=document.querySelector('.pg.act');
