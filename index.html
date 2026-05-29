@@ -3071,7 +3071,7 @@ function rEV(e,idx){
 function MFC(){var fa=document.getElementById('ef-f').value;var ts=document.getElementById('ef-t'),ks=document.getElementById('ef-k');ts.innerHTML='<option value="">'+(fa?'— wybierz —':'— wybierz fazę —')+'</option>';ts.disabled=!fa;ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=true;if(fa)GT(fa).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});}
 function MTC(){var fa=document.getElementById('ef-f').value,tm=document.getElementById('ef-t').value;var ks=document.getElementById('ef-k');ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=!tm;if(tm)GK(fa,tm).forEach(k=>{var o=document.createElement('option');o.textContent=k;ks.appendChild(o);});}
 function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',imgUrl:(document.getElementById('ef-imgurl')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();uD();}
-function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();uD();ST('"'+n+'" usunięte');}
+function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();uD();saveLS();supaSetEXS();ST('"'+n+'" usunięte');}
 function HFS(e){
   var f=e.target.files[0];
   if(!f)return;
@@ -3402,6 +3402,7 @@ function saveK(){
     ST('"'+title+'" zapisany!');
   }
   saveLS();
+  supaSetKONSP();
   setTimeout(function(){SP('konsp');},500);
 }
 
@@ -3451,7 +3452,7 @@ function rKL(){
       +'</div>';
   }).join('');
 }
-function delK(i){if(!confirm('Usunąć "'+KONSP[i].title+'"?'))return;var n=KONSP[i].title;KONSP.splice(i,1);rKL();uD();ST('"'+n+'" usunięty');}
+function delK(i){if(!confirm('Usunąć "'+KONSP[i].title+'"?'))return;var n=KONSP[i].title;KONSP.splice(i,1);rKL();uD();saveLS();supaSetKONSP();ST('"'+n+'" usunięty');}
 
 // ─── WIDOK KONSPEKTU ───────────────────────────────────────────
 var viewKonspIdx=null;
@@ -3681,7 +3682,7 @@ function savePostSession(){
   KONSP[postSessionIdx].notes=notes;
   if(obecni.length||document.querySelectorAll('.ps-cb').length)KONSP[postSessionIdx].obecni=obecni;
   cM('mo-post-session');
-  saveLS();rKL();uD();
+  saveLS();supaSetKONSP();rKL();uD();
   var n=obecni.length,total=document.querySelectorAll('.ps-cb').length;
   ST('✓ Zapisano'+(n?': '+n+(total?' / '+total:'')+' obecnych':''));
 }
@@ -3897,9 +3898,9 @@ function renderPPEdit(){
     var val=e(k[f[0]]||'');
     h+='<div class="pe-field"><label class="pe-lbl">'+f[1]+'</label>';
     if(f[2]==='ta'){
-      h+='<textarea class="pe-ta" data-field="'+f[0]+'" rows="3">'+val+'</textarea>';
+      h+='<textarea id="pe-'+f[0]+'" class="pe-ta" data-field="'+f[0]+'" rows="3">'+val+'</textarea>';
     }else{
-      h+='<input class="pe-inp" data-field="'+f[0]+'" value="'+val+'">';
+      h+='<input id="pe-'+f[0]+'" class="pe-inp" data-field="'+f[0]+'" value="'+val+'">';
     }
     h+='</div>';
   });
@@ -3920,11 +3921,11 @@ function renderPPEdit(){
     var val=f[0]==='dur'?String(k[f[0]]||90):e(k[f[0]]||'');
     h+='<div class="pe-field"><label class="pe-lbl">'+f[1]+'</label>';
     if(f[2]==='date'){
-      h+='<input class="pe-inp" type="date" data-field="'+f[0]+'" value="'+val+'">';
+      h+='<input id="pe-'+f[0]+'" class="pe-inp" type="date" data-field="'+f[0]+'" value="'+val+'">';
     }else if(f[2]==='num'){
-      h+='<input class="pe-inp" type="number" data-field="'+f[0]+'" value="'+val+'" min="10" max="240">';
+      h+='<input id="pe-'+f[0]+'" class="pe-inp" type="number" data-field="'+f[0]+'" value="'+val+'" min="10" max="240">';
     }else{
-      h+='<input class="pe-inp" data-field="'+f[0]+'" value="'+val+'">';
+      h+='<input id="pe-'+f[0]+'" class="pe-inp" data-field="'+f[0]+'" value="'+val+'">';
     }
     h+='</div>';
   });
@@ -3950,11 +3951,11 @@ function renderPPEdit(){
         var val=e(String(ex[f[0]]||''));
         h+='<div class="pe-field"><label class="pe-lbl">'+f[1]+'</label>';
         if(f[2]==='ta'){
-          h+='<textarea class="pe-ta" data-exidx="'+idx+'" data-field="'+f[0]+'" rows="2">'+val+'</textarea>';
+          h+='<textarea id="pe-ex-'+idx+'-'+f[0]+'" class="pe-ta" data-exidx="'+idx+'" data-field="'+f[0]+'" rows="2">'+val+'</textarea>';
         }else if(f[2]==='num'){
-          h+='<input class="pe-inp" type="number" data-exidx="'+idx+'" data-field="'+f[0]+'" value="'+val+'" min="1" max="120">';
+          h+='<input id="pe-ex-'+idx+'-'+f[0]+'" class="pe-inp" type="number" data-exidx="'+idx+'" data-field="'+f[0]+'" value="'+val+'" min="1" max="120">';
         }else{
-          h+='<input class="pe-inp" data-exidx="'+idx+'" data-field="'+f[0]+'" value="'+val+'">';
+          h+='<input id="pe-ex-'+idx+'-'+f[0]+'" class="pe-inp" data-exidx="'+idx+'" data-field="'+f[0]+'" value="'+val+'">';
         }
         h+='</div>';
       });
@@ -4034,7 +4035,7 @@ function savePPOnly(){
     (previewData.phases[ph]||[]).forEach(function(e){previewData.total+=parseInt(e.time)||0;});
   });
   KONSP[previewKonspIdx]=JSON.parse(JSON.stringify(previewData));
-  saveLS();rKL();
+  saveLS();supaSetKONSP();rKL();
   ppShowStatus('✓ Zapisano');
 }
 
@@ -4478,29 +4479,58 @@ var _supaReady=false;
 var _supaChannel=null;
 
 // Inicjalizacja klienta Supabase (vanilla JS fetch wrapper)
+// BUG FIX #1: zawsze uzywamy SUPA_KEY_ACTIVE (JWT zalogowanego usera),
+//             nie statycznego anon key — inaczej RLS blokuje zapis/odczyt
+function _supaHeaders(extra){
+  return Object.assign({'apikey':SUPA_KEY,'Authorization':'Bearer '+(SUPA_KEY_ACTIVE||SUPA_KEY),'Content-Type':'application/json'},extra||{});
+}
+
 async function supaGet(storeName){
   var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&store_name=eq.'+storeName+'&select=data',{
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'}
+    headers:_supaHeaders()
   });
   if(!r.ok)throw new Error('supaGet failed: '+r.status);
   var rows=await r.json();
   return rows.length?rows[0].data:null;
 }
 
+// BUG FIX #2: PATCH zwraca 200 nawet gdy 0 wierszy zaktualizowanych —
+//             uzywamy upsert przez POST + Prefer: resolution=merge-duplicates
+//             (wymaga UNIQUE(club_key, store_name) w tabeli pfg_store)
 async function supaSet(storeName,data,visibleTo){
   var body=JSON.stringify({club_key:CLUB_KEY,store_name:storeName,visible_to:visibleTo||'all',data:data,updated_at:new Date().toISOString(),updated_by:_deviceId});
-  var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&store_name=eq.'+storeName,{
-    method:'PATCH',
-    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}
-  ,body});
+  var r=await fetch(SUPA_URL+'/rest/v1/pfg_store',{
+    method:'POST',
+    headers:_supaHeaders({'Prefer':'return=minimal,resolution=merge-duplicates'}),
+    body
+  });
   if(!r.ok){
-    // Jeśli wiersz nie istnieje — utwórz
-    await fetch(SUPA_URL+'/rest/v1/pfg_store',{
-      method:'POST',
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    // Fallback gdy constraint nie istnieje: sprobuj PATCH, potem INSERT
+    var r2=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&store_name=eq.'+storeName,{
+      method:'PATCH',
+      headers:_supaHeaders({'Prefer':'return=minimal'}),
       body
     });
+    if(!r2.ok){
+      // Ostateczny fallback: zwykly INSERT
+      await fetch(SUPA_URL+'/rest/v1/pfg_store',{
+        method:'POST',
+        headers:_supaHeaders({'Prefer':'return=minimal'}),
+        body
+      });
+    }
   }
+}
+
+// BUG FIX #3: granularny zapis — tylko EXS lub tylko KONSP
+// Podpiety do sE/delE i saveK/delK zeby nie zapisywac wszystkich 16 stores
+async function supaSetEXS(){
+  if(!_supaReady)return;
+  try{await supaSet('EXS',EXS,'all');}catch(e){console.warn('supaSetEXS error:',e);}
+}
+async function supaSetKONSP(){
+  if(!_supaReady)return;
+  try{await supaSet('KONSP',KONSP,'all');}catch(e){console.warn('supaSetKONSP error:',e);}
 }
 
 // Mapowanie store → visible_to
@@ -4552,7 +4582,7 @@ async function loadFromSupabase(){
   // Pobierz wszystkie dostępne store'y jednym zapytaniem
   try{
     var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,data,visible_to',{
-      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      headers:_supaHeaders()
     });
     if(!r.ok)throw new Error('load failed');
     var rows=await r.json();
@@ -4622,7 +4652,7 @@ function startRealtimeSync(){
     if(!_supaReady||!currentUser)return;
     try{
       var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,updated_at,updated_by',{
-        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+        headers:_supaHeaders()
       });
       if(!r.ok)return;
       var rows=await r.json();
@@ -5101,7 +5131,7 @@ function delCoachModal(){if(editCoachIdx===null)return;if(!confirm('Usunąć "'+
 var _origSC=sC;
 sC=function(){_origSC();saveLS();};
 var _origSE=sE;
-sE=function(isNew){_origSE(isNew);saveLS();};
+sE=function(isNew){_origSE(isNew);saveLS();supaSetEXS();};
 var _origUC=uC;
 uC=function(){_origUC();saveLS();};
 
