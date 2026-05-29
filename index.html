@@ -871,6 +871,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="ni-child" id="ni-dir-plan" onclick="SP('dir-plan')"><svg viewBox="0 0 16 16"><path d="M2 2h12v3H2zM2 7h5v7H2zM9 7h5v3H9zM9 12h5v2H9z"/></svg>Planowanie</div>
         <div class="ni-child" id="ni-dir-overview" onclick="SP('dir-overview')"><svg viewBox="0 0 16 16"><circle cx="4" cy="12" r="2"/><circle cx="8" cy="6" r="2"/><circle cx="12" cy="9" r="2"/><path d="M4 10V5M8 4V2M12 7V3" stroke-width="1.2"/></svg>Akademia+</div>
         <div class="ni-child" id="ni-dir-ex" onclick="SP('dir-ex')"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg>Baza ćwiczeń</div>
+        <div class="ni-child" id="ni-dir-konsp" onclick="SP('dir-konsp')"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/></svg>Konspekty</div>
         <div class="ni-child" id="ni-dir-talent" onclick="SP('dir-talent')"><svg viewBox="0 0 16 16"><polygon points="8,2 10,6 14,6.5 11,9.5 11.8,14 8,11.8 4.2,14 5,9.5 2,6.5 6,6"/></svg>Top Talent</div>
         <div class="ni-child" id="ni-dir-coaches" onclick="SP('dir-coaches')"><svg viewBox="0 0 16 16"><path d="M8 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M13 7l2 2-4 4-2-2"/></svg>Karty trenerów</div>
         <div class="ni-child" id="ni-dir-gamemodel" onclick="SP('dir-gamemodel')"><svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="8" cy="8" r="4"/><path d="M4 4l8 8M12 4L4 12" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" stroke="none"/></svg>Model gry</div>
@@ -1715,6 +1716,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- DIR: KONSPEKTY -->
+<div id="pg-dir-konsp" class="pg">
+  <div class="tb"><div><div class="t1">Konspekty treningowe</div><div class="t2" id="dir-konsp-lbl">0 konspektów</div></div><div class="tb-r"></div></div>
+  <div class="inner">
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:flex-end;">
+      <input class="fi" id="dir-konsp-s" placeholder="Szukaj po tytule, drużynie, trenerze..." oninput="rDirKonsp()" style="flex:1;min-width:180px;"/>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Drużyna</div><select class="fsel-sm" id="dir-konsp-ft" onchange="rDirKonsp()"><option value="">Wszystkie drużyny</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Faza</div><select class="fsel-sm" id="dir-konsp-ff" onchange="rDirKonsp()"><option value="">Wszystkie fazy</option><option>Atakowanie</option><option>Bronienie</option><option>Umiejętności</option><option>Motoryka</option></select></div>
+      <div style="display:flex;flex-direction:column;gap:3px;"><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;">Trener</div><select class="fsel-sm" id="dir-konsp-fc" onchange="rDirKonsp()"><option value="">Wszyscy trenerzy</option></select></div>
+      <div style="font-size:11px;color:var(--g);cursor:pointer;padding:6px 0;" onclick="dirKonspCF()">Wyczyść ×</div>
+    </div>
+    <div id="dir-konsp-grid"></div>
+  </div>
+</div>
+
 <!-- DIR: USTAWIENIA SEZONU -->
 <div id="pg-dir-season" class="pg">
   <div class="tb"><div><div class="t1">Ustawienia sezonu</div><div class="t2">Zarządzanie sezonami akademii</div></div></div>
@@ -2080,6 +2096,7 @@ function SP(n){
   if(n==='tests')rTests();
   if(n==='gamemodel')rGameModelReadonly();
   if(n==='dir-ex')rDirEX();
+  if(n==='dir-konsp')rDirKonsp();
 }
 function oM(id){document.getElementById(id).classList.add('op');}
 function cM(id){document.getElementById(id).classList.remove('op');}
@@ -4903,7 +4920,7 @@ function refreshCurrentPage(){
     'pg-dir-plan':'dir-plan','pg-dir-ioz':'dir-ioz',
     'pg-dir-academy':'dir-academy','pg-dir-skauting':'dir-skauting',
     'pg-dir-finanse':'dir-finanse','pg-dir-gamemodel':'dir-gamemodel',
-    'pg-dir-ex':'dir-ex','pg-dir-season':'dir-season',
+    'pg-dir-ex':'dir-ex','pg-dir-konsp':'dir-konsp','pg-dir-season':'dir-season',
     'pg-trainings':'trainings','pg-matches':'matches'
   };
   var name=pageMap[id];
@@ -7669,6 +7686,94 @@ function promoteCoachToDir(coachId){
 function coachHasProfile(coachId){return !!COACH_PROFILES.find(p=>p.coachId===coachId);}
 
 // ── WIDOK DIR: BAZA ĆWICZEŃ (read-only) ──
+
+// ── DYREKTOR: KONSPEKTY ────────────────────────────────────────────────────
+function rDirKonsp(){
+  var q=(document.getElementById('dir-konsp-s')||{value:''}).value.toLowerCase();
+  var fTeam=(document.getElementById('dir-konsp-ft')||{value:''}).value;
+  var fFaza=(document.getElementById('dir-konsp-ff')||{value:''}).value;
+  var fCoach=(document.getElementById('dir-konsp-fc')||{value:''}).value;
+  var body=document.getElementById('dir-konsp-grid');
+  var lbl=document.getElementById('dir-konsp-lbl');
+  if(!body)return;
+
+  // Wypełnij filtry drużyn i trenerów (jeden raz — przy pustych select)
+  var selT=document.getElementById('dir-konsp-ft');
+  var selC=document.getElementById('dir-konsp-fc');
+  if(selT&&selT.options.length<=1){
+    var teams=[...new Set(KONSP.map(k=>k.team).filter(Boolean))].sort();
+    teams.forEach(function(t){var o=document.createElement('option');o.value=t;o.textContent=t;selT.appendChild(o);});
+  }
+  if(selC&&selC.options.length<=1){
+    var coaches=[...new Set(KONSP.flatMap(k=>[k.coach,k.coach2]).filter(Boolean))].sort();
+    coaches.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;selC.appendChild(o);});
+  }
+
+  var filtered=KONSP.filter(function(k){
+    if(q&&!(k.title.toLowerCase().includes(q)||
+           (k.team||'').toLowerCase().includes(q)||
+           (k.coach||'').toLowerCase().includes(q)||
+           (k.coach2||'').toLowerCase().includes(q)||
+           (k.temat||'').toLowerCase().includes(q)))return false;
+    if(fTeam&&k.team!==fTeam)return false;
+    if(fFaza&&k.faza!==fFaza)return false;
+    if(fCoach&&k.coach!==fCoach&&k.coach2!==fCoach)return false;
+    return true;
+  });
+
+  if(lbl)lbl.textContent=filtered.length+' konspektów · sezon '+currentSeason;
+
+  if(!filtered.length){
+    body.innerHTML='<div class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/><path d="M12 6l2 2-2 2"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">Brak konspektów</div><div style="font-size:12px;color:var(--txt2);">'+(q||fTeam||fFaza||fCoach?'Zmień kryteria filtrowania.':'Trenerzy jeszcze nie dodali konspektów.')+'</div></div>';
+    return;
+  }
+
+  body.innerHTML=filtered.map(function(k){
+    var i=KONSP.indexOf(k);
+    var c=k.c||{bg:'#E1F5EE',tc:'#085041'};
+    var total=['warm','main','cool'].reduce(function(s,ph){return s+(k.phases[ph]||[]).reduce(function(ss,e){return ss+(parseInt(e.time)||0);},0);},0);
+    var exCount=['warm','main','cool'].reduce(function(s,ph){return s+(k.phases[ph]||[]).length;},0);
+    var hasRating=k.rating!==null&&k.rating!==undefined&&k.rating!==0;
+    var stars='';if(hasRating)for(var s2=1;s2<=5;s2++)stars+=(s2<=k.rating?'★':'☆');
+    var ratingHtml=hasRating
+      ?'<span style="color:var(--am);font-size:12px;">'+stars+'</span>'
+      :'<span style="font-size:10px;color:var(--txt3);font-style:italic;">brak oceny</span>';
+    var coachInfo='';
+    if(k.coach)coachInfo+=k.coach;
+    if(k.coach2)coachInfo+=(coachInfo?' & ':'')+k.coach2;
+    return '<div class="kc" style="cursor:pointer;" onclick="oViewKonsp('+i+')">'
+      +'<div class="kci" style="background:'+c.bg+';color:'+c.tc+'"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h7M3 12h9"/></svg></div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div class="kcn">'+escH(k.title)+'</div>'
+      +'<div class="kcm">'
+      +'<span>'+(k.team||'—')+'</span>'
+      +'<span>'+fd(k.date)+'</span>'
+      +'<span>'+total+' min</span>'
+      +'<span>'+exCount+' ćw.</span>'
+      +(k.mikro?'<span style="color:var(--g);">'+escH(k.mikro)+'</span>':'')
+      +(coachInfo?'<span style="color:var(--txt3);">'+escH(coachInfo)+'</span>':'')
+      +'</div>'
+      +(k.faza||k.temat?'<div style="display:flex;gap:4px;margin-top:5px;">'+(k.faza?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+escH(k.faza)+'</span>':'')+(k.temat?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+escH(k.temat)+'</span>':'')+'</div>':'')
+      +(k.notes?'<div style="font-size:11px;color:var(--txt2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📝 '+escH(k.notes)+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;" onclick="event.stopPropagation()">'
+      +'<div style="display:flex;gap:5px;">'
+      +'<button class="btn sm pri" onclick="oPreviewPDF('+i+')" title="Podgląd i pobierz PDF"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M2 4h12v10H2z"/><path d="M5 4V2h6v2"/><path d="M5 8h6M5 11h4"/></svg>Podgląd PDF</button>'
+      +'</div>'
+      +ratingHtml
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function dirKonspCF(){
+  var s=document.getElementById('dir-konsp-s');if(s)s.value='';
+  var selT=document.getElementById('dir-konsp-ft');if(selT)selT.value='';
+  var selF=document.getElementById('dir-konsp-ff');if(selF)selF.value='';
+  var selC=document.getElementById('dir-konsp-fc');if(selC)selC.value='';
+  rDirKonsp();
+}
+
 function rDirEX(){
   var q=(document.getElementById('dir-ex-s')||{value:''}).value.toLowerCase();
   var f=(document.getElementById('dir-ex-ff')||{value:''}).value;
