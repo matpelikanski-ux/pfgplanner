@@ -11053,8 +11053,18 @@ function rDirSettings(){
   html+='</div>';
   html+='<div class="card" style="max-width:480px;border-left:3px solid var(--red);">';
   html+='<div style="font-size:13px;font-weight:600;margin-bottom:8px;">Strefa niebezpieczna</div>';
-  html+='<div style="font-size:12px;color:var(--txt2);margin-bottom:10px;">Poniższe akcje są nieodwracalne.</div>';
-  html+='<button class="btn dan" onclick="if(confirm(\'Usunąć wszystkie karty trenerów?\'))clearCoachProfiles()">Wyczyść karty trenerów</button>';
+  html+='<div style="font-size:12px;color:var(--txt2);margin-bottom:14px;">Poniższe akcje są nieodwracalne.</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:8px;">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sur2);border-radius:8px;">';
+  html+='<div><div style="font-size:12px;font-weight:600;">Drużyny i trenerzy</div><div style="font-size:11px;color:var(--txt2);">Usuwa wszystkie drużyny i konta trenerów</div></div>';
+  html+='<button class="btn dan sm" onclick="clearTeamsAndCoaches()">Wyczyść</button></div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sur2);border-radius:8px;">';
+  html+='<div><div style="font-size:12px;font-weight:600;">Karty trenerów</div><div style="font-size:11px;color:var(--txt2);">Usuwa karty dyrektorskie trenerów</div></div>';
+  html+='<button class="btn dan sm" onclick="if(confirm(\'Usunąć wszystkie karty trenerów?\'))clearCoachProfiles()">Wyczyść</button></div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sur2);border-radius:8px;">';
+  html+='<div><div style="font-size:12px;font-weight:600;">Wszystkie dane aplikacji</div><div style="font-size:11px;color:var(--txt2);">Usuwa ćwiczenia, konspekty, zawodników, mecze, treningi — wszystko</div></div>';
+  html+='<button class="btn dan sm" onclick="clearAllData()">Wyczyść wszystko</button></div>';
+  html+='</div>';
   html+='</div>';
   body.innerHTML=html;
 }
@@ -11067,6 +11077,41 @@ function saveSettings(){
   saveUsers(users);ST('✓ Ustawienia zapisane');
 }
 function clearCoachProfiles(){COACH_PROFILES=[];saveLS();rDirCoaches();ST('Karty trenerów wyczyszczone');}
+
+function clearTeamsAndCoaches(){
+  if(!confirm('Usunąć WSZYSTKIE drużyny i trenerów? Tej akcji nie można cofnąć.'))return;
+  TEAMS=[];COACHES=[];
+  saveLS();
+  // Wyślij pusty stan do Supabase natychmiast
+  if(window._supaReady){
+    Promise.all([
+      supaSet('TEAMS',[],'all'),
+      supaSet('COACHES',[],'all')
+    ]).then(function(){ST('✓ Drużyny i trenerzy usunięci z bazy');});
+  }
+  try{rTeams();}catch(e){}
+  ST('✓ Drużyny i trenerzy usunięci');
+}
+
+async function clearAllData(){
+  if(!confirm('Usunąć WSZYSTKIE dane aplikacji? Ćwiczenia, konspekty, zawodnicy, mecze, treningi — wszystko. Tej akcji NIE MOŻNA COFNĄĆ.'))return;
+  if(!confirm('Na pewno? Wszystkie dane zostaną trwale usunięte.'))return;
+  EXS=[];CYC=[];KONSP=[];TEAMS=[];COACHES=[];PLAYERS=[];TRAININGS=[];
+  MATCHES=[];TESTS=[];COACH_PROFILES=[];GAME_MODELS=[];SCOUT_PLAYERS=[];
+  BUDGETS=[];SKLADKI_DEF=[];SKLADKI_WPL=[];
+  // Nie resetuj currentSeason i ustawień użytkowników
+  saveLS();
+  if(window._supaReady){
+    showSyncStatus('saving');
+    var stores=['EXS','CYC','KONSP','TEAMS','COACHES','PLAYERS','TRAININGS',
+                'MATCHES','TESTS','COACH_PROFILES','GAME_MODELS','SCOUT_PLAYERS',
+                'BUDGETS','SKLADKI_DEF','SKLADKI_WPL'];
+    for(var s of stores){try{await supaSet(s,[],'all');}catch(e){console.warn('clear error',s,e);}}
+    showSyncStatus('saved');
+  }
+  ST('✓ Wszystkie dane usunięte');
+  setTimeout(function(){location.reload();},1200);
+}
 
 // ═══════════════ POTENCJAŁ ZAWODNIKA (ocena dyrektorska) ═══════════════
 var POT_CFG={
@@ -13387,7 +13432,9 @@ function confirmImport(){
         else skipped++;
       } else {PLAYERS.push(p);added++;}
     });
-    saveLS();rIOZ();
+    saveLS();
+    if(window._supaReady)supaSet('PLAYERS',PLAYERS,'all').catch(e=>console.warn('supa PLAYERS',e));
+    rIOZ();
   } else if(type==='druzyny'){
     var {teams,coaches}=ok;
     teams.forEach(t=>{
@@ -13400,35 +13447,74 @@ function confirmImport(){
       if(exists>=0){if(dupMode==='update'){COACHES[exists]={...COACHES[exists],...c};updated++;}else skipped++;}
       else{COACHES.push(c);added++;}
     });
-    saveLS();rTeams();
+    saveLS();
+    if(window._supaReady){
+      Promise.all([
+        supaSet('TEAMS',TEAMS,'all'),
+        supaSet('COACHES',COACHES,'all')
+      ]).catch(e=>console.warn('supa TEAMS/COACHES',e));
+    }
+    rTeams();
+    try{rDirAcademy();}catch(e){}
   } else if(type==='karty-trenerow'){
     ok.forEach(p=>{
       var exists=COACH_PROFILES.findIndex(x=>x.name.toLowerCase()===p.name.toLowerCase());
       if(exists>=0){if(dupMode==='update'){COACH_PROFILES[exists]={...COACH_PROFILES[exists],...p};updated++;}else skipped++;}
       else{COACH_PROFILES.push(p);added++;}
     });
-    saveLS();rDirCoaches();
+    saveLS();
+    if(window._supaReady)supaSet('COACH_PROFILES',COACH_PROFILES,'dyrektor').catch(e=>console.warn('supa COACH_PROFILES',e));
+    rDirCoaches();
   }
   cM('mo-import');
   ST('✓ Import: dodano '+added+(updated?' · zaktualizowano '+updated:'')+(skipped?' · pominięto '+skipped:''));
 }
 
-// Pobierz wzory XLSX (base64 embedded) — link do Supabase Storage lub inline download
+// Generuj wzory XLSX lokalnie (SheetJS)
 function dlWzor(type){
-  var urls={
-    'zawodnicy':'wzor_zawodnicy.xlsx',
-    'druzyny':'wzor_druzyny_trenerzy.xlsx',
-    'karty-trenerow':'wzor_karty_trenerow.xlsx'
-  };
-  var fname=urls[type];
-  if(!fname)return;
-  // Pobierz z Supabase Storage z cache-busting (timestamp)
-  var supaUrl=SUPA_URL+'/storage/v1/object/public/game-models/templates/'+fname+'?t='+Date.now();
-  var a=document.createElement('a');
-  a.href=supaUrl;
-  a.download=fname;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  ST('Pobieranie wzoru…');
+  if(typeof XLSX==='undefined'){ST('Biblioteka XLSX nie załadowana');return;}
+  var wb=XLSX.utils.book_new();
+  if(type==='druzyny'){
+    // Arkusz Drużyny
+    var teamsData=[
+      ['Nazwa drużyny','Kategoria wiekowa','Sezon','Kolor drużyny','Opis/Uwagi'],
+      ['np. U12 Iskra A','Młodzik U12/U13','2025/26','#1D9E75',''],
+      ['np. U14 Iskra A','Trampkarz U14/U15','2025/26','#3C3489',''],
+    ];
+    var wsT=XLSX.utils.aoa_to_sheet(teamsData);
+    wsT['!cols']=[{wch:22},{wch:22},{wch:12},{wch:14},{wch:30}];
+    XLSX.utils.book_append_sheet(wb,wsT,'Drużyny');
+    // Arkusz Trenerzy
+    var coachData=[
+      ['Imię i Nazwisko','Rola/Funkcja','Email','Telefon','Licencja UEFA'],
+      ['np. Jan Kowalski','Trener główny','jan@klub.pl','500000000','UEFA B'],
+      ['np. Anna Nowak','Trener asystent','anna@klub.pl','','UEFA C'],
+    ];
+    var wsC=XLSX.utils.aoa_to_sheet(coachData);
+    wsC['!cols']=[{wch:24},{wch:20},{wch:26},{wch:14},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,wsC,'Trenerzy');
+    XLSX.writeFile(wb,'Wzor_Druzyny_Trenerzy.xlsx');
+  } else if(type==='zawodnicy'){
+    var playersData=[
+      ['Imię i Nazwisko','Data urodzenia','Drużyna','Pozycja','Numer zawodnika','Noga dominująca','Kontakt rodzica','Uwagi zdrowotne','PESEL','Adres zamieszkania'],
+      ['np. Piotr Nowak','2012-05-20','U12 Iskra A','CB','5','Prawa','600000000','','',''],
+      ['np. Adam Wiśniewski','2012-11-03','U12 Iskra A','GK','1','Prawa','','Alergia na pyłki','',''],
+    ];
+    var wsP=XLSX.utils.aoa_to_sheet(playersData);
+    wsP['!cols']=[{wch:22},{wch:16},{wch:18},{wch:10},{wch:8},{wch:16},{wch:16},{wch:20},{wch:13},{wch:24}];
+    XLSX.utils.book_append_sheet(wb,wsP,'Zawodnicy');
+    XLSX.writeFile(wb,'Wzor_Zawodnicy.xlsx');
+  } else if(type==='karty-trenerow'){
+    var kData=[
+      ['Imię i Nazwisko','Data urodzenia','Funkcja w klubie','Preferowana rola','Licencja','Predyspozycje','Kontrakt od','Kontrakt do','Zaśw. Niekaralność','Zaśw. RSpS','Filozofia pracy'],
+      ['np. Jan Kowalski','1985-03-10','Trener główny','Trener taktyczny','UEFA B','Taktyka|Praca z młodzieżą','2024-07-01','2026-06-30','2023-01-01','2023-06-01','Praca poprzez pozycjonowanie'],
+    ];
+    var wsK=XLSX.utils.aoa_to_sheet(kData);
+    wsK['!cols']=[{wch:22},{wch:14},{wch:20},{wch:20},{wch:12},{wch:30},{wch:12},{wch:12},{wch:18},{wch:12},{wch:30}];
+    XLSX.utils.book_append_sheet(wb,wsK,'Karty Trenerów');
+    XLSX.writeFile(wb,'Wzor_KartyTrenerow.xlsx');
+  }
+  ST('✓ Wzór pobrany');
 }
 
 function oImportJSON(){
