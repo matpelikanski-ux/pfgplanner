@@ -4624,8 +4624,16 @@ function saveLS(storeName){
   // Dirty tracking — zaznacz ktore store sie zmienilo
   if(storeName){markDirty(storeName);}
   // Zawsze zapisz lokalnie jako fallback
+  var _now=new Date().toISOString();
   try{
     localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,currentSeason}));
+    // Zapisz też timestamp ostatniej lokalnej modyfikacji per-store
+    var _meta={}; try{var _m=localStorage.getItem(LS_KEY+'_meta');if(_m)_meta=JSON.parse(_m);}catch(e){}
+    // Oznacz wszystkie store'y jako zmodyfikowane teraz (nie wiemy który konkretnie bez argumentu)
+    ['EXS','CYC','KONSP','TEAMS','COACHES','PLAYERS','TRAININGS','MATCHES','TESTS',
+     'COACH_PROFILES','GAME_MODELS','SCOUT_PLAYERS','BUDGETS','SKLADKI_DEF','SKLADKI_WPL','currentSeason'
+    ].forEach(function(k){_meta[k]=_now;});
+    localStorage.setItem(LS_KEY+'_meta',JSON.stringify(_meta));
   }catch(e){}
   // Debounce zapisu do Supabase (max 1 zapis co 800ms)
   if(_saveTimer)clearTimeout(_saveTimer);
@@ -4664,7 +4672,7 @@ async function loadFromSupabase(){
   var storeNames=Object.keys(STORE_VISIBILITY);
   // Pobierz wszystkie dostępne store'y jednym zapytaniem
   try{
-    var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,data,visible_to',{
+    var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,data,visible_to,updated_at',{
       headers:_supaHeaders()
     });
     if(!r.ok)throw new Error('load failed');
@@ -4676,15 +4684,28 @@ async function loadFromSupabase(){
     var _local={};
     try{var _ld=localStorage.getItem(LS_KEY);if(_ld)_local=JSON.parse(_ld);}catch(e){}
 
-    // Helper: weź dane z Supabase jeśli ma rekordy, inaczej zachowaj lokalne
+    // Helper: weź dane z Supabase lub localStorage — wygrywa nowszy (updated_at) lub większy zbiór
+    // Supabase wygrywa gdy: ma dane I jego updated_at >= lokalnego updated_at (czyli Supabase jest najświeższy)
+    // Lokalny wygrywa gdy: Supabase pusty LUB lokalny jest nowszy (niezapisane zmiany)
+    var supaUpdated={}; // mapa storeName → updated_at z Supabase
+    rows.forEach(function(row){if(row.updated_at)supaUpdated[row.store_name]=row.updated_at;});
+    var _localMeta={}; try{var _lm=localStorage.getItem(LS_KEY+'_meta');if(_lm)_localMeta=JSON.parse(_lm);}catch(e){}
+
     function _pick(storeName, localFallback){
       var remote=byName[storeName]?byName[storeName].data:null;
       var local=_local[storeName]||localFallback||[];
-      // Jeśli Supabase ma dane — ufaj Supabase (jest source of truth po sync)
-      // Jeśli Supabase pusty/brak wiersza — zachowaj lokalne (user jeszcze nie zapisał)
-      if(remote&&Array.isArray(remote)&&remote.length>0) return remote;
-      if(remote&&!Array.isArray(remote)&&remote) return remote; // np. currentSeason (string)
-      return local;
+      // Jeśli Supabase brak lub pusty — zawsze lokalny
+      var remoteEmpty=!remote||(Array.isArray(remote)&&remote.length===0);
+      if(remoteEmpty) return local;
+      // Dla nie-tablic (np. currentSeason)
+      if(!Array.isArray(remote)) return remote;
+      // Porównaj timestamps — lokalny nowszy = niezapisane zmiany
+      var supaTs=supaUpdated[storeName]?new Date(supaUpdated[storeName]).getTime():0;
+      var localTs=_localMeta[storeName]?new Date(_localMeta[storeName]).getTime():0;
+      // Jeśli lokalny jest nowszy niż Supabase — lokalny ma niezapisane zmiany, użyj lokalnego
+      if(localTs>supaTs+5000) return local; // 5s margines na opóźnienia sieciowe
+      // Inaczej Supabase jest source of truth
+      return remote;
     }
 
     // Hydratuj zmienne stanu — merge Supabase + localStorage
