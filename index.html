@@ -11040,6 +11040,165 @@ function oAcademyTeam(teamId){
 }
 
 // ── USTAWIENIA ──
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EKSPORT DANYCH
+// ═══════════════════════════════════════════════════════════════════════════
+
+function exportAllXLSX(){
+  if(typeof XLSX==='undefined'){ST('Biblioteka XLSX nie załadowana');return;}
+  var wb=XLSX.utils.book_new();
+  var now=new Date();
+  var dateStr=now.toISOString().slice(0,10);
+
+  // ── 1. ĆWICZENIA ──────────────────────────────────────────────────────────
+  var FAZA_MAP={'a':'Atakowanie','b':'Bronienie','u':'Umiejętności','m':'Motoryka'};
+  var exRows=[['Nazwa ćwiczenia','Faza gry','Temat','Koncept','Szczegół konceptu','Kat. min','Kat. max','Czas (min)','Liczba zawodników','Przestrzeń','Sprzęt','Intensywność','Opis','Coaching points','Link wideo']];
+  (EXS||[]).forEach(function(e){
+    exRows.push([
+      e.n||'',FAZA_MAP[e.f]||e.f||'',e.t||'',e.k||'',e.sk||'',
+      e.km||'',e.kx||'',e.cz||'',e.lz||'',e.p||'',e.sp||'',e.i||'',
+      e.o||'',e.z||'',e.lv||''
+    ]);
+  });
+  var wsEx=XLSX.utils.aoa_to_sheet(exRows);
+  wsEx['!cols']=[{wch:28},{wch:14},{wch:18},{wch:18},{wch:18},{wch:10},{wch:10},{wch:6},{wch:8},{wch:12},{wch:14},{wch:12},{wch:40},{wch:30},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,wsEx,'Ćwiczenia');
+
+  // ── 2. KONSPEKTY ──────────────────────────────────────────────────────────
+  var kRows=[['Tytuł','Drużyna','Data','Trener 1','Trener 2','Faza','Temat','Koncept','Cel','Cele szczegółowe','Mikrocykl','Mezocykl','Miejsce','Czas (min)','Ćwiczenia łącznie','Ocena','Notatki','Data zapisu']];
+  (KONSP||[]).forEach(function(k){
+    var exCount=['warm','main','cool'].reduce(function(s,ph){return s+(k.phases&&k.phases[ph]?k.phases[ph].length:0);},0);
+    kRows.push([
+      k.title||'',k.team||'',k.date||'',k.coach||'',k.coach2||'',
+      k.faza||'',k.temat||'',k.koncept||'',k.goal||'',k.goals||'',
+      k.mikro||'',k.mezo||'',k.place||'',k.dur||'',exCount,
+      k.rating||'',k.notes||'',k.savedAt?k.savedAt.slice(0,10):''
+    ]);
+  });
+  var wsK=XLSX.utils.aoa_to_sheet(kRows);
+  wsK['!cols']=[{wch:28},{wch:16},{wch:12},{wch:20},{wch:20},{wch:14},{wch:16},{wch:18},{wch:30},{wch:30},{wch:12},{wch:12},{wch:16},{wch:8},{wch:8},{wch:6},{wch:30},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsK,'Konspekty');
+
+  // ── 3. DRUŻYNY ────────────────────────────────────────────────────────────
+  var tmRows=[['Nazwa drużyny','Kategoria wiekowa','Sezon','Kolor','Opis']];
+  (TEAMS||[]).forEach(function(t){
+    tmRows.push([t.name||'',t.category||'',t.season||'',t.color||'',t.notes||'']);
+  });
+  var wsTm=XLSX.utils.aoa_to_sheet(tmRows);
+  wsTm['!cols']=[{wch:22},{wch:22},{wch:10},{wch:10},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,wsTm,'Drużyny');
+
+  // ── 4. TRENERZY ───────────────────────────────────────────────────────────
+  var coRows=[['Imię i Nazwisko','Rola/Funkcja','Email','Telefon','Licencja UEFA']];
+  (COACHES||[]).forEach(function(c){
+    coRows.push([c.name||'',c.role||'',c.email||'',c.phone||'',c.license||'']);
+  });
+  var wsCo=XLSX.utils.aoa_to_sheet(coRows);
+  wsCo['!cols']=[{wch:24},{wch:20},{wch:26},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsCo,'Trenerzy');
+
+  // ── 5. ZAWODNICY ──────────────────────────────────────────────────────────
+  var plRows=[['Imię i Nazwisko','Data urodzenia','Drużyna','Pozycja','Numer','Noga dominująca','Kontakt rodzica','Uwagi zdrowotne','PESEL','Adres']];
+  (PLAYERS||[]).forEach(function(p){
+    plRows.push([
+      p.name||'',p.dob||'',p.team||'',p.position||'',p.number||'',
+      p.foot||'',p.contact||'',p.healthNotes||'',p.pesel||'',p.address||''
+    ]);
+  });
+  var wsPl=XLSX.utils.aoa_to_sheet(plRows);
+  wsPl['!cols']=[{wch:24},{wch:14},{wch:18},{wch:10},{wch:8},{wch:14},{wch:18},{wch:22},{wch:13},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,wsPl,'Zawodnicy');
+
+  // ── 6. TRENINGI ───────────────────────────────────────────────────────────
+  var trRows=[['Data','Drużyna','Trener','Czas (min)','Obecni','Nieobecni','Notatki']];
+  (TRAININGS||[]).forEach(function(tr){
+    var obecni=(tr.attendance||[]).filter(function(a){return a.present;}).map(function(a){return a.name;}).join(', ');
+    var nieobecni=(tr.attendance||[]).filter(function(a){return !a.present;}).map(function(a){return a.name;}).join(', ');
+    trRows.push([tr.date||'',tr.team||'',tr.coach||'',tr.duration||'',obecni,nieobecni,tr.notes||'']);
+  });
+  var wsTr=XLSX.utils.aoa_to_sheet(trRows);
+  wsTr['!cols']=[{wch:12},{wch:18},{wch:20},{wch:8},{wch:40},{wch:30},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,wsTr,'Treningi');
+
+  // ── 7. MECZE ──────────────────────────────────────────────────────────────
+  var mRows=[['Data','Drużyna','Przeciwnik','Miejsce','Wynik (my)','Wynik (oni)','Typ','Notatki']];
+  (MATCHES||[]).forEach(function(m){
+    mRows.push([
+      m.date||'',m.team||'',m.opponent||'',m.location||'',
+      m.goalsFor!==undefined?m.goalsFor:'',m.goalsAgainst!==undefined?m.goalsAgainst:'',
+      m.type||'',m.notes||''
+    ]);
+  });
+  var wsM=XLSX.utils.aoa_to_sheet(mRows);
+  wsM['!cols']=[{wch:12},{wch:16},{wch:20},{wch:16},{wch:8},{wch:8},{wch:12},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,wsM,'Mecze');
+
+  // ── 8. KARTY TRENERÓW ────────────────────────────────────────────────────
+  if((COACH_PROFILES||[]).length){
+    var cpRows=[['Imię i Nazwisko','Funkcja','Preferowana rola','Licencja','Predyspozycje','Kontrakt od','Kontrakt do','Zaśw. Niekaralność','Zaśw. RSpS','Filozofia']];
+    (COACH_PROFILES||[]).forEach(function(cp){
+      cpRows.push([
+        cp.name||'',cp.role||'',cp.preferredRole||'',cp.license||'',
+        (cp.predispositions||[]).join(' | '),
+        cp.kontrakt?cp.kontrakt.od||'':'',cp.kontrakt?cp.kontrakt.do||'':'',
+        cp.zaswNiekaralnosc?cp.zaswNiekaralnosc.data||'':'',
+        cp.zaswRejestr?cp.zaswRejestr.data||'':'',
+        cp.filosofia||''
+      ]);
+    });
+    var wsCp=XLSX.utils.aoa_to_sheet(cpRows);
+    wsCp['!cols']=[{wch:22},{wch:18},{wch:18},{wch:12},{wch:30},{wch:12},{wch:12},{wch:16},{wch:12},{wch:40}];
+    XLSX.utils.book_append_sheet(wb,wsCp,'Karty Trenerów');
+  }
+
+  // ── 9. ZAWODNIK - TESTY ───────────────────────────────────────────────────
+  var testsFlat=[];
+  (PLAYERS||[]).forEach(function(p){
+    (p.tests||[]).forEach(function(t){
+      testsFlat.push([p.name||'',p.team||'',t.date||'',t.type||'',t.value||'',t.unit||'',t.notes||'']);
+    });
+  });
+  if(testsFlat.length){
+    var wsTes=XLSX.utils.aoa_to_sheet([['Zawodnik','Drużyna','Data','Test','Wynik','Jednostka','Notatki']].concat(testsFlat));
+    wsTes['!cols']=[{wch:22},{wch:16},{wch:12},{wch:20},{wch:10},{wch:10},{wch:25}];
+    XLSX.utils.book_append_sheet(wb,wsTes,'Testy zawodników');
+  }
+
+  var fname='PFG_Backup_'+dateStr+'.xlsx';
+  XLSX.writeFile(wb,fname);
+  ST('✓ Eksport zakończony — '+fname);
+}
+
+function exportBackupJSON(){
+  var data={
+    _meta:{exportDate:new Date().toISOString(),version:'pfg_v23',club:CLUB_KEY,season:currentSeason},
+    EXS:EXS||[],CYC:CYC||[],KONSP:KONSP||[],TEAMS:TEAMS||[],COACHES:COACHES||[],
+    PLAYERS:PLAYERS||[],TRAININGS:TRAININGS||[],MATCHES:MATCHES||[],TESTS:TESTS||[],
+    COACH_PROFILES:COACH_PROFILES||[],GAME_MODELS:GAME_MODELS||[],
+    SCOUT_PLAYERS:SCOUT_PLAYERS||[],BUDGETS:BUDGETS||[],
+    SKLADKI_DEF:SKLADKI_DEF||[],SKLADKI_WPL:SKLADKI_WPL||[]
+  };
+  var json=JSON.stringify(data,null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  var dateStr=new Date().toISOString().slice(0,10);
+  a.href=url;a.download='PFG_Backup_'+dateStr+'.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  // Podsumowanie
+  var counts=[
+    (EXS||[]).length+' ćwiczeń',
+    (KONSP||[]).length+' konspektów',
+    (TEAMS||[]).length+' drużyn',
+    (PLAYERS||[]).length+' zawodników',
+    (COACHES||[]).length+' trenerów'
+  ].join(' · ');
+  ST('✓ Backup JSON pobrany — '+counts);
+}
+
 function rDirSettings(){
   var body=document.getElementById('dir-settings-body');if(!body)return;
   var users=getUsers();
@@ -11051,6 +11210,35 @@ function rDirSettings(){
   html+='<div><label class="fl">Nazwa konta dyrektora</label><input class="fi" id="set-name-dyrektor" value="'+escH(users.dyrektor.name||'Dyrektor')+'"/></div></div>';
   html+='<button class="btn pri" onclick="saveSettings()">Zapisz ustawienia</button>';
   html+='</div>';
+  // ── SEKCJA EKSPORTU ──────────────────────────────────────────────────────
+  html+='<div class="card" style="max-width:480px;margin-bottom:16px;">';
+  html+='<div style="font-size:13px;font-weight:600;margin-bottom:4px;">Eksport i kopia zapasowa</div>';
+  html+='<div style="font-size:11px;color:var(--txt2);margin-bottom:14px;">Pobierz dane aplikacji jako plik XLSX lub JSON. Zabezpiecz się przed utratą danych.</div>';
+  html+='<div style="display:flex;flex-direction:column;gap:8px;">';
+
+  // Pełny eksport XLSX
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sur2);border-radius:8px;">';
+  html+='<div><div style="font-size:12px;font-weight:600;">Pełny eksport bazy danych</div>';
+  html+='<div style="font-size:11px;color:var(--txt2);">Ćwiczenia · Konspekty · Drużyny · Trenerzy · Zawodnicy · Treningi · Mecze</div></div>';
+  html+='<button class="btn pri sm" onclick="exportAllXLSX()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;margin-right:4px;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Eksportuj XLSX</button></div>';
+
+  // Eksport JSON (pełny backup)
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sur2);border-radius:8px;">';
+  html+='<div><div style="font-size:12px;font-weight:600;">Backup JSON (wszystkie dane)</div>';
+  html+='<div style="font-size:11px;color:var(--txt2);">Pełny backup łącznie z testami, skautingiem, budżetem — do przywrócenia</div></div>';
+  html+='<button class="btn sm" style="white-space:nowrap;" onclick="exportBackupJSON()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;margin-right:4px;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Backup JSON</button></div>';
+
+  html+='</div>';
+  // Statystyki
+  var _exCount=EXS?EXS.length:0,_kCount=KONSP?KONSP.length:0,_plCount=PLAYERS?PLAYERS.length:0,_tmCount=TEAMS?TEAMS.length:0;
+  html+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">';
+  html+='<span style="font-size:10px;background:var(--lg);color:var(--dg);padding:3px 8px;border-radius:20px;">'+_exCount+' ćwiczeń</span>';
+  html+='<span style="font-size:10px;background:var(--lg);color:var(--dg);padding:3px 8px;border-radius:20px;">'+_kCount+' konspektów</span>';
+  html+='<span style="font-size:10px;background:var(--lg);color:var(--dg);padding:3px 8px;border-radius:20px;">'+_plCount+' zawodników</span>';
+  html+='<span style="font-size:10px;background:var(--lg);color:var(--dg);padding:3px 8px;border-radius:20px;">'+_tmCount+' drużyn</span>';
+  html+='</div>';
+  html+='</div>';
+
   html+='<div class="card" style="max-width:480px;border-left:3px solid var(--red);">';
   html+='<div style="font-size:13px;font-weight:600;margin-bottom:8px;">Strefa niebezpieczna</div>';
   html+='<div style="font-size:12px;color:var(--txt2);margin-bottom:14px;">Poniższe akcje są nieodwracalne.</div>';
