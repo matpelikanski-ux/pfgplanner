@@ -1586,10 +1586,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <!-- Prawa kolumna — boisko lub lista szczegółowa -->
     <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
-      <!-- Nagłówek boiska z wyborem drużyny i formacji -->
-      <div style="padding:6px 12px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;flex-shrink:0;background:var(--sur);" id="tt-pitch-hdr">
-        <div style="font-size:11px;font-weight:600;color:var(--txt2);">Skład na boisku:</div>
-        <select class="fsel-sm" id="tt-pitch-team" onchange="rTTPitch()" style="min-width:140px;"><option value="">Wybierz drużynę...</option></select>
+      <!-- Nagłówek boiska z wyborem drużyn i formacji -->
+      <div style="padding:6px 12px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;background:var(--sur);" id="tt-pitch-hdr">
+        <div style="font-size:11px;font-weight:600;color:var(--txt2);">Skład:</div>
         <select class="fsel-sm" id="tt-formation" onchange="rTTPitch()" style="min-width:100px;">
           <optgroup label="Piłka 11-osobowa">
             <option>4-3-3</option><option>4-2-3-1</option><option>4-4-2</option>
@@ -1604,7 +1603,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <option>2-3-1</option><option>3-2-1</option><option>3-1-2</option>
           </optgroup>
         </select>
-        <div style="margin-left:auto;font-size:10px;color:var(--txt3);">Zawodnicy z oceną A/B przypisani do pozycji automatycznie</div>
+        <div style="font-size:11px;font-weight:600;color:var(--txt2);">Drużyny:</div>
+        <select class="fsel-sm" id="tt-pitch-team" onchange="rTTPitch()" style="min-width:140px;"><option value="">Wszystkie drużyny</option></select>
+        <button class="btn sm" onclick="clearTTLineup()" title="Wyczyść ręczny skład" style="margin-left:auto;color:var(--txt3);">Wyczyść skład</button>
+        <div style="font-size:10px;color:var(--txt3);">Kliknij pozycję → wybierz zawodnika ręcznie</div>
       </div>
       <div style="flex:1;overflow:auto;" id="tt-main"></div>
     </div>
@@ -9673,39 +9675,187 @@ function renderSquadPitch(teamName, formation){
   return html;
 }
 
+// ── Stan ręcznego składu Top Talent ──────────────────────────────────────
+// _ttLineup: {slotKey: {playerIdx, playerName}} — ręczne przypisania
+var _ttLineup={};
+
+function clearTTLineup(){_ttLineup={};rTTPitch();ST('Skład wyczyszczony');}
+
 function rTTPitch(){
   var main=document.getElementById('tt-main');if(!main)return;
-  var teamSel=document.getElementById('tt-pitch-team');
   var formation=(document.getElementById('tt-formation')||{}).value||'4-3-3';
-  var team=teamSel?teamSel.value:'';
+  var filterTeam=(document.getElementById('tt-pitch-team')||{}).value||'';
 
-  if(!team){
-    main.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--txt2);font-size:13px;text-align:center;padding:40px;"><div><div style="font-size:32px;margin-bottom:12px;">⚽</div><div style="font-weight:500;margin-bottom:6px;">Wybierz drużynę</div><div style="font-size:12px;color:var(--txt3);">Wybierz drużynę z listy powyżej aby zobaczyć najlepszy skład na boisku</div></div></div>';
-    return;
-  }
+  // Pula zawodników: wszyscy ocenieni A/B z wybranych drużyn
+  var pool=PLAYERS.filter(function(p){
+    var g=lastGrade(p);
+    if(g!=='A'&&g!=='B')return false;
+    if(filterTeam&&p.team!==filterTeam)return false;
+    return true;
+  }).sort(function(a,b){
+    var gv=function(g){return g==='A'?0:1;};
+    return gv(lastGrade(a))-gv(lastGrade(b))||(a.name||'').localeCompare(b.name||'');
+  });
 
-  var players=getTeamPlayersSorted(team);
-  var slots=assignPlayersToSlots(team, formation);
-  var startingNames=slots.filter(function(s){return s.starter;}).map(function(s){return s.starter.name;});
-  var bench=players.filter(function(p){return!startingNames.includes(p.name);}).slice(0,7);
-  var html='<div style="display:flex;flex-direction:column;height:100%;">';
-  html+=renderPitchFM(team, formation, null);
+  var form=FORMATIONS[formation]||FORMATIONS['4-3-3'];
+  var slots=form.slots||form;
+
+  // Zbierz użytych zawodników w składzie
+  var usedIdxs=Object.values(_ttLineup).map(function(v){return v.playerIdx;}).filter(function(x){return x!==undefined;});
+
+  // Ławka: zawodnicy z puli którzy nie są w składzie
+  var benchPlayers=pool.filter(function(p){return!usedIdxs.includes(PLAYERS.indexOf(p));});
+
+  // Boisko
+  var pitchHtml='<div style="position:relative;width:100%;height:100%;background:linear-gradient(180deg,#2D6A2D 0%,#3A7A3A 50%,#2D6A2D 100%);overflow:hidden;">';
+  // Linie boiska
+  pitchHtml+='<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.25;" viewBox="0 0 100 100" preserveAspectRatio="none">'
+    +'<rect x="1" y="1" width="98" height="98" fill="none" stroke="white" stroke-width=".7"/>'
+    +'<line x1="1" y1="50" x2="99" y2="50" stroke="white" stroke-width=".5"/>'
+    +'<circle cx="50" cy="50" r="12" fill="none" stroke="white" stroke-width=".5"/>'
+    +'<circle cx="50" cy="50" r="1" fill="white"/>'
+    +'<rect x="22" y="1" width="56" height="16" fill="none" stroke="white" stroke-width=".5"/>'
+    +'<rect x="35" y="1" width="30" height="7" fill="none" stroke="white" stroke-width=".5"/>'
+    +'<rect x="22" y="83" width="56" height="16" fill="none" stroke="white" stroke-width=".5"/>'
+    +'<rect x="35" y="93" width="30" height="7" fill="none" stroke="white" stroke-width=".5"/>'
+    +'</svg>';
+
+  // Sloty pozycji
+  slots.forEach(function(slot){
+    var posAbbr=slot[0], x=slot[1], y=slot[2];
+    var slotKey=posAbbr+'_'+x+'_'+y;
+    var assigned=_ttLineup[slotKey];
+    var p=assigned?PLAYERS[assigned.playerIdx]:null;
+    // Sprawdź że zawodnik nadal istnieje
+    if(p&&p.name!==assigned.playerName)p=null;
+    var g=p?lastGrade(p):null;
+    var dotColor=g==='A'?'#1D9E75':g==='B'?'#EF9F27':'rgba(255,255,255,0.4)';
+
+    pitchHtml+='<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%);z-index:3;text-align:center;cursor:pointer;" onclick="oTTAssign(\''+slotKey+'\',\''+posAbbr+'\')">'
+      // Kółko pozycji
+      +'<div style="width:34px;height:34px;border-radius:50%;background:'+(p?'#1565C0':'rgba(255,255,255,0.15)')+';border:2px solid '+(p?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.4)')+';display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-size:8px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);">'
+      +escH(posAbbr)
+      +'</div>'
+      // Karta zawodnika
+      +'<div style="background:rgba(10,20,35,'+(p?'0.92':'0.6')+');border:1px solid rgba(255,255,255,'+(p?'0.25':'0.15')+');border-radius:5px;min-width:88px;max-width:110px;padding:4px 6px;box-shadow:0 2px 8px rgba(0,0,0,.5);">'
+      +(p
+        ?'<div style="font-size:9.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(p.name)+'</div>'
+         +'<div style="display:flex;align-items:center;gap:3px;justify-content:center;margin-top:1px;">'
+         +'<div style="width:6px;height:6px;border-radius:50%;background:'+dotColor+';"></div>'
+         +'<span style="font-size:8px;color:'+dotColor+';font-weight:600;">'+g+'</span>'
+         +(p.team?'<span style="font-size:7px;color:rgba(255,255,255,0.5);"> · '+escH(p.team.replace('MKS Iskra Pszczyna ',''))+'</span>':'')
+         +'</div>'
+        :'<div style="font-size:9px;color:rgba(255,255,255,0.45);font-style:italic;">Kliknij → wybierz</div>'
+      )
+      +'</div>'
+      +(p?'<div style="font-size:8px;color:rgba(255,255,255,0.5);margin-top:2px;cursor:pointer;" onclick="event.stopPropagation();removeTTSlot(\''+slotKey+'\')">✕ usuń</div>':'')
+      +'</div>';
+  });
+  pitchHtml+='</div>';
+
   // Ławka
-  html+='<div style="background:rgba(0,0,0,0.82);padding:7px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">';
-  html+='<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.06em;margin-right:6px;flex-shrink:0;">Ławka:</div>';
-  if(!bench.length){
-    html+='<span style="font-size:11px;color:rgba(255,255,255,0.4);">Brak zawodników na ławce</span>';
+  var benchHtml='<div style="background:rgba(0,0,0,0.82);padding:7px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:38px;">'
+    +'<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.06em;margin-right:4px;flex-shrink:0;">Ławka:</div>';
+  if(!benchPlayers.length){
+    benchHtml+='<span style="font-size:11px;color:rgba(255,255,255,0.35);font-style:italic;">Wszyscy zawodnicy w składzie lub brak zawodników A/B</span>';
   } else {
-    bench.forEach(function(p){
+    benchPlayers.slice(0,12).forEach(function(p){
       var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'rgba(255,255,255,0.1)',tc:'#ccc',bc:'rgba(255,255,255,0.3)'};
       var idx=PLAYERS.indexOf(p);
-      html+='<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 7px;cursor:pointer;font-size:10px;color:#fff;" onclick="renderPlayerView('+idx+')">'
-        +escH(p.name)+(g&&g!=='—'?'<span style="font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;background:'+gc.bg+';color:'+gc.tc+';">'+g+'</span>':'')
+      benchHtml+='<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 7px;cursor:pointer;font-size:10px;color:#fff;" onclick="renderPlayerView('+idx+')">'
+        +escH(p.name)
+        +(g&&g!=='—'?'<span style="font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;background:'+gc.bg+';color:'+gc.tc+';">'+g+'</span>':'')
+        +(p.team?'<span style="font-size:8px;color:rgba(255,255,255,0.4);margin-left:2px;">'+escH(p.team.replace('MKS Iskra Pszczyna ',''))+'</span>':'')
         +'</div>';
     });
+    if(benchPlayers.length>12)benchHtml+='<span style="font-size:10px;color:rgba(255,255,255,0.4);">+'+( benchPlayers.length-12)+' więcej</span>';
   }
-  html+='</div></div>';
-  main.innerHTML=html;
+  benchHtml+='</div>';
+
+  main.innerHTML='<div style="display:flex;flex-direction:column;height:100%;">'
+    +'<div style="flex:1;overflow:hidden;">'+pitchHtml+'</div>'
+    +benchHtml
+    +'</div>';
+}
+
+// Modal wyboru zawodnika na pozycję
+function oTTAssign(slotKey, posAbbr){
+  var formation=(document.getElementById('tt-formation')||{}).value||'4-3-3';
+  var filterTeam=(document.getElementById('tt-pitch-team')||{}).value||'';
+  // Wszyscy zawodnicy A/B (z filtrem drużyny jeśli wybrany)
+  var pool=PLAYERS.filter(function(p){
+    var g=lastGrade(p);
+    if(g!=='A'&&g!=='B'&&g!=='C')return false;
+    if(filterTeam&&p.team!==filterTeam)return false;
+    return true;
+  });
+  // Zajęte indeksy (poza bieżącym slotem)
+  var usedIdxs=Object.entries(_ttLineup)
+    .filter(function(e){return e[0]!==slotKey;})
+    .map(function(e){return e[1].playerIdx;});
+
+  // Posortuj: idealne dopasowanie pozycji → podobna pozycja → reszta
+  var posGroups=POS_ABBR_MAP[posAbbr]||[posAbbr];
+  pool.sort(function(a,b){
+    var scorePos=function(p){
+      var pos=p.position||'';
+      if(pos===posAbbr)return 0;
+      if(posGroups.some(function(g){return pos.includes(g)||g.includes(pos);}))return 1;
+      return 2;
+    };
+    var gv=function(p){var g=lastGrade(p);return g==='A'?0:g==='B'?1:2;};
+    return scorePos(a)-scorePos(b)||gv(a)-gv(b)||(a.name||'').localeCompare(b.name||'');
+  });
+
+  var mo=document.getElementById('mo-tt-assign');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-tt-assign';
+    mo.innerHTML='<div class="mbox" style="width:460px;"><div class="mh"><div class="mt2" id="mo-tt-assign-title">Wybierz zawodnika</div><button class="mc2" onclick="cM(\'mo-tt-assign\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div style="padding:8px 16px;"><input class="fi" id="mo-tt-s" placeholder="Szukaj zawodnika…" oninput="filterTTPool()" style="margin-bottom:0;"/></div><div class="mbody" id="mo-tt-pool" style="max-height:380px;overflow-y:auto;padding:0;"></div><div class="mfs"><button class="btn dan sm" onclick="removeTTSlot(window._ttCurSlot);cM(\'mo-tt-assign\')">Zwolnij pozycję</button><button class="btn" onclick="cM(\'mo-tt-assign\')">Anuluj</button></div></div>';
+    document.body.appendChild(mo);
+  }
+  window._ttCurSlot=slotKey;
+  window._ttCurPool=pool;
+  window._ttUsedIdxs=usedIdxs;
+  document.getElementById('mo-tt-assign-title').textContent='Pozycja: '+posAbbr;
+  var searchEl=document.getElementById('mo-tt-s');if(searchEl)searchEl.value='';
+  filterTTPool();
+  oM('mo-tt-assign');
+}
+
+function filterTTPool(){
+  var q=((document.getElementById('mo-tt-s')||{}).value||'').toLowerCase();
+  var pool=window._ttCurPool||[];
+  var usedIdxs=window._ttUsedIdxs||[];
+  var filtered=q?pool.filter(function(p){return (p.name||'').toLowerCase().includes(q)||(p.position||'').toLowerCase().includes(q)||(p.team||'').toLowerCase().includes(q);}):pool;
+  var html=filtered.map(function(p){
+    var idx=PLAYERS.indexOf(p);
+    var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'var(--sur2)',tc:'var(--txt2)',bc:'var(--brd)'};
+    var inUse=usedIdxs.includes(idx);
+    var isCurrent=_ttLineup[window._ttCurSlot]&&_ttLineup[window._ttCurSlot].playerIdx===idx;
+    var by=playerBirthYear(p);
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:'+(inUse?'default':'pointer')+';opacity:'+(inUse?'0.4':'1')+';background:'+(isCurrent?'var(--lg)':'transparent')+';border-bottom:0.5px solid var(--brd);" '
+      +(!inUse?'onclick="assignTTSlot('+idx+',\''+escH(p.name)+'\')" onmouseenter="this.style.background=\''+(isCurrent?'var(--lg)':'var(--sur2)')+'\';" onmouseleave="this.style.background=\''+(isCurrent?'var(--lg)':'transparent')+'\';"':'')+'>'
+      +'<div style="width:32px;height:32px;border-radius:50%;background:'+gc.bg+';color:'+gc.tc+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">'+playerInitialsShort(p.name)+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:12px;font-weight:500;color:var(--txt);">'+escH(p.name)+(isCurrent?' ✓':'')+(inUse?' (w składzie)':'')+'</div>'
+      +'<div style="font-size:10px;color:var(--txt3);">'+(p.position||'—')+(by?' · '+by:'')+(p.team?' · '+escH(p.team):'')+'</div>'
+      +'</div>'
+      +'<span style="font-size:11px;padding:2px 7px;border-radius:10px;background:'+gc.bg+';color:'+gc.tc+';font-weight:600;flex-shrink:0;">'+g+'</span>'
+      +'</div>';
+  }).join('');
+  if(!filtered.length)html='<div style="padding:20px;text-align:center;color:var(--txt2);font-size:12px;">Brak zawodników spełniających kryteria</div>';
+  var poolEl=document.getElementById('mo-tt-pool');if(poolEl)poolEl.innerHTML=html;
+}
+
+function assignTTSlot(playerIdx, playerName){
+  _ttLineup[window._ttCurSlot]={playerIdx:playerIdx,playerName:playerName};
+  cM('mo-tt-assign');
+  rTTPitch();
+}
+
+function removeTTSlot(slotKey){
+  delete _ttLineup[slotKey];
+  rTTPitch();
 }
 
 
