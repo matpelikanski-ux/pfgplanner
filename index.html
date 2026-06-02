@@ -5763,6 +5763,46 @@ function renderPlayerView(idx){
     html+='</div>';
   }
 
+  // ── Sekcja 6: Zaproszenia / Testy zewnętrzne ──
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:8px;">';
+  html+='<div class="sh" style="margin:0;border:none;padding:0;">Zaproszenia i testy'+(p.zapros&&p.zapros.length?' ('+p.zapros.length+')':'')+'</div>';
+  html+='<button class="btn sm pri" onclick="oAddZapros('+idx+')"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj wpis</button>';
+  html+='</div>';
+  var zapros=p.zapros||[];
+  if(zapros.length){
+    var ZTYPE_CFG={
+      'test-u-nas':{label:'Test w naszym klubie',bg:'var(--lg)',tc:'var(--dg)',ico:'🏠'},
+      'test-u-nich':{label:'Test w innym klubie',bg:'#FFF3E0',tc:'#E65100',ico:'🔄'},
+      'zaproszenie-wyslane':{label:'Zaproszenie wysłane',bg:'#E3F2FD',tc:'#1565C0',ico:'📨'},
+      'zaproszenie-otrzymane':{label:'Zaproszenie otrzymane',bg:'#F3E5F5',tc:'#6A1B9A',ico:'📬'},
+      'transfer':{label:'Transfer / Zmiana klubu',bg:'#FCE4EC',tc:'#880E4F',ico:'⚡'},
+    };
+    var sortedZ=[...zapros].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    sortedZ.forEach((z,si)=>{
+      var realIdx=zapros.indexOf(z);
+      var zcfg=ZTYPE_CFG[z.type]||{label:z.type||'Inne',bg:'var(--sur2)',tc:'var(--txt2)',ico:'📋'};
+      html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:10px 12px;margin-bottom:8px;border-left:3px solid '+zcfg.tc+';">';
+      html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">';
+      html+='<div style="flex:1;min-width:0;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">';
+      html+='<span style="font-size:12px;">'+zcfg.ico+'</span>';
+      html+='<span style="font-size:11px;font-weight:600;color:'+zcfg.tc+';background:'+zcfg.bg+';padding:2px 7px;border-radius:20px;">'+zcfg.label+'</span>';
+      html+='<span style="font-size:10px;color:var(--txt3);">'+(z.date?fdShort(z.date):'brak daty')+'</span>';
+      html+='</div>';
+      if(z.club)html+='<div style="font-size:12px;font-weight:600;color:var(--txt1);margin-bottom:2px;">'+escH(z.club)+'</div>';
+      if(z.notes)html+='<div style="font-size:11px;color:var(--txt2);line-height:1.5;">'+escH(z.notes)+'</div>';
+      if(z.result)html+='<div style="font-size:11px;margin-top:4px;"><span style="font-weight:600;color:var(--txt3);">Wynik: </span><span style="color:var(--txt1);">'+escH(z.result)+'</span></div>';
+      html+='</div>';
+      html+='<button class="btn sm dan" style="padding:2px 6px;font-size:10px;flex-shrink:0;" onclick="delZapros('+idx+','+realIdx+')">Usuń</button>';
+      html+='</div></div>';
+    });
+  } else {
+    html+='<div style="background:var(--sur2);border-radius:var(--r2);padding:14px;text-align:center;">';
+    html+='<div style="font-size:12px;color:var(--txt2);margin-bottom:6px;">Brak wpisów o zaproszeniach ani testach</div>';
+    html+='<button class="btn sm pri" onclick="oAddZapros('+idx+')">+ Dodaj pierwszy wpis</button>';
+    html+='</div>';
+  }
+
   document.getElementById('mo-player-body').innerHTML=html;
   document.getElementById('mo-player-foot').innerHTML=
     '<button class="btn dan sm" onclick="delPlayerConfirm('+idx+')">Usuń zawodnika</button>'
@@ -5770,6 +5810,63 @@ function renderPlayerView(idx){
 }
 
 // ── POMIAR ANTROPOMETRYCZNY ──
+// ── ZAPROSZENIA / TESTY ZEWNĘTRZNE ──────────────────────────────────────────
+function oAddZapros(playerIdx){
+  viewPlayerIdx=playerIdx;
+  var p=PLAYERS[playerIdx];
+  var mo=document.getElementById('mo-zapros');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-zapros';
+    mo.innerHTML='<div class="mbox"><div class="mh"><div class="mt2">Zaproszenie / Test</div><button class="mc2" onclick="cM(\'mo-zapros\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody" id="mo-zapros-body"></div><div class="mfs"><span></span><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-zapros\')">Anuluj</button><button class="btn pri" onclick="saveZapros()">Zapisz wpis</button></div></div></div>';
+    document.body.appendChild(mo);
+  }
+  document.getElementById('mo-zapros-body').innerHTML=
+    '<div class="fr"><label class="fl">Typ wpisu *</label>'
+    +'<select class="fsel" id="zap-type">'
+    +'<option value="test-u-nas">🏠 Test w naszym klubie</option>'
+    +'<option value="test-u-nich">🔄 Test w innym klubie</option>'
+    +'<option value="zaproszenie-wyslane">📨 Zaproszenie wysłane (do innego klubu)</option>'
+    +'<option value="zaproszenie-otrzymane">📬 Zaproszenie otrzymane (od innego klubu)</option>'
+    +'<option value="transfer">⚡ Transfer / Zmiana klubu</option>'
+    +'</select></div>'
+    +'<div class="fr2"><div><label class="fl">Klub</label><input class="fi" id="zap-club" placeholder="Nazwa klubu"/></div>'
+    +'<div><label class="fl">Data</label><input class="fi" id="zap-date" type="date" value="'+new Date().toISOString().slice(0,10)+'"/></div></div>'
+    +'<div class="fr"><label class="fl">Wynik / Decyzja</label><input class="fi" id="zap-result" placeholder="np. Przyjęty, Odrzucony, W toku…"/></div>'
+    +'<div class="fr"><label class="fl">Notatki</label><textarea class="fta" id="zap-notes" rows="3" placeholder="Dodatkowe informacje, warunki, obserwacje…"></textarea></div>';
+  oM('mo-zapros');
+}
+
+function saveZapros(){
+  var idx=viewPlayerIdx;
+  var p=PLAYERS[idx];
+  if(!p)return;
+  var type=document.getElementById('zap-type').value;
+  var club=(document.getElementById('zap-club').value||'').trim();
+  var date=document.getElementById('zap-date').value||'';
+  var result=(document.getElementById('zap-result').value||'').trim();
+  var notes=(document.getElementById('zap-notes').value||'').trim();
+  if(!p.zapros)p.zapros=[];
+  p.zapros.push({type,club,date,result,notes,addedAt:new Date().toISOString()});
+  saveLS();
+  if(window._supaReady)supaSet('PLAYERS',PLAYERS,'all').catch(e=>console.warn('supa PLAYERS',e));
+  cM('mo-zapros');
+  renderPlayerView(idx);
+  rIOZ();try{rDirIOZ();}catch(e){}
+  ST('✓ Wpis dodany');
+}
+
+function delZapros(playerIdx,zaprosIdx){
+  if(!confirm('Usunąć ten wpis?'))return;
+  var p=PLAYERS[playerIdx];
+  if(!p||!p.zapros)return;
+  p.zapros.splice(zaprosIdx,1);
+  saveLS();
+  if(window._supaReady)supaSet('PLAYERS',PLAYERS,'all').catch(e=>console.warn('supa PLAYERS',e));
+  renderPlayerView(playerIdx);
+  rIOZ();try{rDirIOZ();}catch(e){}
+  ST('✓ Wpis usunięty');
+}
+
 function oAddAnthro(playerIdx){
   viewPlayerIdx=playerIdx;
   var p=PLAYERS[playerIdx];
@@ -7959,21 +8056,33 @@ function rDirIOZ(){
   }).sort((a,b)=>(a.team||'').localeCompare(b.team||'')||(a.name||'').localeCompare(b.name||''));
   if(sub)sub.textContent=fil.length+' zawodników'+(fTeam?' · '+fTeam:'');
   if(!fil.length){grid.innerHTML='<div class="empty"><div style="font-size:14px;font-weight:600;">Brak zawodników</div><div style="font-size:12px;color:var(--txt2);margin-top:6px;">Dodaj zawodników przez import XLSX lub przycisk Dodaj zawodnika.</div></div>';return;}
-  // Użyj tej samej funkcji renderowania co rIOZ — tylko przekaż inny kontener
-  var origGrid=document.getElementById('ioz-grid');
-  grid.innerHTML=fil.map((p,idx)=>{
+  // Identyczne karty jak u trenera (rIOZ)
+  grid.innerHTML=fil.map(p=>{
     var realIdx=PLAYERS.indexOf(p);
-    var col2=playerColor(p.id||p.name);
-    var ini2=playerInitials(p.name);
-    var lastG=(p.oceny&&p.oceny.length)?p.oceny[p.oceny.length-1].grade:'';
-    var gCfg=GRADE_CFG[lastG]||{bg:'var(--sur2)',tc:'var(--txt3)'};
-    return '<div class="ioz-card" onclick="renderPlayerView('+realIdx+')">'
-      +'<div class="ioz-av" style="background:'+col2+';">'+ini2+'</div>'
-      +'<div class="ioz-info">'
-      +'<div class="ioz-name">'+escH(p.name)+'</div>'
-      +'<div class="ioz-meta">'+(p.position||'—')+' · '+(p.team||'—')+'</div>'
+    var grade=lastGrade(p);
+    var gc=grade?GRADE_CFG[grade]:null;
+    var age=calcAge(p.dob);
+    var col=playerColor(p.id||p.name);
+    var ini=playerInitials(p.name);
+    var lastA=lastAnthro(p);
+    var lastOcena=p.oceny&&p.oceny.length?p.oceny[p.oceny.length-1]:null;
+    var hasHealth=p.healthNotes&&p.healthNotes.trim();
+    var hasZapros=(p.zapros||[]).length>0;
+    return '<div class="ioz-card" onclick="oViewPlayer('+realIdx+')">'
+      +'<div class="ioz-card-top">'
+      +'<div class="ioz-card-head">'
+      +'<div style="display:flex;align-items:center;gap:10px;">'
+      +'<div class="ioz-av" style="background:'+col+';">'+ini+'</div>'
+      +'<div>'
+      +'<div class="ioz-name">'+p.name+(hasHealth?' <span title="Notatki zdrowotne" style="font-size:12px;">🏥</span>':'')+(hasZapros?' <span title="Historia zaproszeń" style="font-size:11px;">📋</span>':'')+'</div>'
+      +'<div class="ioz-team">'+(p.team||'Brak drużyny')+(age?' · '+age+' lat':'')+(p.position?' · '+p.position:'')+'</div>'
       +'</div>'
-      +(lastG?'<div class="ioz-grade" style="background:'+gCfg.bg+';color:'+gCfg.tc+';">'+lastG+'</div>':'')
+      +'</div>'
+      +'<div class="ioz-grade '+(grade||'none')+'">'+(grade||'—')+'</div>'
+      +'</div>'
+      +(gc?'<div style="font-size:10px;font-weight:500;color:'+gc.tc+';background:'+gc.bg+';padding:3px 8px;border-radius:20px;display:inline-block;margin-bottom:6px;">'+gc.label+'</div>':'')
+      +(lastOcena?'<div style="font-size:11px;color:var(--txt2);margin-bottom:4px;">Ostatnia ocena: <strong style="color:var(--txt1);">'+lastOcena.grade+'</strong> · '+(lastOcena.date||'')+'</div>':'')
+      +(lastA?'<div style="font-size:10px;color:var(--txt3);">'+lastA.height+'cm / '+lastA.weight+'kg</div>':'')
       +'</div>';
   }).join('');
 }
