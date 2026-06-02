@@ -931,6 +931,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <span id="sb-view-label">Przełącz na panel trenera</span>
     </button>
   </div>
+  <div id="sb-export-btns" style="display:none;padding:4px 10px 6px;border-top:1px solid var(--brd);display:flex;gap:6px;">
+    <button onclick="exportAllXLSX()" title="Eksportuj wszystkie dane do XLSX" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 8px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur2);cursor:pointer;font-size:10px;font-weight:600;color:var(--g);transition:all .15s;">
+      <svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>XLSX
+    </button>
+    <button onclick="exportBackupJSON()" title="Pobierz backup JSON" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 8px;border-radius:var(--r2);border:1px solid var(--brd);background:var(--sur2);cursor:pointer;font-size:10px;font-weight:600;color:var(--txt2);transition:all .15s;">
+      <svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>JSON
+    </button>
+  </div>
   <div style="padding:6px 14px 8px;font-size:10px;" id="sync-status"><span style="color:var(--txt3);">● Łączenie…</span></div>
 </div>
 <div class="main">
@@ -1335,7 +1343,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- DIR: PRZEGLĄD -->
 <div id="pg-dir-dash" class="pg">
-  <div class="tb"><div><div class="t1">Panel dyrektorski</div><div class="t2" id="dir-dash-sub">Akademia MKS Iskra Pszczyna</div></div><div class="tb-r"></div></div>
+  <div class="tb"><div><div class="t1">Panel dyrektorski</div><div class="t2" id="dir-dash-sub">Akademia MKS Iskra Pszczyna</div></div><div class="tb-r"><button class="btn" onclick="exportBackupJSON()" title="Pobierz pełny backup JSON"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Backup JSON</button><button class="btn pri" onclick="exportAllXLSX()"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 11l5 3 5-3"/><path d="M3 3h10"/></svg>Eksportuj XLSX</button></div></div>
   <div class="inner" id="dir-dash-body"></div>
 </div>
 
@@ -7443,6 +7451,10 @@ function applyRole(){
   // Przełącznik widoku — tylko dla admin i dyrektor
   var switcher=document.getElementById('sb-view-switcher');
   if(switcher)switcher.style.display=isDir?'':'none';
+
+  // Przyciski eksportu — tylko dla admin i dyrektor
+  var expBtns=document.getElementById('sb-export-btns');
+  if(expBtns)expBtns.style.display=isDir?'flex':'none';
 
   // Ustal który sidebar pokazać
   var showTrener=!isDir||_viewMode==='trener';
