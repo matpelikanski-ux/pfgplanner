@@ -9676,17 +9676,25 @@ function renderSquadPitch(teamName, formation){
 }
 
 // ── Stan ręcznego składu Top Talent ──────────────────────────────────────
-// _ttLineup: {slotKey: {playerIdx, playerName}} — ręczne przypisania
+// _ttLineup: {slotKey: [{playerIdx, playerName}, ...]} — max 3 zawodników na pozycję
 var _ttLineup={};
 
 function clearTTLineup(){_ttLineup={};rTTPitch();ST('Skład wyczyszczony');}
+
+// Wszystkie przypisane indeksy (de-duplikacja przez wszystkie sloty)
+function _ttAllUsed(){
+  var used=[];
+  Object.values(_ttLineup).forEach(function(arr){
+    (arr||[]).forEach(function(v){if(v&&v.playerIdx!==undefined)used.push(v.playerIdx);});
+  });
+  return used;
+}
 
 function rTTPitch(){
   var main=document.getElementById('tt-main');if(!main)return;
   var formation=(document.getElementById('tt-formation')||{}).value||'4-3-3';
   var filterTeam=(document.getElementById('tt-pitch-team')||{}).value||'';
 
-  // Pula zawodników: wszyscy ocenieni A/B z wybranych drużyn
   var pool=PLAYERS.filter(function(p){
     var g=lastGrade(p);
     if(g!=='A'&&g!=='B')return false;
@@ -9699,16 +9707,11 @@ function rTTPitch(){
 
   var form=FORMATIONS[formation]||FORMATIONS['4-3-3'];
   var slots=form.slots||form;
-
-  // Zbierz użytych zawodników w składzie
-  var usedIdxs=Object.values(_ttLineup).map(function(v){return v.playerIdx;}).filter(function(x){return x!==undefined;});
-
-  // Ławka: zawodnicy z puli którzy nie są w składzie
-  var benchPlayers=pool.filter(function(p){return!usedIdxs.includes(PLAYERS.indexOf(p));});
+  var allUsed=_ttAllUsed();
+  var benchPlayers=pool.filter(function(p){return!allUsed.includes(PLAYERS.indexOf(p));});
 
   // Boisko
   var pitchHtml='<div style="position:relative;width:100%;height:100%;background:linear-gradient(180deg,#2D6A2D 0%,#3A7A3A 50%,#2D6A2D 100%);overflow:hidden;">';
-  // Linie boiska
   pitchHtml+='<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.25;" viewBox="0 0 100 100" preserveAspectRatio="none">'
     +'<rect x="1" y="1" width="98" height="98" fill="none" stroke="white" stroke-width=".7"/>'
     +'<line x1="1" y1="50" x2="99" y2="50" stroke="white" stroke-width=".5"/>'
@@ -9720,36 +9723,53 @@ function rTTPitch(){
     +'<rect x="35" y="93" width="30" height="7" fill="none" stroke="white" stroke-width=".5"/>'
     +'</svg>';
 
-  // Sloty pozycji
   slots.forEach(function(slot){
     var posAbbr=slot[0], x=slot[1], y=slot[2];
     var slotKey=posAbbr+'_'+x+'_'+y;
-    var assigned=_ttLineup[slotKey];
-    var p=assigned?PLAYERS[assigned.playerIdx]:null;
-    // Sprawdź że zawodnik nadal istnieje
-    if(p&&p.name!==assigned.playerName)p=null;
-    var g=p?lastGrade(p):null;
-    var dotColor=g==='A'?'#1D9E75':g==='B'?'#EF9F27':'rgba(255,255,255,0.4)';
+    var assigned=_ttLineup[slotKey]||[];
+    var hasAny=assigned.length>0;
 
-    pitchHtml+='<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%);z-index:3;text-align:center;cursor:pointer;" onclick="oTTAssign(\''+slotKey+'\',\''+posAbbr+'\')">'
-      // Kółko pozycji
-      +'<div style="width:34px;height:34px;border-radius:50%;background:'+(p?'#1565C0':'rgba(255,255,255,0.15)')+';border:2px solid '+(p?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.4)')+';display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-size:8px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);">'
-      +escH(posAbbr)
-      +'</div>'
-      // Karta zawodnika
-      +'<div style="background:rgba(10,20,35,'+(p?'0.92':'0.6')+');border:1px solid rgba(255,255,255,'+(p?'0.25':'0.15')+');border-radius:5px;min-width:88px;max-width:110px;padding:4px 6px;box-shadow:0 2px 8px rgba(0,0,0,.5);">'
-      +(p
-        ?'<div style="font-size:9.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(p.name)+'</div>'
-         +'<div style="display:flex;align-items:center;gap:3px;justify-content:center;margin-top:1px;">'
-         +'<div style="width:6px;height:6px;border-radius:50%;background:'+dotColor+';"></div>'
-         +'<span style="font-size:8px;color:'+dotColor+';font-weight:600;">'+g+'</span>'
-         +(p.team?'<span style="font-size:7px;color:rgba(255,255,255,0.5);"> · '+escH(p.team.replace('MKS Iskra Pszczyna ',''))+'</span>':'')
-         +'</div>'
-        :'<div style="font-size:9px;color:rgba(255,255,255,0.45);font-style:italic;">Kliknij → wybierz</div>'
-      )
-      +'</div>'
-      +(p?'<div style="font-size:8px;color:rgba(255,255,255,0.5);margin-top:2px;cursor:pointer;" onclick="event.stopPropagation();removeTTSlot(\''+slotKey+'\')">✕ usuń</div>':'')
-      +'</div>';
+    // Kółko pozycji — kolor wg liczby przypisanych
+    var circleColor=assigned.length>=3?'#1D9E75':assigned.length>=1?'#1565C0':'rgba(255,255,255,0.15)';
+    var circleBorder=hasAny?'rgba(255,255,255,0.75)':'rgba(255,255,255,0.4)';
+
+    pitchHtml+='<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%);z-index:3;text-align:center;cursor:pointer;" onclick="oTTAssign(\''+slotKey+'\',\''+posAbbr+'\')">';
+    pitchHtml+='<div style="width:34px;height:34px;border-radius:50%;background:'+circleColor+';border:2px solid '+circleBorder+';display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-size:8px;font-weight:700;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.4);">'+escH(posAbbr)+'</div>';
+
+    // Karta z rankingiem zawodników
+    pitchHtml+='<div style="background:rgba(10,20,35,'+(hasAny?'0.92':'0.6')+');border:1px solid rgba(255,255,255,'+(hasAny?'0.22':'0.12')+');border-radius:5px;min-width:100px;max-width:118px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.5);">';
+
+    if(!hasAny){
+      pitchHtml+='<div style="padding:5px 7px;font-size:9px;color:rgba(255,255,255,0.4);font-style:italic;">Kliknij → dodaj</div>';
+    } else {
+      var RANK_LABELS=['1.','2.','3.'];
+      var RANK_ALPHA=[1,0.72,0.5];
+      assigned.forEach(function(v,ri){
+        var p=PLAYERS[v.playerIdx];
+        if(p&&p.name!==v.playerName)p=null;
+        if(!p)return;
+        var g=lastGrade(p);
+        var dotColor=g==='A'?'#1D9E75':g==='B'?'#EF9F27':'rgba(255,255,255,0.35)';
+        var isFirst=ri===0;
+        pitchHtml+='<div style="padding:'+(isFirst?'5':'3')+'px 6px '+(ri<assigned.length-1?'0':'4')+'px;'+(ri>0?'border-top:1px solid rgba(255,255,255,0.07);':'')+'display:flex;align-items:center;gap:4px;opacity:'+RANK_ALPHA[ri]+';cursor:pointer;" onclick="event.stopPropagation();renderPlayerView('+PLAYERS.indexOf(p)+')">';
+        pitchHtml+='<span style="font-size:7px;font-weight:700;color:rgba(255,255,255,0.45);flex-shrink:0;width:10px;">'+RANK_LABELS[ri]+'</span>';
+        pitchHtml+='<div style="flex:1;min-width:0;">';
+        pitchHtml+='<div style="font-size:'+(isFirst?'9.5':'8.5')+'px;font-weight:'+(isFirst?'700':'500')+';color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(p.name)+'</div>';
+        pitchHtml+='<div style="display:flex;align-items:center;gap:2px;margin-top:1px;">'
+          +'<div style="width:5px;height:5px;border-radius:50%;background:'+dotColor+';flex-shrink:0;"></div>'
+          +'<span style="font-size:7.5px;color:'+dotColor+';font-weight:600;">'+g+'</span>'
+          +(p.team?'<span style="font-size:7px;color:rgba(255,255,255,0.4);"> · '+escH(p.team.replace('MKS Iskra Pszczyna ',''))+'</span>':'')
+          +'</div>';
+        pitchHtml+='</div>';
+        pitchHtml+='<span style="font-size:9px;color:rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0;padding:0 2px;" onclick="event.stopPropagation();removeTTRank(\''+slotKey+'\','+ri+')" title="Usuń">✕</span>';
+        pitchHtml+='</div>';
+      });
+      if(assigned.length<3){
+        pitchHtml+='<div style="padding:3px 7px 5px;border-top:1px solid rgba(255,255,255,0.07);font-size:8px;color:rgba(255,255,255,0.35);text-align:center;">+ dodaj #'+(assigned.length+1)+'</div>';
+      }
+    }
+
+    pitchHtml+='</div></div>';
   });
   pitchHtml+='</div>';
 
@@ -9757,14 +9777,14 @@ function rTTPitch(){
   var benchHtml='<div style="background:rgba(0,0,0,0.82);padding:7px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:38px;">'
     +'<div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.06em;margin-right:4px;flex-shrink:0;">Ławka:</div>';
   if(!benchPlayers.length){
-    benchHtml+='<span style="font-size:11px;color:rgba(255,255,255,0.35);font-style:italic;">Wszyscy zawodnicy w składzie lub brak zawodników A/B</span>';
+    benchHtml+='<span style="font-size:11px;color:rgba(255,255,255,0.35);font-style:italic;">Wszyscy zawodnicy przypisani lub brak zawodników A/B</span>';
   } else {
     benchPlayers.slice(0,12).forEach(function(p){
-      var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'rgba(255,255,255,0.1)',tc:'#ccc',bc:'rgba(255,255,255,0.3)'};
+      var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'rgba(255,255,255,0.1)',tc:'#ccc'};
       var idx=PLAYERS.indexOf(p);
       benchHtml+='<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 7px;cursor:pointer;font-size:10px;color:#fff;" onclick="renderPlayerView('+idx+')">'
         +escH(p.name)
-        +(g&&g!=='—'?'<span style="font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;background:'+gc.bg+';color:'+gc.tc+';">'+g+'</span>':'')
+        +(g?'<span style="font-size:8px;padding:0 3px;border-radius:2px;margin-left:3px;background:'+gc.bg+';color:'+gc.tc+';">'+g+'</span>':'')
         +(p.team?'<span style="font-size:8px;color:rgba(255,255,255,0.4);margin-left:2px;">'+escH(p.team.replace('MKS Iskra Pszczyna ',''))+'</span>':'')
         +'</div>';
     });
@@ -9774,27 +9794,26 @@ function rTTPitch(){
 
   main.innerHTML='<div style="display:flex;flex-direction:column;height:100%;">'
     +'<div style="flex:1;overflow:hidden;">'+pitchHtml+'</div>'
-    +benchHtml
-    +'</div>';
+    +benchHtml+'</div>';
 }
 
-// Modal wyboru zawodnika na pozycję
+// Modal wyboru zawodnika — teraz dodaje do rankingu (max 3)
 function oTTAssign(slotKey, posAbbr){
-  var formation=(document.getElementById('tt-formation')||{}).value||'4-3-3';
   var filterTeam=(document.getElementById('tt-pitch-team')||{}).value||'';
-  // Wszyscy zawodnicy A/B (z filtrem drużyny jeśli wybrany)
   var pool=PLAYERS.filter(function(p){
     var g=lastGrade(p);
     if(g!=='A'&&g!=='B'&&g!=='C')return false;
     if(filterTeam&&p.team!==filterTeam)return false;
     return true;
   });
-  // Zajęte indeksy (poza bieżącym slotem)
-  var usedIdxs=Object.entries(_ttLineup)
+  // Zawodnicy już przypisani do INNYCH slotów (do oznaczenia wyszarzone, ale nadal klikalnie)
+  var otherUsed=Object.entries(_ttLineup)
     .filter(function(e){return e[0]!==slotKey;})
-    .map(function(e){return e[1].playerIdx;});
+    .flatMap(function(e){return (e[1]||[]).map(function(v){return v.playerIdx;});});
+  // Zawodnicy już w tym slocie
+  var curSlot=_ttLineup[slotKey]||[];
+  var curIdxs=curSlot.map(function(v){return v.playerIdx;});
 
-  // Posortuj: idealne dopasowanie pozycji → podobna pozycja → reszta
   var posGroups=POS_ABBR_MAP[posAbbr]||[posAbbr];
   pool.sort(function(a,b){
     var scorePos=function(p){
@@ -9810,13 +9829,19 @@ function oTTAssign(slotKey, posAbbr){
   var mo=document.getElementById('mo-tt-assign');
   if(!mo){
     mo=document.createElement('div');mo.className='mo';mo.id='mo-tt-assign';
-    mo.innerHTML='<div class="mbox" style="width:460px;"><div class="mh"><div class="mt2" id="mo-tt-assign-title">Wybierz zawodnika</div><button class="mc2" onclick="cM(\'mo-tt-assign\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div style="padding:8px 16px;"><input class="fi" id="mo-tt-s" placeholder="Szukaj zawodnika…" oninput="filterTTPool()" style="margin-bottom:0;"/></div><div class="mbody" id="mo-tt-pool" style="max-height:380px;overflow-y:auto;padding:0;"></div><div class="mfs"><button class="btn dan sm" onclick="removeTTSlot(window._ttCurSlot);cM(\'mo-tt-assign\')">Zwolnij pozycję</button><button class="btn" onclick="cM(\'mo-tt-assign\')">Anuluj</button></div></div>';
+    mo.innerHTML='<div class="mbox" style="width:500px;">'
+      +'<div class="mh"><div class="mt2" id="mo-tt-assign-title">Wybierz zawodnika</div><button class="mc2" onclick="cM(\'mo-tt-assign\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
+      +'<div style="padding:8px 16px 4px;"><input class="fi" id="mo-tt-s" placeholder="Szukaj zawodnika…" oninput="filterTTPool()" style="margin-bottom:0;"/></div>'
+      +'<div id="mo-tt-cur-rank" style="padding:0 16px 4px;"></div>'
+      +'<div class="mbody" id="mo-tt-pool" style="max-height:340px;overflow-y:auto;padding:0;"></div>'
+      +'<div class="mfs"><button class="btn dan sm" onclick="removeTTSlot(window._ttCurSlot)">Wyczyść pozycję</button><button class="btn" onclick="cM(\'mo-tt-assign\')">Zamknij</button></div>'
+      +'</div>';
     document.body.appendChild(mo);
   }
   window._ttCurSlot=slotKey;
   window._ttCurPool=pool;
-  window._ttUsedIdxs=usedIdxs;
-  document.getElementById('mo-tt-assign-title').textContent='Pozycja: '+posAbbr;
+  window._ttOtherUsed=otherUsed;
+  document.getElementById('mo-tt-assign-title').textContent='Pozycja: '+posAbbr+' — ranking zawodników';
   var searchEl=document.getElementById('mo-tt-s');if(searchEl)searchEl.value='';
   filterTTPool();
   oM('mo-tt-assign');
@@ -9825,39 +9850,94 @@ function oTTAssign(slotKey, posAbbr){
 function filterTTPool(){
   var q=((document.getElementById('mo-tt-s')||{}).value||'').toLowerCase();
   var pool=window._ttCurPool||[];
-  var usedIdxs=window._ttUsedIdxs||[];
-  var filtered=q?pool.filter(function(p){return (p.name||'').toLowerCase().includes(q)||(p.position||'').toLowerCase().includes(q)||(p.team||'').toLowerCase().includes(q);}):pool;
+  var slotKey=window._ttCurSlot;
+  var curSlot=_ttLineup[slotKey]||[];
+  var curIdxs=curSlot.map(function(v){return v.playerIdx;});
+  var otherUsed=window._ttOtherUsed||[];
+
+  // Aktualny ranking — mini-sekcja nad listą
+  var rankHtml='';
+  if(curSlot.length){
+    rankHtml='<div style="background:var(--sur2);border-radius:var(--r2);padding:8px 10px;margin-bottom:4px;">'
+      +'<div style="font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Aktualny ranking na tej pozycji:</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;">';
+    curSlot.forEach(function(v,ri){
+      var p=PLAYERS[v.playerIdx];
+      if(!p)return;
+      var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'var(--sur)',tc:'var(--txt2)'};
+      rankHtml+='<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--sur);border-radius:5px;">'
+        +'<span style="font-size:10px;font-weight:700;color:var(--txt3);width:14px;">'+(ri+1)+'.</span>'
+        +'<span style="font-size:12px;font-weight:500;flex:1;">'+escH(p.name)+'</span>'
+        +'<span style="font-size:10px;padding:1px 5px;border-radius:8px;background:'+gc.bg+';color:'+gc.tc+';font-weight:600;">'+g+'</span>'
+        +(ri>0?'<button style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--txt3);padding:0 2px;" onclick="moveTTRankUp(\''+slotKey+'\','+ri+')" title="Przesuń wyżej">↑</button>':'')
+        +'<button style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--red);padding:0 2px;" onclick="removeTTRank(\''+slotKey+'\','+ri+');filterTTPool()" title="Usuń">✕</button>'
+        +'</div>';
+    });
+    rankHtml+='</div></div>';
+  }
+  var rankEl=document.getElementById('mo-tt-cur-rank');
+  if(rankEl)rankEl.innerHTML=rankHtml;
+
+  var full=curSlot.length>=3;
+  var filtered=q?pool.filter(function(p){
+    return (p.name||'').toLowerCase().includes(q)||(p.position||'').toLowerCase().includes(q)||(p.team||'').toLowerCase().includes(q);
+  }):pool;
+
   var html=filtered.map(function(p){
     var idx=PLAYERS.indexOf(p);
-    var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'var(--sur2)',tc:'var(--txt2)',bc:'var(--brd)'};
-    var inUse=usedIdxs.includes(idx);
-    var isCurrent=_ttLineup[window._ttCurSlot]&&_ttLineup[window._ttCurSlot].playerIdx===idx;
+    var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'var(--sur2)',tc:'var(--txt2)'};
+    var inCur=curIdxs.includes(idx);
+    var inOther=otherUsed.includes(idx);
+    var canAdd=!inCur&&!full;
     var by=playerBirthYear(p);
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:'+(inUse?'default':'pointer')+';opacity:'+(inUse?'0.4':'1')+';background:'+(isCurrent?'var(--lg)':'transparent')+';border-bottom:0.5px solid var(--brd);" '
-      +(!inUse?'onclick="assignTTSlot('+idx+',\''+escH(p.name)+'\')" onmouseenter="this.style.background=\''+(isCurrent?'var(--lg)':'var(--sur2)')+'\';" onmouseleave="this.style.background=\''+(isCurrent?'var(--lg)':'transparent')+'\';"':'')+'>'
-      +'<div style="width:32px;height:32px;border-radius:50%;background:'+gc.bg+';color:'+gc.tc+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">'+playerInitialsShort(p.name)+'</div>'
+    var rank=inCur?curIdxs.indexOf(idx)+1:null;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:'+(canAdd?'pointer':'default')+';background:'+(inCur?'var(--lg)':'transparent')+';border-bottom:0.5px solid var(--brd);opacity:'+(full&&!inCur?0.45:1)+';" '
+      +(canAdd?'onclick="assignTTSlot('+idx+',\''+escH(p.name)+'\')" onmouseenter="this.style.background=\''+(inCur?'var(--lg)':'var(--sur2)')+'\';" onmouseleave="this.style.background=\''+(inCur?'var(--lg)':'transparent')+'\'"':'')+' >'
+      +'<div style="width:32px;height:32px;border-radius:50%;background:'+(inCur?'var(--g)':gc.bg)+';color:'+(inCur?'#fff':gc.tc)+';display:flex;align-items:center;justify-content:center;font-size:'+(inCur?'11':'10')+'px;font-weight:700;flex-shrink:0;">'+(inCur?rank:playerInitialsShort(p.name))+'</div>'
       +'<div style="flex:1;min-width:0;">'
-      +'<div style="font-size:12px;font-weight:500;color:var(--txt);">'+escH(p.name)+(isCurrent?' ✓':'')+(inUse?' (w składzie)':'')+'</div>'
+      +'<div style="font-size:12px;font-weight:500;color:var(--txt);">'+escH(p.name)+(inCur?' <span style="font-size:10px;color:var(--g);font-weight:600;">#'+rank+' ✓</span>':'')+(inOther&&!inCur?' <span style="font-size:10px;color:var(--txt3);">(inna pozycja)</span>':'')+'</div>'
       +'<div style="font-size:10px;color:var(--txt3);">'+(p.position||'—')+(by?' · '+by:'')+(p.team?' · '+escH(p.team):'')+'</div>'
       +'</div>'
       +'<span style="font-size:11px;padding:2px 7px;border-radius:10px;background:'+gc.bg+';color:'+gc.tc+';font-weight:600;flex-shrink:0;">'+g+'</span>'
+      +(full&&!inCur?'<span style="font-size:9px;color:var(--txt3);flex-shrink:0;">pełna</span>':'')
       +'</div>';
   }).join('');
   if(!filtered.length)html='<div style="padding:20px;text-align:center;color:var(--txt2);font-size:12px;">Brak zawodników spełniających kryteria</div>';
+  if(full&&!q)html='<div style="padding:10px 14px;font-size:11px;color:var(--txt3);border-bottom:0.5px solid var(--brd);">Pozycja ma już 3 zawodników. Usuń jednego aby dodać innego.</div>'+html;
   var poolEl=document.getElementById('mo-tt-pool');if(poolEl)poolEl.innerHTML=html;
 }
 
 function assignTTSlot(playerIdx, playerName){
-  _ttLineup[window._ttCurSlot]={playerIdx:playerIdx,playerName:playerName};
-  cM('mo-tt-assign');
+  var slotKey=window._ttCurSlot;
+  if(!_ttLineup[slotKey])_ttLineup[slotKey]=[];
+  if(_ttLineup[slotKey].length>=3)return;
+  // Nie dodawaj duplikatów
+  if(_ttLineup[slotKey].some(function(v){return v.playerIdx===playerIdx;}))return;
+  _ttLineup[slotKey].push({playerIdx:playerIdx,playerName:playerName});
+  filterTTPool(); // odśwież modal bez zamykania
+  rTTPitch();
+}
+
+function removeTTRank(slotKey,rankIdx){
+  if(!_ttLineup[slotKey])return;
+  _ttLineup[slotKey].splice(rankIdx,1);
+  if(!_ttLineup[slotKey].length)delete _ttLineup[slotKey];
+  rTTPitch();
+}
+
+function moveTTRankUp(slotKey,rankIdx){
+  if(!_ttLineup[slotKey]||rankIdx<1)return;
+  var arr=_ttLineup[slotKey];
+  var tmp=arr[rankIdx-1];arr[rankIdx-1]=arr[rankIdx];arr[rankIdx]=tmp;
+  filterTTPool();
   rTTPitch();
 }
 
 function removeTTSlot(slotKey){
   delete _ttLineup[slotKey];
+  filterTTPool();
   rTTPitch();
 }
-
 
 function rTTList(players){
   var main=document.getElementById('tt-main');if(!main)return;
