@@ -1714,7 +1714,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- DIR: BAZA ĆWICZEŃ (read-only) -->
 <div id="pg-dir-ex" class="pg">
-  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="dir-ex-lbl">0 ćwiczeń</div></div></div>
+  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="dir-ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
   <div class="inner">
     <div style="display:flex;gap:8px;margin-bottom:10px;"><input class="fi" id="dir-ex-s" placeholder="Szukaj po nazwie lub opisie..." oninput="rDirEX()" style="flex:1;"/></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
@@ -3107,8 +3107,8 @@ function rEV(e,idx){
 
 function MFC(){var fa=document.getElementById('ef-f').value;var ts=document.getElementById('ef-t'),ks=document.getElementById('ef-k');ts.innerHTML='<option value="">'+(fa?'— wybierz —':'— wybierz fazę —')+'</option>';ts.disabled=!fa;ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=true;if(fa)GT(fa).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});}
 function MTC(){var fa=document.getElementById('ef-f').value,tm=document.getElementById('ef-t').value;var ks=document.getElementById('ef-k');ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=!tm;if(tm)GK(fa,tm).forEach(k=>{var o=document.createElement('option');o.textContent=k;ks.appendChild(o);});}
-function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',imgUrl:(document.getElementById('ef-imgurl')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();uD();}
-function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();uD();saveLS();supaSetEXS();ST('"'+n+'" usunięte');}
+function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',imgUrl:(document.getElementById('ef-imgurl')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();try{rDirEX();}catch(e2){}uD();}
+function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();try{rDirEX();}catch(e2){}uD();saveLS();supaSetEXS();ST('"'+n+'" usunięte');}
 function HFS(e){
   var f=e.target.files[0];
   if(!f)return;
@@ -8259,13 +8259,14 @@ function rDirEX(){
   var oe=document.getElementById('dir-eex');if(oe)oe.remove();
   if(!fil.length){
     g.innerHTML='';
-    g.insertAdjacentHTML('beforebegin','<div id="dir-eex" class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(EXS.length?'Brak wyników':'Baza ćwiczeń jest pusta')+'</div><div style="font-size:12px;color:var(--txt2);">'+(EXS.length?'Zmień kryteria wyszukiwania.':'Trener nie dodał jeszcze żadnych ćwiczeń.')+'</div></div>');
+    g.insertAdjacentHTML('beforebegin','<div id="dir-eex" class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(EXS.length?'Brak wyników':'Baza ćwiczeń jest pusta')+'</div><div style="font-size:12px;color:var(--txt2);">'+(EXS.length?'Zmień kryteria wyszukiwania.':'Kliknij „Dodaj ćwiczenie" aby dodać pierwsze ćwiczenie do bazy.')+'</div></div>');
     return;
   }
   g.innerHTML=fil.map(e=>{
+    var idx=EXS.indexOf(e);
     var c=CC[e.f]||{bg:'#E1F5EE',tc:'#085041',ic:'#1D9E75'};
     var ic2=IC[e.i]||{bg:'#F1EFE8',tc:'#6B6860'};
-    return '<div class="ec" onclick="dirViewEX('+EXS.indexOf(e)+')">'
+    return '<div class="ec" onclick="dirViewEX('+idx+')">'
       +((e.img||e.imgUrl)?'<img src="'+(e.img||e.imgUrl)+'" alt="'+e.n+'" style="width:100%;max-height:180px;object-fit:contain;border-radius:6px;margin-bottom:10px;background:var(--sur2);" onerror="this.style.display=\'none\'">':'<div class="ei" style="background:'+c.bg+';color:'+c.ic+'"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M5 8h6M8 5v6"/></svg></div>')
       +'<div class="en">'+e.n+'</div>'
       +'<div class="eb">'+(e.f?'<span class="bdg" style="background:'+c.bg+';color:'+c.tc+';">'+e.f+'</span>':'')+(e.t?'<span class="bdg" style="background:var(--sur2);color:var(--txt2);font-size:9px;">'+e.t+'</span>':'')+(e.lv?'<span class="bdg" style="background:#FFEEE8;color:#C0392B;font-size:9px;">▶</span>':'')+'</div>'
@@ -8275,13 +8276,9 @@ function rDirEX(){
   }).join('');
 }
 function dirViewEX(idx){
-  // Otwiera modal podglądu trenera (rEV) w trybie read-only — bez przycisku Edytuj
   var e=EXS[idx];if(!e)return;
   EI=idx;IMG=e.img||null;IMN=e.imn||null;
   rEV(e,idx);
-  // Schowaj przycisk Edytuj — dyrektor tylko przegląda
-  var eb=document.getElementById('ex-eb');
-  if(eb)eb.innerHTML='<span class="bdg" style="background:var(--sur2);color:var(--txt2);">👁 Tylko podgląd</span>';
   oM('mo-ex');
 }
 function dirFFC(){
