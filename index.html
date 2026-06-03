@@ -8087,48 +8087,6 @@ function saveSquadProposal(){
   cM('mo-sq-proposal');
   ST('✓ Propozycja "'+prop.title+'" zapisana i widoczna dla dyrektora');
 }
-  var teamSel=document.getElementById('sq-f-team');
-  var filterTeam=(teamSel||{}).value||'';
-  // Wypełnij drużyny
-  if(teamSel&&teamSel.options.length<=1){
-    TEAMS.filter(function(t){return t.season===currentSeason;}).sort(function(a,b){return (a.name||'').localeCompare(b.name||'');}).forEach(function(t){
-      var o=document.createElement('option');o.value=t.name;o.textContent=t.name;teamSel.appendChild(o);
-    });
-  }
-  // Lista zawodników po lewej
-  var listEl=document.getElementById('sq-player-list');
-  if(listEl){
-    var pool=PLAYERS.filter(function(p){
-      var g=lastGrade(p);if(!g)return false;
-      if(filterTeam&&p.team!==filterTeam)return false;
-      return true;
-    }).sort(function(a,b){
-      var gv=function(g){return g==='A'?0:g==='B'?1:2;};
-      return gv(lastGrade(a))-gv(lastGrade(b))||(a.name||'').localeCompare(b.name||'');
-    });
-    if(!pool.length){
-      listEl.innerHTML='<div style="padding:16px;text-align:center;font-size:11px;color:var(--txt2);">Brak zawodników z ocenami.<br>Dodaj oceny na kartach zawodników.</div>';
-    } else {
-      listEl.innerHTML=pool.map(function(p){
-        var idx=PLAYERS.indexOf(p);
-        var g=lastGrade(p);var gc=GRADE_COLORS[g]||{bg:'var(--sur2)',tc:'var(--txt2)'};
-        var by=playerBirthYear(p);
-        // Sprawdź czy już w składzie
-        var inLineup=Object.values(_sqLineup).some(function(arr){return (arr||[]).some(function(v){return v.playerIdx===idx;});});
-        return '<div style="display:flex;align-items:center;gap:7px;padding:6px 10px;border-bottom:0.5px solid var(--brd);background:'+(inLineup?'var(--lg)':'transparent')+';cursor:pointer;" onclick="renderPlayerView('+idx+')">'
-          +'<div style="width:26px;height:26px;border-radius:50%;background:'+gc.bg+';color:'+gc.tc+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0;">'+playerInitialsShort(p.name)+'</div>'
-          +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(p.name)+(inLineup?' ✓':'')+'</div>'
-          +'<div style="font-size:9.5px;color:var(--txt3);">'+(p.position||'—')+(by?' · '+by:'')+(p.team&&!filterTeam?' · '+escH(p.team.replace('MKS Iskra Pszczyna ','')):'')+'</div>'
-          +'</div>'
-          +'<span style="font-size:9px;padding:1px 5px;border-radius:8px;background:'+gc.bg+';color:'+gc.tc+';font-weight:600;">'+g+'</span>'
-          +'</div>';
-      }).join('');
-    }
-  }
-  rSquadPitch();
-}
-
 function rDirSquad(){
   var body=document.getElementById('dir-squad-body');if(!body)return;
   var proposals=SQUAD_PROPOSALS||[];
