@@ -8446,74 +8446,7 @@ function dirExCF(){
 
 // ── WIDOK DIR: PRZEGLĄD ──
 // ── Planowanie dyrektora (readonly) ──
-function rDirPlan(){
-  var lbl=document.getElementById('dir-yr-l');
-  if(lbl)lbl.textContent=cY+'/'+(String(cY+1).slice(2));
-  var sub=document.getElementById('dir-plan-sub');
-  if(sub)sub.textContent='Sezon '+cY+'/'+(String(cY+1).slice(2));
 
-  var ganttEl=document.getElementById('dir-plan-gantt');
-  if(ganttEl){
-    // Renderuj uproszczony Gantt dla dyrektora
-    var cycsYear=CYC.filter(c=>c.year===cY);
-    if(!cycsYear.length){
-      ganttEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--txt2);font-size:12px;">Brak zaplanowanych cykli na rok '+cY+'. Kliknij „Dodaj okres" aby rozpocząć planowanie.</div>';
-    } else {
-      var MONTHS=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
-      var html='<div style="overflow-x:auto;margin-bottom:8px;"><table style="border-collapse:collapse;min-width:500px;font-size:11px;width:100%;">';
-      html+='<thead><tr><th style="text-align:left;padding:5px 10px;background:var(--sur2);border:1px solid var(--brd);min-width:140px;">Cykl</th>';
-      MONTHS.forEach(m=>html+='<th style="padding:3px 2px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:32px;text-align:center;">'+m+'</th>');
-      html+='<th style="padding:3px 6px;background:var(--sur2);border:1px solid var(--brd);font-size:9px;min-width:60px;text-align:center;">Akcja</th></tr></thead><tbody>';
-      var typeColors={'macro':'#E6F1FB','meso':'#EEEDFE','micro':'var(--lg)'};
-      var typeBorder={'macro':'#85B7EB','meso':'#AFA9EC','micro':'#5DCAA5'};
-      var typeLabel={'macro':'Makro','meso':'Mezo','micro':'Mikro'};
-      cycsYear.forEach((c,i)=>{
-        var realIdx=CYC.indexOf(c);
-        var bg=typeColors[c.type]||'var(--sur2)';
-        var bc=typeBorder[c.type]||'var(--brd)';
-        html+='<tr><td style="padding:5px 8px;border:1px solid var(--brd);">';
-        html+='<div style="font-size:11px;font-weight:500;">'+escH(c.name)+'</div>';
-        html+='<div style="font-size:9px;color:var(--txt3);">'+typeLabel[c.type]+'</div></td>';
-        MONTHS.forEach((m,mi)=>{
-          var inRange=(mi>=c.startM&&mi<=c.endM);
-          html+='<td style="padding:0;border:1px solid var(--brd);"><div style="height:22px;background:'+(inRange?bg:'transparent')+';'+(inRange?'border-left:2px solid '+bc+';':'')+'margin:1px;border-radius:2px;"></div></td>';
-        });
-        html+='<td style="padding:3px 4px;border:1px solid var(--brd);text-align:center;">';
-        html+='<button onclick="oEC('+realIdx+')" style="font-size:9px;background:var(--sur2);border:1px solid var(--brd);border-radius:3px;padding:2px 5px;cursor:pointer;margin-right:2px;">✎</button>';
-        html+='<button onclick="dC('+realIdx+')" style="font-size:9px;background:var(--lred);color:var(--red);border:1px solid #FECDD3;border-radius:3px;padding:2px 5px;cursor:pointer;">×</button>';
-        html+='</td></tr>';
-      });
-      html+='</tbody></table></div>';
-      ganttEl.innerHTML=html;
-    }
-  }
-
-  // Karty cykli z listami
-  var types=['macro','meso','micro'];
-  types.forEach(function(type){
-    var cycs=CYC.filter(c=>c.year===cY&&c.type===type);
-    var cntEl=document.getElementById('dir-cnt-'+type);
-    var listEl=document.getElementById('dir-list-'+type);
-    if(cntEl)cntEl.textContent=cycs.length;
-    if(listEl){
-      listEl.innerHTML=cycs.map(function(c){
-        var idx=CYC.indexOf(c);
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--brd);font-size:11px;">'
-          +'<div><div style="font-weight:500;">'+escH(c.name)+'</div>'
-          +(c.startDate&&c.endDate?'<div style="font-size:10px;color:var(--txt3);">'+fd(c.startDate)+' – '+fd(c.endDate)+'</div>':'')
-          +'</div>'
-          +'<div style="display:flex;gap:4px;flex-shrink:0;">'
-          +'<button onclick="oEC('+idx+')" style="font-size:9px;background:var(--sur2);border:1px solid var(--brd);border-radius:3px;padding:2px 5px;cursor:pointer;">✎</button>'
-          +'<button onclick="dC('+idx+')" style="font-size:9px;background:var(--lred);color:var(--red);border:1px solid #FECDD3;border-radius:3px;padding:2px 5px;cursor:pointer;">×</button>'
-          +'</div></div>';
-      }).join('') || '<div style="font-size:11px;color:var(--txt3);padding:6px 0;">Brak</div>';
-    }
-  });
-
-  // Notatki
-  var notesEl=document.getElementById('dir-plan-notes');
-  if(notesEl&&CYC.planNotes!==undefined)notesEl.value=CYC.planNotes||'';
-}
 
 // ── Karty zawodników w module dyrektora ──
 function rDirIOZ(){
@@ -8944,28 +8877,7 @@ function setDirPlanView(v){
 function dirPlanPrevY(){cY--;rYL();rDirPlan();}
 function dirPlanNextY(){cY++;rYL();rDirPlan();}
 
-function rDirPlan(){
-  var lbl=document.getElementById('dir-yr-l');
-  if(lbl)lbl.textContent=cY+'/'+(String(cY+1).slice(2));
-  var sub=document.getElementById('dir-plan-sub');
-  if(sub)sub.textContent='Sezon '+cY+'/'+(String(cY+1).slice(2));
 
-  // Aktualizuj filtr drużyn
-  var tSel=document.getElementById('dir-plan-team');
-  if(tSel){
-    var teams=TEAMS.filter(function(t){return t.season===currentSeason;}).map(function(t){return t.name;}).sort();
-    var prevT=tSel.value;
-    tSel.innerHTML='<option value="">Wszystkie drużyny</option>'+teams.map(function(t){return '<option value="'+escH(t)+'"'+(t===prevT?' selected':'')+'>'+escH(t)+'</option>';}).join('');
-  }
-  var fTeam=(document.getElementById('dir-plan-team')||{}).value||'';
-
-  var body=document.getElementById('dir-plan-body');
-  if(!body)return;
-
-  if(dirPlanView==='gantt')_renderDirGantt(body,fTeam);
-  else if(dirPlanView==='cal')_renderDirPlanCal(body,fTeam);
-  else _renderDirPlanList(body,fTeam);
-}
 
 // ── WIDOK GANTT ──
 function _renderDirGantt(body,fTeam){
@@ -9853,10 +9765,6 @@ var GRADE_COLORS={
   C:{bg:'#FAECE7',tc:'#712B13',bc:'#E24B4A'}
 };
 
-function lastGrade(p){
-  if(!p.oceny||!p.oceny.length)return'';
-  return p.oceny[p.oceny.length-1].grade||'';
-}
 
 function playerInitialsShort(name){
   if(!name)return'?';
@@ -14161,6 +14069,48 @@ var IMPORT_TYPES={
     }
   }
 };
+
+
+// Pobierz zbiorczy szablon Excel dla importu danych
+function downloadImportTemplate(e){
+  if(e)e.preventDefault();
+  if(typeof XLSX==='undefined'){ST('Biblioteka XLSX nie załadowana');return;}
+  var wb=XLSX.utils.book_new();
+
+  // Arkusz 1: Zawodnicy
+  var pl=[
+    ['Imię i Nazwisko','Data urodzenia','Drużyna','Pozycja','Numer zawodnika','Noga dominująca','Kontakt rodzica','Uwagi zdrowotne','PESEL','Adres zamieszkania'],
+    ['Jan Kowalski','2012-05-20','MKS Iskra Pszczyna U12A','CB','5','Prawa','600 000 000','','',''],
+    ['Adam Wiśniewski','2012-11-03','MKS Iskra Pszczyna U12A','GK','1','Prawa','','Alergia na pyłki','',''],
+  ];
+  var wsP=XLSX.utils.aoa_to_sheet(pl);
+  wsP['!cols']=[{wch:22},{wch:14},{wch:26},{wch:10},{wch:8},{wch:14},{wch:16},{wch:20},{wch:13},{wch:24}];
+  XLSX.utils.book_append_sheet(wb,wsP,'Zawodnicy');
+
+  // Arkusz 2: Drużyny
+  var tm=[
+    ['Nazwa drużyny','Kategoria wiekowa','Sezon','Kolor drużyny','Opis/Uwagi'],
+    ['MKS Iskra Pszczyna U12A','Młodzik U12/U13','2025/26','#1D9E75',''],
+    ['MKS Iskra Pszczyna U14A','Trampkarz U14/U15','2025/26','#3C3489',''],
+  ];
+  var wsT=XLSX.utils.aoa_to_sheet(tm);
+  wsT['!cols']=[{wch:28},{wch:22},{wch:10},{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,wsT,'Drużyny');
+
+  // Arkusz 3: Trenerzy
+  var co=[
+    ['Imię i Nazwisko','Rola/Funkcja','Email','Telefon','Licencja UEFA'],
+    ['Jan Kowalski','Trener główny','jan@klub.pl','500000000','UEFA B'],
+    ['Anna Nowak','Trener asystent','anna@klub.pl','','UEFA C'],
+  ];
+  var wsC=XLSX.utils.aoa_to_sheet(co);
+  wsC['!cols']=[{wch:24},{wch:20},{wch:26},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,wsC,'Trenerzy');
+
+  var dateStr=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb,'Szablon_Import_PFG_'+dateStr+'.xlsx');
+  ST('✓ Szablon pobrany');
+}
 
 function oImport(type){
   var cfg=IMPORT_TYPES[type];if(!cfg)return;
