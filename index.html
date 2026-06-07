@@ -1278,9 +1278,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- IMPORT PDF AI -->
 <div id="pg-import-pdf" class="pg" style="overflow:hidden;">
   <div class="tb">
-    <div><div class="t1">Import PDF (AI)</div><div class="t2">Wyodrębnij ćwiczenia i grafiki z pliku PDF</div></div>
+    <div><div class="t1">Import PDF (AI)</div><div class="t2">Wyodrębnij ćwiczenia i grafiki z dowolnego pliku PDF</div></div>
   </div>
   <div class="inner" id="pdf-import-body">
+
+    <!-- Sekcja: gotowe zestawy -->
+    <div class="card" style="padding:16px 20px;margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Gotowe zestawy ćwiczeń</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--sur2);border-radius:var(--r2);">
+        <div>
+          <div style="font-size:13px;font-weight:600;">🐺 Wolverhampton Wanderers Academy</div>
+          <div style="font-size:11px;color:var(--txt2);">150 ćwiczeń · WU/TP/PP/AD · Kevin Thelwell · już wbudowane w aplikację</div>
+        </div>
+        <button class="btn" onclick="oImportWolves()" style="background:#8B5CF6;color:#fff;border-color:#7C3AED;flex-shrink:0;">
+          <svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>
+          Dodaj do bazy
+        </button>
+      </div>
+    </div>
+
+    <!-- Sekcja: import własnego PDF -->
+    <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Import własnego pliku PDF</div>
     <div id="pdf-drop-zone" style="border:2.5px dashed var(--brd);border-radius:var(--r);padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:var(--sur2);margin-bottom:20px;"
       ondragover="event.preventDefault();this.style.borderColor='var(--g)';this.style.background='var(--lg)';"
       ondragleave="this.style.borderColor='var(--brd)';this.style.background='var(--sur2)';"
@@ -1293,7 +1311,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <path d="M36 32v8M32 36h8" stroke="var(--g)" stroke-width="2"/>
       </svg>
       <div style="font-size:15px;font-weight:600;color:var(--txt1);margin-bottom:6px;">Przeciągnij plik PDF lub kliknij aby wybrać</div>
-      <div style="font-size:12px;color:var(--txt3);">Obsługuje pliki do 20 MB · PDF z programami treningowymi, katalogami ćwiczeń itp.</div>
+      <div style="font-size:12px;color:var(--txt3);margin-bottom:8px;">Obsługuje pliki do 25 MB · programy treningowe, katalogi ćwiczeń, materiały UEFA</div>
+      <div style="font-size:11px;color:var(--txt3);">AI (Claude) wyodrębni ćwiczenia po polsku + grafiki boisk automatycznie</div>
     </div>
     <div id="pdf-import-result" style="display:none;"></div>
   </div>
@@ -1752,7 +1771,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- DIR: BAZA ĆWICZEŃ (read-only) -->
 <div id="pg-dir-ex" class="pg">
-  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="dir-ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn" onclick="oImportWolves()" style="background:#8B5CF6;color:#fff;border-color:#7C3AED;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Wolves Academy</button><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
+  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="dir-ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
   <div class="inner">
     <div style="display:flex;gap:8px;margin-bottom:10px;"><input class="fi" id="dir-ex-s" placeholder="Szukaj po nazwie lub opisie..." oninput="rDirEX()" style="flex:1;"/></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
