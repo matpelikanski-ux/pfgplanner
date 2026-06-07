@@ -899,6 +899,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="ni-children" id="nc-finanse">
         <div class="ni-child" id="ni-dir-skladki" onclick="SP('dir-skladki')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><path d="M4 10h2M8 10h4"/><circle cx="5" cy="5.5" r=".8" fill="currentColor" stroke="none"/></svg>Opłaty</div>
         <div class="ni-child" id="ni-dir-finanse" onclick="SP('dir-finanse')"><svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 7h14"/><circle cx="5" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M8 9h4M8 11h3"/></svg>Budżet</div>
+        <div class="ni-child" id="ni-dir-faktury" onclick="SP('dir-faktury')"><svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>Faktury</div>
       </div>
 
       <!-- 6. Ustawienia -->
@@ -1421,6 +1422,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
   <div id="fin-body"></div>
+</div>
+
+<!-- DIR: FAKTURY -->
+<div id="pg-dir-faktury" class="pg">
+  <div class="tb">
+    <div><div class="t1">Faktury</div><div class="t2" id="fak-sub">0 faktur</div></div>
+    <div class="tb-r">
+      <input class="fi" id="fak-s" placeholder="Szukaj faktury…" oninput="rFaktury()" style="width:200px;margin:0;"/>
+      <button class="btn pri" onclick="oAddFaktura()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj fakturę</button>
+    </div>
+  </div>
+  <div class="inner" id="fak-body"></div>
 </div>
 
 <!-- DIR: SKŁADKI -->
@@ -2063,7 +2076,7 @@ var DIR_NAV_GROUPS={
   'dir-plan':'ng-szkolenie','dir-overview':'ng-szkolenie','dir-ex':'ng-szkolenie',
   'dir-talent':'ng-szkolenie','dir-coaches':'ng-szkolenie','dir-gamemodel':'ng-szkolenie',
   'dir-academy':'ng-akademia','dir-ioz':'ng-akademia','dir-skauting':'ng-akademia',
-  'dir-skladki':'ng-finanse','dir-finanse':'ng-finanse',
+  'dir-skladki':'ng-finanse','dir-finanse':'ng-finanse','dir-faktury':'ng-finanse',
   'dir-users':'ng-ustawienia','dir-season':'ng-ustawienia','dir-settings':'ng-ustawienia',
   // Trener
   'teams':'ng-druzyny','ioz':'ng-druzyny','tests':'ng-druzyny',
@@ -4633,7 +4646,7 @@ var STORE_VISIBILITY={
   PLAYERS:'all',TRAININGS:'all',MATCHES:'all',TESTS:'all',
   currentSeason:'all',
   COACH_PROFILES:'dyrektor',GAME_MODELS:'all',
-  SCOUT_PLAYERS:'dyrektor',BUDGETS:'dyrektor',
+  SCOUT_PLAYERS:'dyrektor',BUDGETS:'dyrektor',FAKTURY:'dyrektor',
   SKLADKI_DEF:'all',SKLADKI_WPL:'all'
 };
 
@@ -4646,7 +4659,7 @@ function saveLS(storeName){
   // Zawsze zapisz lokalnie jako fallback
   var _now=new Date().toISOString();
   try{
-    localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,SQUAD_PROPOSALS,currentSeason}));
+    localStorage.setItem(LS_KEY,JSON.stringify({EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,FAKTURY,SKLADKI_DEF,SKLADKI_WPL,SQUAD_PROPOSALS,currentSeason}));
     // Zapisz też timestamp ostatniej lokalnej modyfikacji per-store
     var _meta={}; try{var _m=localStorage.getItem(LS_KEY+'_meta');if(_m)_meta=JSON.parse(_m);}catch(e){}
     // Oznacz wszystkie store'y jako zmodyfikowane teraz (nie wiemy który konkretnie bez argumentu)
@@ -4667,7 +4680,7 @@ function markDirty(storeName){_dirtyStores.add(storeName);}
 async function saveToSupabase(){
   if(!_supaReady)return;
   var role=currentUser?currentUser.role:'trener';
-  var allStores={EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,SKLADKI_DEF,SKLADKI_WPL,SQUAD_PROPOSALS,currentSeason};
+  var allStores={EXS,CYC,KONSP,TEAMS,COACHES,PLAYERS,TRAININGS,MATCHES,TESTS,COACH_PROFILES,GAME_MODELS,SCOUT_PLAYERS,BUDGETS,FAKTURY,SKLADKI_DEF,SKLADKI_WPL,SQUAD_PROPOSALS,currentSeason};
   // Zapisz tylko to co sie zmienilo; jesli _dirtyStores pusty — zapisz wszystko (pierwsza inicjalizacja)
   var toSave=_dirtyStores.size>0
     ? Object.fromEntries(Object.entries(allStores).filter(([k])=>_dirtyStores.has(k)))
@@ -4744,6 +4757,7 @@ async function loadFromSupabase(){
     SQUAD_PROPOSALS=_pick('SQUAD_PROPOSALS',[]);
     SCOUT_PLAYERS=_pick('SCOUT_PLAYERS',[]);
     BUDGETS=_pick('BUDGETS',[]);
+    FAKTURY=_pick('FAKTURY',[]);
     SKLADKI_DEF=_pick('SKLADKI_DEF',[]);
     SKLADKI_WPL=_pick('SKLADKI_WPL',[]);
 
@@ -4961,7 +4975,7 @@ function refreshCurrentPage(){
     'pg-dir-cal':'dir-cal','pg-dir-overview':'dir-overview','pg-dir-talent':'dir-talent',
     'pg-dir-plan':'dir-plan','pg-dir-ioz':'dir-ioz',
     'pg-dir-academy':'dir-academy','pg-dir-skauting':'dir-skauting',
-    'pg-dir-finanse':'dir-finanse','pg-dir-gamemodel':'dir-gamemodel',
+    'pg-dir-finanse':'dir-finanse','pg-dir-faktury':'dir-faktury','pg-dir-gamemodel':'dir-gamemodel',
     'pg-dir-ex':'dir-ex','pg-dir-konsp':'dir-konsp','pg-dir-squad':'dir-squad','pg-dir-season':'dir-season',
     'pg-trainings':'trainings','pg-matches':'matches','pg-squad':'squad'
   };
@@ -7767,6 +7781,7 @@ var COACH_PROFILES=[]; // {id, coachId, name, dob, role, license, predisposition
 var SQUAD_PROPOSALS=[]; // {id, coachName, team, formation, lineup, savedAt, notes}
 var GAME_MODELS=[]; // {id, ageCategory, sections:[{title, items:[{text}]}], notes, updatedAt}
 var SCOUT_PLAYERS=[]; // {id, name, matchId, sourceText, opponent, ourTeam, date, position, age, notes, status, priority, addedAt}
+var FAKTURY=[]; // {id,nr,dostawca,data,kwota,waluta,opis,kategoria,budzetId,budzetSection,budzetRow,status,img,imgName,podzialKosztow:[]}
 var BUDGETS=[]; // {id, name, year, saldoStart, sections:[...]}
 var SKLADKI_DEF=[]; // {id, name, kwota, typ:'miesieczna'|'jednorazowa', druzyna, sezon, miesiaceBezplatne:[]}
 var SKLADKI_WPL=[]; // {id, defId, playerId, rok, miesiac, kwota, status:'oplacony'|'zalegly'|'bezplatny', datWplaty, metoda, uwagi}
@@ -12538,7 +12553,385 @@ function oViewGameModel(i){
   document.getElementById('mo-gmv-body').innerHTML=html;
   oM('mo-gm-view');
 }
-// ═══════════════ FINANSE ═══════════════
+// ═══════════════ FAKTURY ════════════════════════════════════════════════════
+
+var FAK_KATEGORIE=['Transport','Sprzęt sportowy','Stroje i odzież','Wynajem obiektów','Wynagrodzenia','Turnieje i rozgrywki','Ubezpieczenie','Marketing i reklama','Szkolenie','Administracja','Usługi zewnętrzne','Inne'];
+var FAK_STATUS={
+  'robocza':    {label:'Robocza',    bg:'var(--sur2)',  tc:'var(--txt3)'},
+  'do-zatwierdzenia': {label:'Do zatwierdzenia', bg:'#FFF3E0', tc:'#E65100'},
+  'zatwierdzona': {label:'Zatwierdzona', bg:'#E8F5E9', tc:'#2E7D32'},
+  'oplacona':   {label:'Opłacona',   bg:'var(--lg)',    tc:'var(--dg)'},
+  'odrzucona':  {label:'Odrzucona',  bg:'#FEECEC',     tc:'#C0392B'},
+};
+
+function rFaktury(){
+  var body=document.getElementById('fak-body'); if(!body)return;
+  var q=((document.getElementById('fak-s')||{}).value||'').toLowerCase();
+  var faks=(FAKTURY||[]).filter(function(f){
+    if(!q)return true;
+    return (f.nr||'').toLowerCase().includes(q)||(f.dostawca||'').toLowerCase().includes(q)||(f.opis||'').toLowerCase().includes(q)||(f.kategoria||'').toLowerCase().includes(q);
+  });
+  var sub=document.getElementById('fak-sub');
+  var total=(FAKTURY||[]).reduce(function(s,f){return s+(parseFloat(f.kwota)||0);},0);
+  if(sub)sub.textContent=(FAKTURY||[]).length+' faktur · łącznie '+fPLN(total);
+
+  if(!faks.length){
+    body.innerHTML='<div class="empty"><div class="ei2"><svg viewBox="0 0 16 16"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h4"/></svg></div><div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+(FAKTURY.length?'Brak wyników':'Brak faktur')+'</div><div style="font-size:12px;color:var(--txt2);">'+(FAKTURY.length?'Zmień kryteria wyszukiwania.':'Kliknij „Dodaj fakturę" aby dodać pierwszą fakturę.')+'</div></div>';
+    return;
+  }
+
+  // Podsumowanie statusów
+  var byStatus={};
+  (FAKTURY||[]).forEach(function(f){var s=f.status||'robocza';byStatus[s]=(byStatus[s]||0)+1;});
+  var summaryHtml='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">';
+  Object.entries(FAK_STATUS).forEach(function(e){
+    var s=e[0],cfg=e[1];
+    if(!byStatus[s])return;
+    var sum=(FAKTURY||[]).filter(function(f){return (f.status||'robocza')===s;}).reduce(function(acc,f){return acc+(parseFloat(f.kwota)||0);},0);
+    summaryHtml+='<div style="background:'+cfg.bg+';color:'+cfg.tc+';padding:6px 12px;border-radius:var(--r2);font-size:11px;font-weight:600;">'
+      +cfg.label+' ('+byStatus[s]+') · '+fPLN(sum)+'</div>';
+  });
+  summaryHtml+='</div>';
+
+  var gridHtml='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;">';
+  gridHtml+=faks.map(function(fak){
+    var idx=(FAKTURY||[]).indexOf(fak);
+    var st=FAK_STATUS[fak.status||'robocza']||FAK_STATUS['robocza'];
+    var budzetInfo='';
+    if(fak.budzetId){
+      var b=(BUDGETS||[]).find(function(b){return b.id===fak.budzetId;});
+      if(b)budzetInfo='<div style="font-size:10px;color:var(--txt3);margin-top:4px;">📊 '+escH(b.name)+(fak.budzetSection?' → '+escH(fak.budzetSection):'')+(fak.budzetRow?' → '+escH(fak.budzetRow):'')+'</div>';
+    }
+    var podział=(fak.podzialKosztow||[]);
+    var podzialHtml='';
+    if(podział.length){
+      podzialHtml='<div style="margin-top:8px;border-top:1px solid var(--brd);padding-top:6px;">';
+      podzialHtml+='<div style="font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;margin-bottom:4px;">Podział kosztów</div>';
+      podział.forEach(function(p){
+        var pct=fak.kwota?Math.round((p.kwota/fak.kwota)*100):0;
+        podzialHtml+='<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:2px;">'
+          +'<span style="color:var(--txt2);">'+escH(p.opis||p.kategoria||'')+'</span>'
+          +'<span style="font-weight:600;">'+fPLN(p.kwota)+'<span style="color:var(--txt3);font-size:9px;margin-left:4px;">('+pct+'%)</span></span>'
+          +'</div>';
+      });
+      podzialHtml+='</div>';
+    }
+    return '<div class="card" style="padding:0;overflow:hidden;cursor:pointer;" onclick="oViewFaktura('+idx+')">'
+      +(fak.img?'<div style="height:140px;overflow:hidden;background:var(--sur2);">'
+        +'<img src="'+fak.img+'" style="width:100%;height:100%;object-fit:contain;" onerror="this.parentElement.style.display=\'none\'">'
+        +'</div>':'')
+      +'<div style="padding:12px 14px;">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--txt1);">'+(fak.nr?'<span style="color:var(--txt3);font-weight:500;margin-right:6px;">'+escH(fak.nr)+'</span>':'')+escH(fak.dostawca||'Brak dostawcy')+'</div>'
+      +'<div style="font-size:11px;color:var(--txt2);margin-top:2px;">'+(fak.data?fd(fak.data)+' · ':'')+escH(fak.kategoria||'')+'</div>'
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0;">'
+      +'<div style="font-size:16px;font-weight:700;color:var(--txt1);">'+fPLN(fak.kwota||0)+'</div>'
+      +'<div style="font-size:9px;padding:2px 6px;border-radius:10px;background:'+st.bg+';color:'+st.tc+';font-weight:600;margin-top:3px;">'+st.label+'</div>'
+      +'</div>'
+      +'</div>'
+      +(fak.opis?'<div style="font-size:11px;color:var(--txt2);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escH(fak.opis)+'</div>':'')
+      +budzetInfo
+      +podzialHtml
+      +'</div>'
+      +'</div>';
+  }).join('');
+  gridHtml+='</div>';
+  body.innerHTML=summaryHtml+gridHtml;
+}
+
+function oAddFaktura(){
+  _fakEditIdx=null;
+  _renderFakturaModal({});
+}
+
+function oViewFaktura(idx){
+  _fakEditIdx=idx;
+  _renderFakturaModal(FAKTURY[idx]||{});
+}
+
+var _fakEditIdx=null;
+
+function _renderFakturaModal(fak){
+  var mo=document.getElementById('mo-faktura');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-faktura';
+    document.body.appendChild(mo);
+  }
+  var isNew=_fakEditIdx===null;
+  // Budżety do wyboru
+  var budzetOpts='<option value="">— nie przypisuj —</option>'+(BUDGETS||[]).map(function(b){
+    return '<option value="'+b.id+'" '+(fak.budzetId===b.id?'selected':'')+'>'+escH(b.name)+'</option>';
+  }).join('');
+
+  // Sekcje wybranego budżetu
+  var selBudget=fak.budzetId?(BUDGETS||[]).find(function(b){return b.id===fak.budzetId;}):null;
+  var sectionOpts='<option value="">— wybierz sekcję —</option>';
+  var rowOpts='<option value="">— wybierz wiersz —</option>';
+  if(selBudget&&selBudget.sections){
+    selBudget.sections.filter(function(s){return s.type==='koszt';}).forEach(function(s){
+      sectionOpts+='<option value="'+escH(s.name)+'" '+(fak.budzetSection===s.name?'selected':'')+'>'+escH(s.name)+'</option>';
+    });
+    if(fak.budzetSection){
+      var sec=selBudget.sections.find(function(s){return s.name===fak.budzetSection;});
+      if(sec&&sec.rows)sec.rows.forEach(function(r){
+        rowOpts+='<option value="'+escH(r.label||r)+'" '+(fak.budzetRow===(r.label||r)?'selected':'')+'>'+escH(r.label||r)+'</option>';
+      });
+    }
+  }
+
+  // Podział kosztów
+  var podział=fak.podzialKosztow||[];
+  var podzialRows=podział.map(function(p,pi){
+    return '<div style="display:flex;gap:6px;margin-bottom:6px;" id="pk-row-'+pi+'">'
+      +'<input class="fi" placeholder="Opis pozycji" value="'+escH(p.opis||'')+'" style="flex:2;margin:0;" oninput="updatePK('+pi+',\'opis\',this.value)"/>'
+      +'<input class="fi" type="number" placeholder="Kwota" value="'+(p.kwota||'')+'" style="flex:1;margin:0;" oninput="updatePK('+pi+',\'kwota\',this.value)"/>'
+      +'<button class="btn sm dan" onclick="removePK('+pi+')" style="padding:0 8px;">✕</button>'
+      +'</div>';
+  }).join('');
+
+  mo.innerHTML='<div class="mbox" style="width:720px;max-height:94vh;overflow-y:auto;">'
+    +'<div class="mh" style="position:sticky;top:0;background:var(--sur);z-index:2;">'
+    +'<div class="mt2">'+(isNew?'Nowa faktura':'Edytuj fakturę')+'</div>'
+    +'<button class="mc2" onclick="cM(\'mo-faktura\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button>'
+    +'</div>'
+    +'<div style="padding:16px 20px;display:flex;flex-direction:column;gap:14px;">'
+
+    // Sekcja: dane podstawowe
+    +'<div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;">Dane faktury</div>'
+    +'<div class="fr2">'
+    +'<div><label class="fl">Numer faktury</label><input class="fi" id="fak-nr" value="'+escH(fak.nr||'')+'" placeholder="np. FV/2026/001"/></div>'
+    +'<div><label class="fl">Data wystawienia</label><input class="fi" id="fak-data" type="date" value="'+(fak.data||new Date().toISOString().slice(0,10))+'"/></div>'
+    +'</div>'
+    +'<div class="fr2">'
+    +'<div><label class="fl">Dostawca / Wystawca *</label><input class="fi" id="fak-dostawca" value="'+escH(fak.dostawca||'')+'" placeholder="Nazwa firmy lub osoby"/></div>'
+    +'<div><label class="fl">Kategoria</label><select class="fsel" id="fak-kat">'
+    +FAK_KATEGORIE.map(function(k){return '<option '+(fak.kategoria===k?'selected':'')+'>'+k+'</option>';}).join('')
+    +'</select></div>'
+    +'</div>'
+    +'<div class="fr2">'
+    +'<div><label class="fl">Kwota brutto (PLN) *</label><input class="fi" id="fak-kwota" type="number" step="0.01" value="'+(fak.kwota||'')+'" placeholder="0.00" oninput="updatePKTotal()"/></div>'
+    +'<div><label class="fl">Status</label><select class="fsel" id="fak-status">'
+    +Object.entries(FAK_STATUS).map(function(e){return '<option value="'+e[0]+'" '+(( fak.status||'robocza')===e[0]?'selected':'')+'>'+e[1].label+'</option>';}).join('')
+    +'</select></div>'
+    +'</div>'
+    +'<div><label class="fl">Opis</label><textarea class="fta" id="fak-opis" rows="2" placeholder="Opis usługi lub towaru…">'+escH(fak.opis||'')+'</textarea></div>'
+
+    // Sekcja: przypisanie do budżetu
+    +'<div style="border-top:1px solid var(--brd);padding-top:14px;">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Przypisanie do budżetu</div>'
+    +'<div class="fr2">'
+    +'<div><label class="fl">Budżet</label><select class="fsel" id="fak-budzet" onchange="onFakBudzetChange()">'
+    +budzetOpts+'</select></div>'
+    +'<div><label class="fl">Sekcja (kategoria)</label><select class="fsel" id="fak-section" onchange="onFakSectionChange()">'
+    +sectionOpts+'</select></div>'
+    +'</div>'
+    +'<div style="max-width:340px;"><label class="fl">Wiersz budżetu</label><select class="fsel" id="fak-row">'
+    +rowOpts+'</select></div>'
+    +'</div>'
+
+    // Sekcja: podział kosztów
+    +'<div style="border-top:1px solid var(--brd);padding-top:14px;">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;">Podział kosztów</div>'
+    +'<button class="btn sm" onclick="addPKRow()">+ Dodaj pozycję</button>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--txt2);margin-bottom:8px;">Podziel fakturę na kilka pozycji kosztowych (np. różne drużyny, działy)</div>'
+    +'<div id="pk-rows">'+podzialRows+'</div>'
+    +'<div style="display:flex;justify-content:flex-end;font-size:12px;font-weight:600;color:var(--txt2);margin-top:6px;">Suma podziału: <span id="pk-sum" style="margin-left:8px;color:var(--txt1);">'+fPLN(podział.reduce(function(s,p){return s+(parseFloat(p.kwota)||0);},0))+'</span></div>'
+    +'</div>'
+
+    // Sekcja: zdjęcie / skan
+    +'<div style="border-top:1px solid var(--brd);padding-top:14px;">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Zdjęcie / Skan faktury</div>'
+    +'<div id="fak-img-wrap" style="margin-bottom:10px;">'
+    +(fak.img?'<img src="'+fak.img+'" style="max-width:100%;max-height:280px;border-radius:var(--r2);border:1px solid var(--brd);object-fit:contain;display:block;margin-bottom:8px;" id="fak-img-preview"/>'
+             :'<div id="fak-img-preview" style="display:none;"></div>')
+    +'</div>'
+    +'<label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:8px 14px;border:1.5px dashed var(--brd);border-radius:var(--r2);font-size:12px;color:var(--txt2);">'
+    +'<svg viewBox="0 0 16 16" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;"><rect x="1" y="4" width="14" height="10" rx="1.5"/><path d="M1 8h14M5 4V2h6v2"/></svg>'
+    +(fak.img?'Zmień zdjęcie':'Dodaj zdjęcie / skan')
+    +'<input type="file" accept="image/*,application/pdf" style="display:none;" onchange="onFakImgChange(event)"/>'
+    +'</label>'
+    +(fak.img?'<button class="btn sm dan" style="margin-left:8px;" onclick="clearFakImg()">Usuń zdjęcie</button>':'')
+    +'</div>'
+
+    +'</div>'// koniec padding div
+    +'<div class="mfs">'
+    +(!isNew?'<button class="btn dan sm" onclick="deleteFaktura('+_fakEditIdx+')">Usuń fakturę</button>':'<span></span>')
+    +'<div style="display:flex;gap:8px;">'
+    +'<button class="btn" onclick="cM(\'mo-faktura\')">Anuluj</button>'
+    +'<button class="btn pri" onclick="saveFaktura()">Zapisz fakturę</button>'
+    +'</div></div>'
+    +'</div>';
+
+  // Tymczasowe dane podziału kosztów
+  window._fakPK=JSON.parse(JSON.stringify(podział));
+  window._fakImg=fak.img||null;
+  oM('mo-faktura');
+}
+
+function onFakBudzetChange(){
+  var bid=document.getElementById('fak-budzet').value;
+  var b=(BUDGETS||[]).find(function(b){return b.id===bid;});
+  var sel=document.getElementById('fak-section');
+  sel.innerHTML='<option value="">— wybierz sekcję —</option>';
+  if(b&&b.sections){
+    b.sections.filter(function(s){return s.type==='koszt';}).forEach(function(s){
+      var o=document.createElement('option');o.value=s.name;o.textContent=s.name;sel.appendChild(o);
+    });
+  }
+  document.getElementById('fak-row').innerHTML='<option value="">— wybierz wiersz —</option>';
+}
+
+function onFakSectionChange(){
+  var bid=document.getElementById('fak-budzet').value;
+  var sname=document.getElementById('fak-section').value;
+  var b=(BUDGETS||[]).find(function(b){return b.id===bid;});
+  var rowSel=document.getElementById('fak-row');
+  rowSel.innerHTML='<option value="">— wybierz wiersz —</option>';
+  if(b&&sname){
+    var sec=b.sections.find(function(s){return s.name===sname;});
+    if(sec&&sec.rows)sec.rows.forEach(function(r){
+      var o=document.createElement('option');o.value=r.label||r;o.textContent=r.label||r;rowSel.appendChild(o);
+    });
+  }
+}
+
+function addPKRow(){
+  window._fakPK.push({opis:'',kwota:0});
+  var idx=window._fakPK.length-1;
+  var wrap=document.getElementById('pk-rows');
+  var div=document.createElement('div');
+  div.style.cssText='display:flex;gap:6px;margin-bottom:6px;';
+  div.id='pk-row-'+idx;
+  div.innerHTML='<input class="fi" placeholder="Opis pozycji" style="flex:2;margin:0;" oninput="updatePK('+idx+',\'opis\',this.value)"/>'
+    +'<input class="fi" type="number" placeholder="Kwota" style="flex:1;margin:0;" oninput="updatePK('+idx+',\'kwota\',this.value)"/>'
+    +'<button class="btn sm dan" onclick="removePK('+idx+')" style="padding:0 8px;">✕</button>';
+  if(wrap)wrap.appendChild(div);
+}
+
+function updatePK(idx,field,val){
+  if(!window._fakPK[idx])return;
+  window._fakPK[idx][field]=field==='kwota'?parseFloat(val)||0:val;
+  updatePKTotal();
+}
+
+function removePK(idx){
+  if(!window._fakPK)return;
+  window._fakPK.splice(idx,1);
+  // Przerender rows
+  var wrap=document.getElementById('pk-rows');
+  if(!wrap)return;
+  wrap.innerHTML=window._fakPK.map(function(p,pi){
+    return '<div style="display:flex;gap:6px;margin-bottom:6px;" id="pk-row-'+pi+'">'
+      +'<input class="fi" placeholder="Opis pozycji" value="'+escH(p.opis||'')+'" style="flex:2;margin:0;" oninput="updatePK('+pi+',\'opis\',this.value)"/>'
+      +'<input class="fi" type="number" placeholder="Kwota" value="'+(p.kwota||'')+'" style="flex:1;margin:0;" oninput="updatePK('+pi+',\'kwota\',this.value)"/>'
+      +'<button class="btn sm dan" onclick="removePK('+pi+')" style="padding:0 8px;">✕</button>'
+      +'</div>';
+  }).join('');
+  updatePKTotal();
+}
+
+function updatePKTotal(){
+  var kwota=parseFloat((document.getElementById('fak-kwota')||{}).value)||0;
+  var sum=(window._fakPK||[]).reduce(function(s,p){return s+(parseFloat(p.kwota)||0);},0);
+  var el=document.getElementById('pk-sum');
+  if(el){
+    el.textContent=fPLN(sum);
+    el.style.color=Math.abs(sum-kwota)<0.01?'var(--g)':'var(--red)';
+  }
+}
+
+function onFakImgChange(e){
+  var file=e.target.files[0];if(!file)return;
+  if(file.size>3*1024*1024){ST('Plik zbyt duży — maks. 3 MB');return;}
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    window._fakImg=ev.target.result;
+    var prev=document.getElementById('fak-img-preview');
+    if(prev){prev.src=ev.target.result;prev.style.cssText='max-width:100%;max-height:280px;border-radius:var(--r2);border:1px solid var(--brd);object-fit:contain;display:block;margin-bottom:8px;';}
+    ST('Zdjęcie załadowane');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearFakImg(){
+  window._fakImg=null;
+  var prev=document.getElementById('fak-img-preview');
+  if(prev)prev.style.display='none';
+}
+
+function saveFaktura(){
+  var dostawca=(document.getElementById('fak-dostawca')||{}).value||'';
+  if(!dostawca.trim()){ST('Podaj nazwę dostawcy');return;}
+  var kwota=parseFloat((document.getElementById('fak-kwota')||{}).value)||0;
+  if(!kwota){ST('Podaj kwotę faktury');return;}
+
+  var obj={
+    id:(_fakEditIdx!==null&&FAKTURY[_fakEditIdx])?FAKTURY[_fakEditIdx].id:('fak_'+Date.now()),
+    nr:(document.getElementById('fak-nr')||{}).value||'',
+    dostawca:dostawca.trim(),
+    data:(document.getElementById('fak-data')||{}).value||'',
+    kwota:kwota,
+    kategoria:(document.getElementById('fak-kat')||{}).value||'',
+    opis:(document.getElementById('fak-opis')||{}).value||'',
+    status:(document.getElementById('fak-status')||{}).value||'robocza',
+    budzetId:(document.getElementById('fak-budzet')||{}).value||'',
+    budzetSection:(document.getElementById('fak-section')||{}).value||'',
+    budzetRow:(document.getElementById('fak-row')||{}).value||'',
+    podzialKosztow:(window._fakPK||[]).filter(function(p){return p.opis||p.kwota;}),
+    img:window._fakImg||null,
+    savedAt:new Date().toISOString()
+  };
+
+  if(_fakEditIdx!==null)FAKTURY[_fakEditIdx]=obj;
+  else FAKTURY.unshift(obj);
+
+  // Jeśli przypisana do budżetu — zaktualizuj wartości rzeczywiste
+  if(obj.budzetId&&obj.budzetSection&&obj.budzetRow){
+    _syncFakturaWithBudget(obj);
+  }
+
+  saveLS();
+  if(window._supaReady)supaSet('FAKTURY',FAKTURY,'dyrektor').catch(function(e){console.warn('supa FAKTURY',e);});
+  cM('mo-faktura');
+  rFaktury();
+  ST('✓ Faktura '+(obj.nr?'nr '+obj.nr+' ':'')+'zapisana');
+}
+
+function _syncFakturaWithBudget(fak){
+  // Dodaj kwotę faktury jako "wykonanie" w odpowiednim wierszu budżetu
+  var b=(BUDGETS||[]).find(function(b){return b.id===fak.budzetId;});
+  if(!b||!b.sections)return;
+  var sec=b.sections.find(function(s){return s.name===fak.budzetSection;});
+  if(!sec||!sec.rows)return;
+  var row=sec.rows.find(function(r){return (r.label||r)===fak.budzetRow;});
+  if(!row)return;
+  // Zsumuj wszystkie faktury przypisane do tego samego wiersza
+  var total=(FAKTURY||[]).reduce(function(sum,f){
+    if(f.budzetId===fak.budzetId&&f.budzetSection===fak.budzetSection&&f.budzetRow===fak.budzetRow&&(f.status==='zatwierdzona'||f.status==='oplacona')){
+      return sum+(parseFloat(f.kwota)||0);
+    }
+    return sum;
+  },0);
+  if(typeof row==='object')row.actual=total;
+  // Odśwież widok budżetu jeśli otwarty
+  try{var fb=document.getElementById('fin-body');if(fb&&fb.innerHTML)rDirFinanse();}catch(e2){}
+}
+
+function deleteFaktura(idx){
+  if(!confirm('Usunąć tę fakturę?'))return;
+  FAKTURY.splice(idx,1);
+  saveLS();
+  if(window._supaReady)supaSet('FAKTURY',FAKTURY,'dyrektor').catch(function(){});
+  cM('mo-faktura');
+  rFaktury();
+  ST('Faktura usunięta');
+}
+
+// ═══════════════ FINANSE ════════════════════════════════════════════════════
 var MONTHS_SHORT=['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
 var FIN_PRESETS={
   sezonowy:[
@@ -13924,6 +14317,7 @@ SP=function(n){
   if(n==='dir-gamemodel')rGameModel();
   if(n==='dir-users')rDirUsers();
   if(n==='dir-settings')rDirSettings();
+  if(n==='dir-faktury')rFaktury();
   if(n.startsWith('dir-')){
     document.querySelectorAll('#sb-role-dyrektor .ni, #sb-role-dyrektor .ni-child').forEach(x=>x.classList.remove('active'));
     var ni=document.getElementById('ni-'+n);if(ni)ni.classList.add('active');
