@@ -3063,14 +3063,144 @@ function RE(){
 // analizuje przez Claude API, buduje podgląd do zatwierdzenia
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════════
+// IMPORT PDF — parser tekstowy (domyślny) + AI (zapasowy)
+// ═══════════════════════════════════════════════════════════════════════════
+
 var _pdfState = {
   file: null,
-  pdfDoc: null,       // PDF.js document
+  pdfDoc: null,
   totalPages: 0,
-  pageData: [],       // [{pageNum, imgDataUrl, text}]
-  extracted: [],      // [{name,f,t,k,cz,lz,i,o,z,imgBase64}]
+  pageData: [],    // [{pageNum, text, diagramImg}]
+  extracted: [],   // [{name,f,t,k,cz,lz,i,o,z,imgBase64}]
   processing: false
 };
+
+// ── Taksonomia do klasyfikacji ───────────────────────────────────────────
+var PDF_FAZA_KEYS = {
+  a: ['attack','attacking','shooting','crossing','finishing','forward','winger','striker','offens','possession','build up','passing pattern','overlap','combination'],
+  b: ['defend','defending','pressure','pressing','retreat','compact','cover','tracking','block','intercept','recovery'],
+  m: ['speed','agility','sprint','fitness','conditioning','endurance','strength','power','motor','physical','warm','cool','stretch','recovery','jog']
+};
+var PDF_TEMAT_KEYS = {
+  'Rozgrzewka':           ['warm up','warm-up','warmup','cool down','recovery','stretch','jog'],
+  'Gra kombinacyjna':     ['passing','combination','possession','rondo','control','build up','short pass'],
+  'Finalizacja':          ['shooting','shot','finish','goal','crossing','header','volley'],
+  'Presing i obrona':     ['defending','pressure','pressing','retreat','compact','intercept','recovery'],
+  'Ruchy bez piłki':      ['movement','run','overlap','forward run','timing','support','off the ball'],
+  'Gra szeroka':          ['wide','winger','full back','wing','flank','cross','switch'],
+  'Kontratak':            ['counter','break','transition','quick','direct'],
+  'Szybkość i zwinność':  ['speed','agility','sprint','fast','quick feet','ladder','acceleration'],
+  'Wzorce gry':           ['pattern','shadow','shape','formation','positional','unit','team'],
+};
+
+function _classifyExercise(name, desc) {
+  var text = (name + ' ' + desc).toLowerCase();
+  // Faza
+  var f = 'u';
+  var maxScore = 0;
+  Object.entries(PDF_FAZA_KEYS).forEach(function(entry) {
+    var score = entry[1].filter(function(k){return text.includes(k);}).length;
+    if(score > maxScore){maxScore=score; f=entry[0];}
+  });
+  // Temat
+  var t = 'Umiejętności';
+  maxScore = 0;
+  Object.entries(PDF_TEMAT_KEYS).forEach(function(entry) {
+    var score = entry[1].filter(function(k){return text.includes(k);}).length;
+    if(score > maxScore){maxScore=score; t=entry[0];}
+  });
+  // Intensywność
+  var i = 'Średnia';
+  if(/high intensity|sprint|power|explosive/i.test(text)) i='Wysoka';
+  else if(/warm up|cool|recovery|stretch|light|jog/i.test(text)) i='Niska';
+  // Czas
+  var cz = 15;
+  var tm = text.match(/(\d+)\s*(x\s*\d+\s*)?(min|minute)/);
+  if(tm) cz = Math.min(parseInt(tm[1]),45);
+  // Liczba zawodników
+  var lz = '';
+  var lzm = text.match(/(\d+)\s*v\s*(\d+)|(\d+)\s*players?|(\d+)\s*vs?\s*(\d+)/i);
+  if(lzm) lz = lzm[0].replace(/players?/i,'').trim();
+
+  return {f:f, t:t, i:i, cz:cz, lz:lz};
+}
+
+// ── Główny parser tekstowy ───────────────────────────────────────────────
+function _parseTextPages(pageData) {
+  var results = [];
+
+  pageData.forEach(function(pd) {
+    var text = pd.text || '';
+    if(text.length < 30) return;
+
+    // Strategie wykrywania ćwiczenia na stronie:
+    // 1. Pierwszy niepusty akapit jako nazwa (linia bez bullets)
+    // 2. Szukaj sekcji Organisation/Organization jako opis
+    // 3. Szukaj Key Factors/Points jako coaching points
+    // 4. Szukaj kodów w nawiasach (WU01, TP05 itd.)
+
+    var lines = text.split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
+    if(!lines.length) return;
+
+    // Nazwa — pierwsza linia (ew. z kodem)
+    var name = lines[0].replace(/\([A-Z]{2}\d+[a-z]?\)/,'').trim();
+    // Wyczyść artefakty OCR (same litery O1 X2 itp.)
+    name = name.replace(/^\s*[OX]\d+\s*/g,'').trim();
+    if(name.length < 3) name = lines[1] || name;
+    name = name.slice(0,80);
+
+    // Opis — sekcja Organisation lub wszystkie bullet pointy
+    var orgIdx = text.search(/Organisation|Organization/i);
+    var kfIdx  = text.search(/Key [Ff]actors?|Key [Pp]oints?|Coaching [Pp]oints?/i);
+    var progIdx= text.search(/Progression|Variation/i);
+
+    var desc = '';
+    if(orgIdx >= 0) {
+      var descEnd = kfIdx > orgIdx ? kfIdx : (progIdx > orgIdx ? progIdx : orgIdx + 600);
+      desc = text.slice(orgIdx + 'Organisation'.length, descEnd)
+        .replace(/^[\s:]+/,'').replace(/\s+/g,' ').trim().slice(0,500);
+    } else {
+      // Zbierz bullet pointy
+      desc = lines.filter(function(l){return /^[•\-\*]/.test(l)||l.length>20;})
+        .slice(0,6).join(' ').replace(/[•\-\*]/g,'').replace(/\s+/g,' ').trim().slice(0,500);
+    }
+
+    // Coaching points
+    var cp = '';
+    if(kfIdx >= 0) {
+      var cpEnd = progIdx > kfIdx ? progIdx : kfIdx + 400;
+      cp = text.slice(kfIdx + 'Key Factors'.length, cpEnd)
+        .replace(/^[\s:]+/,'').replace(/\n+/g,' | ').replace(/\s+/g,' ').trim().slice(0,300);
+    }
+
+    var cls = _classifyExercise(name, desc);
+
+    results.push({
+      name: name,
+      f: cls.f,
+      t: cls.t,
+      k: '',
+      cz: cls.cz,
+      lz: cls.lz,
+      i: cls.i,
+      o: desc,
+      z: cp,
+      imgBase64: pd.diagramImg || null,
+      pageNum: pd.pageNum
+    });
+  });
+
+  // Odfiltruj śmieci (zbyt krótkie, duplikaty nazw, strony tytułowe)
+  var seen = new Set();
+  return results.filter(function(ex) {
+    if(ex.name.length < 4) return false;
+    if(/wolverhampton|developed by|academy manager|kevin thelwell/i.test(ex.name)) return false;
+    if(seen.has(ex.name.toLowerCase())) return false;
+    seen.add(ex.name.toLowerCase());
+    return true;
+  });
+}
 
 // ── Drag & drop / file select ────────────────────────────────────────────
 function onPdfDrop(e){
@@ -3093,7 +3223,7 @@ function _startPdfImport(file){
   _showPdfUI('loaded',{name:file.name,size:(file.size/1024).toFixed(0)+'KB'});
 }
 
-// ── Renderowanie UI ──────────────────────────────────────────────────────
+// ── UI ────────────────────────────────────────────────────────────────────
 function _showPdfUI(stage,data){
   var res=document.getElementById('pdf-import-result');
   var dz=document.getElementById('pdf-drop-zone');
@@ -3103,49 +3233,34 @@ function _showPdfUI(stage,data){
   if(stage==='loaded'){
     if(dz)dz.style.display='none';
     res.innerHTML=
-      '<div class="card" style="padding:20px 24px;">'+
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
-      '<svg viewBox="0 0 32 32" style="width:36px;height:36px;flex-shrink:0;"><rect x="2" y="1" width="22" height="30" rx="2" fill="#FEECEC" stroke="#C0392B" stroke-width="1.5"/><text x="13" y="21" font-size="9" fill="#C0392B" text-anchor="middle" font-family="sans-serif">PDF</text></svg>'+
-      '<div><div style="font-size:14px;font-weight:600;">'+escH(data.name)+'</div>'+
-      '<div style="font-size:11px;color:var(--txt3);">'+data.size+'</div></div>'+
-      '<button class="btn sm" onclick="resetPdfImport()" style="margin-left:auto;">Zmień plik</button>'+
+      '<div class="card" style="padding:18px 22px;">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'+
+      '<svg viewBox="0 0 32 32" style="width:34px;height:34px;flex-shrink:0;"><rect x="2" y="1" width="22" height="30" rx="2" fill="#FEECEC" stroke="#C0392B" stroke-width="1.5"/><text x="13" y="21" font-size="9" fill="#C0392B" text-anchor="middle" font-family="sans-serif">PDF</text></svg>'+
+      '<div><div style="font-size:13px;font-weight:600;">'+escH(data.name)+'</div><div style="font-size:11px;color:var(--txt3);">'+data.size+'</div></div>'+
+      '<button class="btn sm" onclick="resetPdfImport()" style="margin-left:auto;">Zmień</button>'+
       '</div>'+
-      '<div style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:16px;background:var(--sur2);padding:10px 14px;border-radius:var(--r2);">'+
-      '<strong>AI wyodrębni z każdej strony PDF:</strong><br>'+
-      '• Nazwy i opisy ćwiczeń (po polsku)<br>'+
-      '• Fazę gry, temat, coaching points<br>'+
-      '• <strong>Grafiki i schematy boiska</strong> — przypisane do ćwiczenia<br>'+
+      '<div style="display:flex;gap:10px;">'+
+      '<button class="btn pri" onclick="runPdfTextExtract()" style="flex:1;padding:11px;">'+
+      '<svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;margin-right:5px;"><path d="M2 4h12M2 8h8M2 12h10"/></svg>'+
+      'Parsuj tekstowo <span style="font-size:10px;font-weight:400;">(szybko, offline)</span></button>'+
+      '<button class="btn" onclick="runPdfAiExtract()" style="flex:1;padding:11px;background:#8B5CF6;color:#fff;border-color:#7C3AED;">'+
+      '<svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;margin-right:5px;"><circle cx="8" cy="8" r="6"/><path d="M6 8l2 2 3-3"/></svg>'+
+      'Analizuj AI <span style="font-size:10px;font-weight:400;">(wolniej, lepsza jakość)</span></button>'+
       '</div>'+
-      '<button class="btn pri" onclick="runPdfAiExtract()" style="width:100%;padding:12px;">'+
-      '<svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;margin-right:6px;"><path d="M8 2v9M4 8l4-4 4 4"/><rect x="2" y="12" width="12" height="2" rx="1"/></svg>'+
-      'Analizuj PDF (ekstrakcja tekstu + grafik)</button>'+
       '</div>';
 
   } else if(stage==='progress'){
     var pct=data.total?Math.round(data.done/data.total*100):0;
     res.innerHTML=
-      '<div class="card" style="padding:20px 24px;">'+
-      '<div style="font-size:14px;font-weight:600;margin-bottom:6px;">'+escH(data.label||'Przetwarzam…')+'</div>'+
-      '<div style="background:var(--sur2);border-radius:20px;height:10px;overflow:hidden;margin-bottom:10px;">'+
+      '<div class="card" style="padding:20px 22px;">'+
+      '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">'+escH(data.label||'Przetwarzam…')+'</div>'+
+      '<div style="background:var(--sur2);border-radius:20px;height:8px;overflow:hidden;margin-bottom:8px;">'+
       '<div style="width:'+pct+'%;height:100%;background:var(--g);border-radius:20px;transition:width .3s;"></div></div>'+
-      '<div style="font-size:12px;color:var(--txt2);">'+escH(data.detail||'')+'</div>'+
+      '<div style="font-size:11px;color:var(--txt2);">'+escH(data.detail||'')+'</div>'+
       '</div>';
 
   } else if(stage==='review'){
     _renderPdfReview();
-  } else if(stage==='error'){
-    if(dz)dz.style.display='';
-    res.style.display='none';
-    var dz2=document.getElementById('pdf-drop-zone');
-    if(dz2)dz2.style.display='';
-    var errDiv=document.createElement('div');
-    errDiv.className='card';
-    errDiv.style.cssText='padding:16px;border-left:3px solid var(--red);margin-bottom:16px;';
-    errDiv.innerHTML='<div style="font-size:13px;font-weight:600;margin-bottom:6px;">Błąd: '+escH(data.message)+'</div>'+
-      '<div style="font-size:11px;color:var(--txt2);">'+escH(data.detail||'')+'</div>';
-    res.style.display='block';
-    res.innerHTML='';
-    res.appendChild(errDiv);
   }
 }
 
@@ -3157,58 +3272,56 @@ function _renderPdfReview(){
   if(!exs.length){
     res.innerHTML='<div class="card" style="padding:20px;">'+
       '<div style="font-size:14px;font-weight:600;margin-bottom:6px;">Nie znaleziono ćwiczeń</div>'+
-      '<div style="font-size:12px;color:var(--txt2);margin-bottom:12px;">AI nie wykrył struktury ćwiczeń w tym PDF.<br>Sprawdź czy PDF zawiera warstwę tekstową (nie jest skanem).</div>'+
-      '<button class="btn" onclick="resetPdfImport()">Spróbuj inny plik</button></div>';
+      '<div style="font-size:12px;color:var(--txt2);margin-bottom:12px;">Parser nie wykrył struktury ćwiczeń. Spróbuj opcji AI — radzi sobie z niestandardową strukturą.</div>'+
+      '<div style="display:flex;gap:8px;">'+
+      '<button class="btn" onclick="resetPdfImport()">Zmień plik</button>'+
+      '<button class="btn" onclick="runPdfAiExtract()" style="background:#8B5CF6;color:#fff;border-color:#7C3AED;">Spróbuj z AI</button>'+
+      '</div></div>';
     return;
   }
 
   var FAZA_MAP={a:'Atakowanie',b:'Bronienie',u:'Umiejętności',m:'Motoryka'};
+  var FAZA_C={a:'#4CAF50',b:'#F44336',u:'#2196F3',m:'#FF9800'};
+
   var html=
-    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">'+
     '<div>'+
-    '<div style="font-size:17px;font-weight:700;">Znaleziono '+exs.length+' ćwiczeń</div>'+
-    '<div style="font-size:12px;color:var(--txt2);">Edytuj pola przed dodaniem do bazy. Grafiki przypisane automatycznie.</div>'+
+    '<div style="font-size:16px;font-weight:700;">Znaleziono '+exs.length+' ćwiczeń</div>'+
+    '<div style="font-size:12px;color:var(--txt2);">Sprawdź i edytuj. Grafiki przypisane automatycznie gdzie wykryto schemat boiska.</div>'+
     '</div>'+
-    '<div style="display:flex;gap:8px;">'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+    '<button class="btn" onclick="runPdfAiExtract()" style="background:#8B5CF6;color:#fff;border-color:#7C3AED;font-size:11px;">Ulepsz przez AI</button>'+
     '<button class="btn" onclick="resetPdfImport()">Zacznij od nowa</button>'+
-    '<button class="btn pri" onclick="confirmPdfImport()">Dodaj wszystkie ('+exs.length+') do bazy</button>'+
+    '<button class="btn pri" onclick="confirmPdfImport()">Dodaj '+exs.length+' do bazy</button>'+
     '</div></div>';
 
   html+=exs.map(function(ex,i){
-    var fc={a:'#4CAF50',b:'#F44336',u:'#2196F3',m:'#FF9800'};
-    return '<div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;display:flex;">'+
-      // Grafika po lewej jeśli jest
+    return '<div class="card" style="padding:0;overflow:hidden;margin-bottom:8px;display:flex;">'+
       (ex.imgBase64
-        ?'<div style="width:200px;min-height:130px;flex-shrink:0;background:#1a1a1a;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--brd);">'+
-          '<img src="'+ex.imgBase64+'" style="max-width:196px;max-height:180px;object-fit:contain;display:block;"/>'+
-          '</div>'
-        :'<div style="width:4px;flex-shrink:0;background:'+(fc[ex.f]||'var(--sur2)')+'"></div>')+
-      '<div style="flex:1;padding:12px 14px;min-width:0;">'+
-      // Rząd 1: nazwa + faza + usuń
-      '<div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">'+
-      '<input class="fi" value="'+escH(ex.name||'')+'" style="flex:1;margin:0;font-weight:600;font-size:12px;" oninput="_pdfState.extracted['+i+'].name=this.value" placeholder="Nazwa ćwiczenia"/>'+
+        ?'<div style="width:160px;flex-shrink:0;background:#1a1a1a;display:flex;align-items:center;justify-content:center;border-right:1px solid var(--brd);"><img src="'+ex.imgBase64+'" style="max-width:156px;max-height:150px;object-fit:contain;"/></div>'
+        :'<div style="width:4px;flex-shrink:0;background:'+(FAZA_C[ex.f]||'var(--sur2)')+'"></div>')+
+      '<div style="flex:1;padding:10px 13px;min-width:0;">'+
+      '<div style="display:flex;gap:5px;align-items:center;margin-bottom:7px;">'+
+      '<input class="fi" value="'+escH(ex.name||'')+'" style="flex:1;margin:0;font-weight:600;font-size:12px;" oninput="_pdfState.extracted['+i+'].name=this.value"/>'+
       '<select class="fsel-sm" onchange="_pdfState.extracted['+i+'].f=this.value">'+
       ['a','b','u','m'].map(function(v){return '<option value="'+v+'" '+(ex.f===v?'selected':'')+'>'+FAZA_MAP[v]+'</option>';}).join('')+
       '</select>'+
-      '<button class="btn sm" onclick="removePdfEx('+i+')" style="padding:0 8px;background:var(--sur2);color:var(--txt3);">✕</button>'+
-      '</div>'+
-      // Rząd 2: temat + koncept + czas
-      '<div style="display:flex;gap:6px;margin-bottom:6px;">'+
-      '<input class="fi" value="'+escH(ex.t||'')+'" style="flex:2;margin:0;font-size:11px;" placeholder="Temat" oninput="_pdfState.extracted['+i+'].t=this.value"/>'+
-      '<input class="fi" value="'+escH(ex.k||'')+'" style="flex:2;margin:0;font-size:11px;" placeholder="Koncept" oninput="_pdfState.extracted['+i+'].k=this.value"/>'+
-      '<input class="fi" value="'+(ex.cz||15)+'" type="number" min="1" max="90" style="width:60px;margin:0;font-size:11px;" placeholder="min" oninput="_pdfState.extracted['+i+'].cz=parseInt(this.value)||15"/>'+
       '<select class="fsel-sm" onchange="_pdfState.extracted['+i+'].i=this.value">'+
       ['Niska','Średnia','Wysoka'].map(function(v){return '<option '+(ex.i===v?'selected':'')+'>'+v+'</option>';}).join('')+
       '</select>'+
+      '<input class="fi" value="'+(ex.cz||15)+'" type="number" min="1" max="90" style="width:52px;margin:0;font-size:11px;" oninput="_pdfState.extracted['+i+'].cz=parseInt(this.value)||15"/>'+
+      '<button class="btn sm" onclick="removePdfEx('+i+')" style="padding:0 7px;background:var(--sur2);color:var(--txt3);">✕</button>'+
       '</div>'+
-      // Rząd 3: opis
-      '<textarea class="fta" rows="2" style="font-size:11px;width:100%;" oninput="_pdfState.extracted['+i+'].o=this.value">'+escH(ex.o||'')+'</textarea>'+
-      // Coaching points
-      (ex.z?'<div style="font-size:10px;color:var(--txt3);margin-top:5px;font-style:italic;">💡 '+escH(ex.z.slice(0,150))+'</div>':'')+
+      '<div style="display:flex;gap:5px;margin-bottom:5px;">'+
+      '<input class="fi" value="'+escH(ex.t||'')+'" style="flex:1;margin:0;font-size:11px;" placeholder="Temat" oninput="_pdfState.extracted['+i+'].t=this.value"/>'+
+      '<input class="fi" value="'+escH(ex.k||'')+'" style="flex:1;margin:0;font-size:11px;" placeholder="Koncept" oninput="_pdfState.extracted['+i+'].k=this.value"/>'+
+      '</div>'+
+      '<textarea class="fta" rows="2" style="font-size:11px;width:100%;margin:0;" oninput="_pdfState.extracted['+i+'].o=this.value">'+escH(ex.o||'')+'</textarea>'+
+      (ex.z?'<div style="font-size:10px;color:var(--txt3);margin-top:4px;font-style:italic;">💡 '+escH(ex.z.slice(0,120))+'</div>':'')+
       '</div></div>';
   }).join('');
 
-  html+='<div style="display:flex;justify-content:flex-end;gap:8px;padding-top:8px;">'+
+  html+='<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">'+
     '<button class="btn" onclick="resetPdfImport()">Zacznij od nowa</button>'+
     '<button class="btn pri" onclick="confirmPdfImport()">Dodaj '+exs.length+' ćwiczeń do bazy</button>'+
     '</div>';
@@ -3216,10 +3329,7 @@ function _renderPdfReview(){
   res.innerHTML=html;
 }
 
-function removePdfEx(i){
-  _pdfState.extracted.splice(i,1);
-  _renderPdfReview();
-}
+function removePdfEx(i){_pdfState.extracted.splice(i,1);_renderPdfReview();}
 
 function resetPdfImport(){
   _pdfState={file:null,pdfDoc:null,totalPages:0,pageData:[],extracted:[],processing:false};
@@ -3231,77 +3341,7 @@ function resetPdfImport(){
   if(inp)inp.value='';
 }
 
-// ── Główna funkcja: renderuj PDF → wyślij do AI ──────────────────────────
-async function runPdfAiExtract(){
-  if(!_pdfState.file||_pdfState.processing)return;
-  _pdfState.processing=true;
-
-  try{
-    // 1. Załaduj PDF.js
-    await _loadPdfJs();
-
-    // 2. Otwórz PDF
-    _showPdfUI('progress',{done:0,total:100,label:'Ładowanie PDF…',detail:'Wczytuję strukturę pliku'});
-    var arrayBuf = await _pdfState.file.arrayBuffer();
-    var pdfDoc = await window.pdfjsLib.getDocument({data: arrayBuf}).promise;
-    _pdfState.pdfDoc = pdfDoc;
-    _pdfState.totalPages = pdfDoc.numPages;
-
-    // 3. Renderuj każdą stronę do canvas i zbierz base64 + tekst
-    _showPdfUI('progress',{done:5,total:100,label:'Renderuję strony PDF…',detail:'Strona 0 z '+pdfDoc.numPages});
-    var pageData = [];
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-
-    for(var pg=1; pg<=pdfDoc.numPages; pg++){
-      var page = await pdfDoc.getPage(pg);
-      var viewport = page.getViewport({scale: 1.5}); // 1.5x dla dobrej jakości grafik
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      await page.render({canvasContext:ctx, viewport:viewport}).promise;
-
-      // Pełna strona jako base64 (dla AI)
-      var fullImg = canvas.toDataURL('image/jpeg', 0.82);
-
-      // Wytnij obszar grafiki — wykryj czy schemat jest po lewej czy prawej
-      var imgCrop = _cropDiagramFromCanvas(canvas, ctx);
-
-      // Wyciągnij tekst
-      var textContent = await page.getTextContent();
-      var text = textContent.items.map(function(i){return i.str;}).join(' ');
-
-      pageData.push({
-        pageNum: pg,
-        fullImg: fullImg,            // cała strona (dla AI)
-        diagramImg: imgCrop,         // wycięty schemat (do bazy)
-        text: text.slice(0,800)      // tekst ograniczony do 800 znaków
-      });
-
-      var pct = Math.round(5 + (pg/pdfDoc.numPages)*60);
-      _showPdfUI('progress',{done:pct,total:100,label:'Renderuję strony PDF…',detail:'Strona '+pg+' z '+pdfDoc.numPages});
-    }
-    _pdfState.pageData = pageData;
-    canvas.remove();
-
-    // 4. Wyślij do Claude API — batch po 8 stron
-    _showPdfUI('progress',{done:65,total:100,label:'AI analizuje ćwiczenia…',detail:'Wysyłam do Claude API'});
-    var extracted = await _analyzeWithClaude(pageData);
-    _pdfState.extracted = extracted;
-
-    _pdfState.processing = false;
-    _showPdfUI('review',{});
-
-  }catch(err){
-    _pdfState.processing=false;
-    console.error('PDF import error:', err);
-    _showPdfUI('error',{
-      message: err.message||'Nieznany błąd',
-      detail: 'Sprawdź czy plik PDF jest poprawny i zawiera warstwę tekstową.'
-    });
-  }
-}
-
-// ── Ładowanie PDF.js z CDN ────────────────────────────────────────────────
+// ── Ładowanie PDF.js ──────────────────────────────────────────────────────
 function _loadPdfJs(){
   if(window.pdfjsLib)return Promise.resolve();
   return new Promise(function(resolve,reject){
@@ -3312,188 +3352,229 @@ function _loadPdfJs(){
         'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       resolve();
     };
-    s.onerror=function(){reject(new Error('Nie można załadować PDF.js — sprawdź połączenie internetowe'));};
+    s.onerror=function(){reject(new Error('Nie można załadować PDF.js'));};
     document.head.appendChild(s);
   });
 }
 
 // ── Wykrywanie i wycinanie schematu boiska ────────────────────────────────
-function _cropDiagramFromCanvas(canvas, ctx){
-  var w=canvas.width, h=canvas.height;
+function _cropDiagramFromCanvas(canvas,ctx){
+  var w=canvas.width,h=canvas.height;
   var imgData=ctx.getImageData(0,0,w,h).data;
-
-  // Szukaj zielonego obszaru (schemat boiska) — RGB(0-80, 100-200, 0-80)
   var greenPixels=[];
-  for(var y=0;y<h;y+=4){
-    for(var x=0;x<w;x+=4){
+  for(var y=0;y<h;y+=3){
+    for(var x=0;x<w;x+=3){
       var idx=(y*w+x)*4;
       var r=imgData[idx],g=imgData[idx+1],b=imgData[idx+2];
-      if(g>100&&r<100&&b<100&&g>r*1.5&&g>b*1.5){
-        greenPixels.push({x:x,y:y});
-      }
+      if(g>100&&r<110&&b<110&&g>r*1.4&&g>b*1.4)greenPixels.push({x:x,y:y});
     }
   }
-
-  if(greenPixels.length<50) return null; // Brak zielonego → brak schematu
-
-  // Bounding box zielonego obszaru
+  if(greenPixels.length<40)return null;
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   greenPixels.forEach(function(p){
-    if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x;
-    if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y;
+    if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;
+    if(p.y<minY)minY=p.y;if(p.y>maxY)maxY=p.y;
   });
-
-  // Dodaj margines
-  var pad=20;
-  minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
-  maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
-
-  var cropW=maxX-minX, cropH=maxY-minY;
-  if(cropW<50||cropH<50) return null;
-
-  // Wytnij do nowego canvas
+  var pad=16;
+  minX=Math.max(0,minX-pad);minY=Math.max(0,minY-pad);
+  maxX=Math.min(w,maxX+pad);maxY=Math.min(h,maxY+pad);
+  if((maxX-minX)<40||(maxY-minY)<40)return null;
   var tmp=document.createElement('canvas');
-  tmp.width=cropW; tmp.height=cropH;
-  var tCtx=tmp.getContext('2d');
-  tCtx.drawImage(canvas, minX,minY,cropW,cropH, 0,0,cropW,cropH);
-  var result=tmp.toDataURL('image/jpeg',0.88);
+  tmp.width=maxX-minX;tmp.height=maxY-minY;
+  tmp.getContext('2d').drawImage(canvas,minX,minY,tmp.width,tmp.height,0,0,tmp.width,tmp.height);
+  var r=tmp.toDataURL('image/jpeg',0.85);
   tmp.remove();
-  return result;
+  return r;
 }
 
-// ── Analiza przez Claude API ──────────────────────────────────────────────
-async function _analyzeWithClaude(pageData){
-  var SYSTEM = `Jesteś ekspertem od piłki nożnej i analizy dokumentów treningowych.
+// ── Renderowanie stron PDF → pageData ────────────────────────────────────
+async function _renderPdfPages(file, onProgress){
+  await _loadPdfJs();
+  var arrayBuf = await file.arrayBuffer();
+  var pdfDoc = await window.pdfjsLib.getDocument({data:arrayBuf}).promise;
+  _pdfState.pdfDoc = pdfDoc;
+  _pdfState.totalPages = pdfDoc.numPages;
+
+  var pageData = [];
+  var canvas = document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+
+  for(var pg=1; pg<=pdfDoc.numPages; pg++){
+    var page = await pdfDoc.getPage(pg);
+    var viewport = page.getViewport({scale:1.5});
+    canvas.width=viewport.width; canvas.height=viewport.height;
+    await page.render({canvasContext:ctx, viewport:viewport}).promise;
+
+    var diagramImg = _cropDiagramFromCanvas(canvas, ctx);
+
+    var textContent = await page.getTextContent();
+    var text = textContent.items.map(function(i){return i.str;}).join('\n');
+
+    pageData.push({pageNum:pg, text:text, diagramImg:diagramImg,
+      fullImg: diagramImg ? null : null}); // fullImg tylko dla AI
+
+    onProgress(pg, pdfDoc.numPages);
+  }
+  canvas.remove();
+  return pageData;
+}
+
+// ── TRYB 1: Parser tekstowy ───────────────────────────────────────────────
+async function runPdfTextExtract(){
+  if(!_pdfState.file||_pdfState.processing)return;
+  _pdfState.processing=true;
+
+  try{
+    _showPdfUI('progress',{done:5,total:100,label:'Wczytuję PDF…',detail:'Renderuję strony'});
+
+    var pageData = await _renderPdfPages(_pdfState.file, function(done, total){
+      _showPdfUI('progress',{
+        done: Math.round(5+done/total*70), total:100,
+        label:'Renderuję strony…',
+        detail:'Strona '+done+' z '+total
+      });
+    });
+    _pdfState.pageData = pageData;
+
+    _showPdfUI('progress',{done:80,total:100,label:'Parsuj ćwiczenia…',detail:'Analiza tekstu'});
+    var extracted = _parseTextPages(pageData);
+    _pdfState.extracted = extracted;
+    _pdfState.processing = false;
+    _showPdfUI('review',{});
+
+  }catch(err){
+    _pdfState.processing=false;
+    var res=document.getElementById('pdf-import-result');
+    if(res)res.innerHTML='<div class="card" style="padding:16px;border-left:3px solid var(--red);">'+
+      '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">Błąd: '+escH(err.message)+'</div>'+
+      '<button class="btn" onclick="resetPdfImport()" style="margin-right:8px;">Zmień plik</button>'+
+      '<button class="btn" onclick="runPdfAiExtract()" style="background:#8B5CF6;color:#fff;border-color:#7C3AED;">Spróbuj z AI</button>'+
+      '</div>';
+  }
+}
+
+// ── TRYB 2: AI (Claude API) ───────────────────────────────────────────────
+async function runPdfAiExtract(){
+  if(!_pdfState.file||_pdfState.processing)return;
+  _pdfState.processing=true;
+
+  var SYSTEM=`Jesteś ekspertem od piłki nożnej i analizy dokumentów treningowych.
 Z przesłanych stron PDF wyodrębnij WSZYSTKIE ćwiczenia treningowe.
 
 Dla każdego ćwiczenia zwróć obiekt JSON:
-- name: nazwa ćwiczenia po polsku (krótka, max 60 znaków)
-- f: faza — TYLKO: "a"=Atakowanie, "b"=Bronienie, "u"=Umiejętności, "m"=Motoryka  
-- t: temat (np. "Rozgrzewka", "Gra kombinacyjna", "Presing i obrona", "Finalizacja", "Ruchy bez piłki", "Szybkość i zwinność")
-- k: koncept szczegółowy (np. "Podanie i przyjęcie", "Pressing drużynowy", "Strzały na bramkę")
-- cz: czas w minutach (liczba całkowita)
-- lz: liczba zawodników (np. "8" lub "6-10", może być puste)
-- i: intensywność — TYLKO: "Niska", "Średnia" lub "Wysoka"
-- o: opis organizacji po polsku (2-4 zdania, jasne i konkretne)
-- z: coaching points po polsku (2-4 punkty rozdzielone " | ")
-- pageNum: numer strony w PDF (liczba)
+- name: nazwa ćwiczenia po polsku (max 70 znaków)
+- f: "a"=Atakowanie, "b"=Bronienie, "u"=Umiejętności, "m"=Motoryka
+- t: temat (np. "Rozgrzewka", "Gra kombinacyjna", "Presing i obrona", "Finalizacja")
+- k: koncept szczegółowy
+- cz: czas w minutach (liczba)
+- lz: liczba zawodników (może być puste)
+- i: "Niska", "Średnia" lub "Wysoka"
+- o: opis organizacji po polsku (2-4 zdania)
+- z: coaching points po polsku (oddzielone " | ")
+- pageNum: numer strony
 
-Zwróć WYŁĄCZNIE tablicę JSON. Bez tekstu przed ani po. Przetłumacz z angielskiego na polski.`;
+Zwróć WYŁĄCZNIE tablicę JSON. Przetłumacz z angielskiego na polski.`;
 
-  var BATCH = 12; // stron na jedno wywołanie API
-  var allExtracted = [];
-
-  for(var i=0; i<pageData.length; i+=BATCH){
-    var batch = pageData.slice(i, i+BATCH);
-    var pct = Math.round(65 + (i/pageData.length)*30);
-    _showPdfUI('progress',{
-      done:pct,total:100,
-      label:'AI analizuje ćwiczenia…',
-      detail:'Strony '+(i+1)+'–'+Math.min(i+BATCH,pageData.length)+' z '+pageData.length+' · Znalezione: '+allExtracted.length
-    });
-
-    // Zbuduj content dla batch — obrazy stron
-    var msgContent = [];
-    batch.forEach(function(pd){
-      // Obraz całej strony
-      var b64 = pd.fullImg.split(',')[1];
-      msgContent.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}});
-      msgContent.push({type:'text',text:'[Strona '+pd.pageNum+'] Tekst: '+pd.text});
-    });
-    msgContent.push({type:'text',text:'Wyodrębnij wszystkie ćwiczenia z powyższych '+batch.length+' stron. Zwróć TYLKO tablicę JSON.'});
-
-    try{
-      var resp = await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:6000,
-          system:SYSTEM,
-          messages:[{role:'user',content:msgContent}]
-        })
+  try{
+    // Renderuj strony jeśli jeszcze nie ma
+    if(!_pdfState.pageData.length){
+      _showPdfUI('progress',{done:5,total:100,label:'Wczytuję PDF…',detail:'Renderuję strony'});
+      var pageData = await _renderPdfPages(_pdfState.file, function(done,total){
+        _showPdfUI('progress',{done:Math.round(5+done/total*50),total:100,
+          label:'Renderuję strony…',detail:'Strona '+done+' z '+total});
       });
-
-      if(!resp.ok){
-        var errData = await resp.json().catch(function(){return {};});
-        console.warn('API error batch '+(i/BATCH+1)+':', errData);
-        continue;
-      }
-
-      var data = await resp.json();
-      var text = data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
-      var m = text.match(/\[[\s\S]*\]/);
-      if(!m) continue;
-
-      var batchExs = JSON.parse(m[0]);
-      if(!Array.isArray(batchExs)) continue;
-
-      // Przypisz schemat boiska do ćwiczenia na podstawie numeru strony
-      batchExs.forEach(function(ex){
-        var pg = batch.find(function(p){return p.pageNum===ex.pageNum;});
-        if(pg&&pg.diagramImg){
-          ex.imgBase64 = pg.diagramImg;
-        } else {
-          ex.imgBase64 = null;
-        }
-        // Normalizuj pola
-        ex.f = ['a','b','u','m'].includes(ex.f)?ex.f:'u';
-        ex.i = ['Niska','Średnia','Wysoka'].includes(ex.i)?ex.i:'Średnia';
-        ex.cz = parseInt(ex.cz)||15;
-        ex.name = (ex.name||'Ćwiczenie').trim().slice(0,80);
-      });
-
-      allExtracted = allExtracted.concat(batchExs.filter(function(e){return e.name;}));
-
-    }catch(batchErr){
-      console.warn('Błąd batcha:', batchErr);
+      _pdfState.pageData = pageData;
     }
-  }
 
-  _showPdfUI('progress',{done:98,total:100,label:'Finalizuję…',detail:'Znaleziono '+allExtracted.length+' ćwiczeń'});
-  return allExtracted;
+    var pageData = _pdfState.pageData;
+
+    // Wczytaj PDF jako base64 dla API
+    var fileBase64 = await new Promise(function(resolve,reject){
+      var reader=new FileReader();
+      reader.onload=function(e){resolve(e.target.result.split(',')[1]);};
+      reader.onerror=reject;
+      reader.readAsDataURL(_pdfState.file);
+    });
+
+    _showPdfUI('progress',{done:60,total:100,label:'AI analizuje ćwiczenia…',detail:'Wysyłam do Claude API'});
+
+    var resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:8000,
+        system:SYSTEM,
+        messages:[{role:'user',content:[
+          {type:'document',source:{type:'base64',media_type:'application/pdf',data:fileBase64}},
+          {type:'text',text:'Wyodrębnij wszystkie ćwiczenia. Zwróć TYLKO tablicę JSON.'}
+        ]}]
+      })
+    });
+
+    if(!resp.ok){
+      var errData=await resp.json().catch(function(){return {};});
+      throw new Error('API error '+resp.status+': '+(errData.error&&errData.error.message||''));
+    }
+
+    var data=await resp.json();
+    var text=data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
+    var m=text.match(/\[[\s\S]*\]/);
+    if(!m)throw new Error('AI nie zwróciło tablicy JSON');
+
+    var extracted=JSON.parse(m[0]);
+    if(!Array.isArray(extracted)||!extracted.length)throw new Error('Pusta tablica');
+
+    // Przypisz grafiki ze stron
+    extracted.forEach(function(ex){
+      ex.f=['a','b','u','m'].includes(ex.f)?ex.f:'u';
+      ex.i=['Niska','Średnia','Wysoka'].includes(ex.i)?ex.i:'Średnia';
+      ex.cz=parseInt(ex.cz)||15;
+      ex.name=(ex.name||'Ćwiczenie').trim().slice(0,80);
+      var pg=pageData.find(function(p){return p.pageNum===ex.pageNum;});
+      ex.imgBase64=pg&&pg.diagramImg?pg.diagramImg:null;
+    });
+
+    _pdfState.extracted=extracted.filter(function(e){return e.name;});
+    _pdfState.processing=false;
+    _showPdfUI('review',{});
+
+  }catch(err){
+    _pdfState.processing=false;
+    var res=document.getElementById('pdf-import-result');
+    if(res)res.innerHTML='<div class="card" style="padding:16px;border-left:3px solid var(--red);">'+
+      '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">Błąd AI: '+escH(err.message)+'</div>'+
+      '<div style="font-size:11px;color:var(--txt2);margin-bottom:10px;">Sprawdź połączenie internetowe.</div>'+
+      '<button class="btn" onclick="resetPdfImport()">Zmień plik</button>'+
+      '</div>';
+  }
 }
 
 // ── Dodaj do bazy ─────────────────────────────────────────────────────────
 function confirmPdfImport(){
   var exs=_pdfState.extracted;
   if(!exs||!exs.length){ST('Brak ćwiczeń do dodania');return;}
-
   var existing=new Set((EXS||[]).map(function(e){return e.n;}));
-  var toAdd=[];
-  var skipped=0;
-
+  var toAdd=[]; var skipped=0;
   exs.forEach(function(ex){
     var name=(ex.name||'').trim();
     if(!name||existing.has(name)){skipped++;return;}
-    toAdd.push({
-      n:name,
-      f:ex.f||'u',
-      t:ex.t||'',
-      k:ex.k||'',
-      sk:'',
-      i:ex.i||'Średnia',
-      cz:ex.cz||15,
-      lz:String(ex.lz||''),
-      p:'',sp:'',
-      o:ex.o||'',
-      z:ex.z||'',
-      lv:'',pk:'',w:'',u:'',fb:'',
-      img:ex.imgBase64||null,
-      imn:name,
-      imgUrl:''
-    });
+    toAdd.push({n:name,f:ex.f||'u',t:ex.t||'',k:ex.k||'',sk:'',
+      i:ex.i||'Średnia',cz:ex.cz||15,lz:String(ex.lz||''),
+      p:'',sp:'',o:ex.o||'',z:ex.z||'',lv:'',pk:'',w:'',u:'',fb:'',
+      img:ex.imgBase64||null,imn:name,imgUrl:''});
   });
-
   if(!toAdd.length){ST('Wszystkie ćwiczenia już istnieją w bazie ('+skipped+' duplikatów)');return;}
-
   EXS=toAdd.concat(EXS||[]);
   saveLS();supaSetEXS();
   RE();try{rDirEX();}catch(e2){}uD();
-  ST('✅ Dodano '+toAdd.length+' ćwiczeń do bazy'+(skipped?' · pominięto '+skipped:'')+' · grafiki: '+toAdd.filter(function(e){return e.img;}).length);
+  var withImg=toAdd.filter(function(e){return e.img;}).length;
+  ST('✅ Dodano '+toAdd.length+' ćwiczeń'+(withImg?' · grafiki: '+withImg:'')+(skipped?' · pominięto: '+skipped:''));
   resetPdfImport();
   SP('ex');
 }
+
+
 
 function oImportWolves(){
   if(typeof WOLVES_EXS==='undefined'||!WOLVES_EXS.length){ST('Brak danych Wolves Academy');return;}
