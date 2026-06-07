@@ -1968,7 +1968,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-// ═══════════════ DANE ═══════════════
 var EXS=[],EI=null,IMG=null,IMN=null;
 var CYC=[],eCYI=null,sCT='macro',cY=2025;
 var KONSP=[],sRat=5;
@@ -2061,15 +2060,11 @@ var IC={Niska:{bg:'#EAF3DE',tc:'#27500A'},Średnia:{bg:'#FAEEDA',tc:'#633806'},W
 var KATS=['Skrzat U6/U7','Żak U8/U9','Orlik U10/U11','Młodzik U12/U13','Trampkarz U14/U15','Junior U16/U17','Junior U18/U19','Senior'];
 var MS=['lip','sie','wrz','paź','lis','gru','sty','lut','mar','kwi','maj','cze'];
 var PNC={warm:'Rozgrzewka',main:'Część główna',cool:'Zakończenie'};
-
-// ═══════════════ HELPERS ═══════════════
 function ST(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 function GT(f){return f&&TX[f]?Object.keys(TX[f]):[];}
 function GK(f,t){return f&&t&&TX[f]&&TX[f][t]?TX[f][t]:[];}
 function fd(ds){if(!ds)return'';var p=ds.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function wr(tx,mc){var ls=[];(tx||'').split('\n').forEach(p2=>{var ws=p2.split(' '),cur='';ws.forEach(w=>{if(cur.length+w.length+(cur?1:0)<=mc)cur+=(cur?' ':'')+w;else{if(cur)ls.push(cur);cur=w;}});if(cur)ls.push(cur);});return ls;}
-
-// ═══════════════ NAWIGACJA ═══════════════
 // Mapa: strona → id grupy nawigacyjnej (dla auto-expand)
 var DIR_NAV_GROUPS={
   // Dyrektor
@@ -2134,10 +2129,7 @@ function SP(n){
 function oM(id){document.getElementById(id).classList.add('op');}
 function cM(id){document.getElementById(id).classList.remove('op');}
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('op');}));
-
-// ═══════════════════════════════════════
 // MOBILE NAVIGATION
-// ═══════════════════════════════════════
 var MOB_ACTIVE = false;
 
 function isMobile(){ return window.innerWidth <= 768; }
@@ -2304,8 +2296,8 @@ function mobDrawerClose(){
   drawer.classList.remove('open');
   document.body.style.overflow='';
   // Hide after transition
-  setTimeout(function(){ 
-    if(!drawer.classList.contains('open')) drawer.style.display='none'; 
+  setTimeout(function(){
+    if(!drawer.classList.contains('open')) drawer.style.display='none';
   }, 260);
 }
 
@@ -2335,9 +2327,6 @@ window.addEventListener('resize', ()=>{
     mobDrawerClose();
   }
 });
-
-
-// ═══════════════ DASHBOARD ═══════════════
 function uD(){
   var seasonTeamCount=TEAMS.filter(t=>t.season===currentSeason).length;
   ['s-k','s-e','s-c'].forEach(id=>{var e=document.getElementById(id);if(e)e.textContent=id==='s-k'?KONSP.length:id==='s-e'?EXS.length:CYC.length;});
@@ -2436,8 +2425,6 @@ function uD(){
       +'<div style="font-size:11px;color:var(--g);cursor:pointer;margin-top:4px;" onclick="SP(\'cal\')">Przejdź do kalendarza →</div>';}
   }
 }
-
-// ═══════════════ PLANOWANIE ═══════════════
 function getSM(){var r=[];for(var i=0;i<12;i++){var mi=(6+i)%12,yr=i<6?cY:cY+1;r.push({lbl:MS[i],yr,mi});}return r;}
 function d2f(ds){if(!ds)return null;var d=new Date(ds),yr=d.getFullYear(),m=d.getMonth();var ms=getSM();for(var i=0;i<ms.length;i++){var mo=ms[i];if(mo.yr===yr&&mo.mi===m){var dim=new Date(yr,m+1,0).getDate();return(i+(d.getDate()-1)/dim)/12;}}return null;}
 function f2d(fr){var ms=getSM(),mi=Math.min(11,Math.floor(fr*12)),mo=ms[mi];var dim=new Date(mo.yr,mo.mi+1,0).getDate(),day=Math.max(1,Math.round((fr*12-mi)*dim));return mo.yr+'-'+String(mo.mi+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');}
@@ -2496,9 +2483,6 @@ function rKT(id,list,isEdit){var c=document.getElementById(id);if(!c)return;c.in
 function aK(){var inp=document.getElementById('mc-ki');var v=(inp.value||'').trim();if(!v)return;aKL.push(v);inp.value='';rKT('mc-kt',aKL,false);}
 function aKE(){var inp=document.getElementById('mec-ki');var v=(inp.value||'').trim();if(!v)return;eKL.push(v);inp.value='';rKT('mec-kt',eKL,true);}
 function rmK(i,isEdit){if(isEdit){eKL.splice(i,1);rKT('mec-kt',eKL,true);}else{aKL.splice(i,1);rKT('mc-kt',aKL,false);}}
-
-// ═══════════════ KALENDARZ ═══════════════
-// ═══════════════ KALENDARZ ═══════════════
 var TRAININGS=[];  // {id, date:'YYYY-MM-DD', time:'HH:MM', team, coach, place, konspektId, notes}
 var MATCHES=[];    // {id, date, time, team, opponent, home, rodzaj, miejsce, sklad[], wynikNasz, wynikRywal, protokol:{...}}
 var TESTS=[];      // {id, name, unit, category, desc, norms:[{ageFrom,ageTo,avg,min,max,desc}]}
@@ -2721,7 +2705,6 @@ function oDay(ds){
 }
 
 // ── DODAJ / EDYTUJ TRENING ──
-// ═══════════════ GENERATOR SERII TRENINGÓW ═══════════════
 var _seRhythm = 7;         // domyślnie co tydzień
 var _seWeekdays = new Set(); // wybrane dni tygodnia (0=Nd, 1=Pn..6=So)
 
@@ -3013,9 +2996,6 @@ function saveLinkKonsp(){
   ST('Konspekt przypisany');
   setTimeout(()=>oDay(ds),200);
 }
-
-
-// ═══════════════ BAZA ĆWICZEŃ ═══════════════
 function FFC(){var f=document.getElementById('ff').value;var ts=document.getElementById('ft'),ks=document.getElementById('fk');ts.innerHTML='<option value="">Wszystkie tematy</option>';ts.disabled=!f;ks.innerHTML='<option value="">Wszystkie koncepty</option>';ks.disabled=true;if(f)GT(f).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});RE();}
 function FTC(){var f=document.getElementById('ff').value,t=document.getElementById('ft').value;var ks=document.getElementById('fk');ks.innerHTML='<option value="">Wszystkie koncepty</option>';ks.disabled=!t;if(t)GK(f,t).forEach(k=>{var o=document.createElement('option');o.textContent=k;ks.appendChild(o);});RE();}
 function CF(){document.getElementById('ex-s').value='';['ff','ft','fk','fi2'].forEach(id=>{var e=document.getElementById(id);if(e)e.value='';});document.getElementById('ft').disabled=true;document.getElementById('ft').innerHTML='<option value="">Wszystkie tematy</option>';document.getElementById('fk').disabled=true;document.getElementById('fk').innerHTML='<option value="">Wszystkie koncepty</option>';RE();}
@@ -3780,8 +3760,6 @@ function savePostSession(){
   var n=obecni.length,total=document.querySelectorAll('.ps-cb').length;
   ST('✓ Zapisano'+(n?': '+n+(total?' / '+total:'')+' obecnych':''));
 }
-
-// ═══════════════ PODGLĄD PDF ═══════════════
 var previewKonspIdx=null;
 var previewData=null;
 
@@ -4337,11 +4315,7 @@ function buildPDF(k){
   var n=allEx.length;
   var cols=n<=1?1:n<=4?2:3;
   var rows=Math.ceil(n/cols);
-
-  // ══════════════════════════════════════════
-  // ══════════════════════════════════════════
   // ── LOGO PFG (base64) ──
-  // ══════════════════════════════════════════
   var PFG_B64=''+PFG_B64+'';
 
   // ── NAGŁÓWEK: jedna zielona belka z logo + wszystkimi polami ──
@@ -4523,7 +4497,6 @@ function buildPDF(k){
   return doc;
 }
 
-
 // Rysowanie boiska
 function rysujBoisko(doc,bx,by,bw,bh,BRD,WHITE,GRAY){
   if(bw<8||bh<8)return;
@@ -4552,9 +4525,6 @@ function rysujBoisko(doc,bx,by,bw,bh,BRD,WHITE,GRAY){
   doc.setFontSize(4);doc.setTextColor(GRAY[0],GRAY[1],GRAY[2]);
   doc.text('diagram',bx+bw/2,by+bh-1.5,{align:'center'});
 }
-
-
-// ═══════════════ LOCALSTORAGE ═══════════════
 var LS_KEY='pfg_iskra_pszczyna_v1';
 var CLUB_KEY='pfg_iskra_pszczyna';
 
@@ -4789,7 +4759,7 @@ async function loadFromSupabase(){
 function loadFromLocal(){
   try{
     var d=localStorage.getItem(LS_KEY);
-    if(d){var p=JSON.parse(d);EXS=p.EXS||[];CYC=p.CYC||[];KONSP=p.KONSP||[];TEAMS=p.TEAMS||getDefaultTeams();COACHES=p.COACHES||getDefaultCoaches();PLAYERS=p.PLAYERS||[];TRAININGS=p.TRAININGS||[];MATCHES=p.MATCHES||[];TESTS=p.TESTS||[];currentSeason=p.currentSeason||'2025/26';COACH_PROFILES=p.COACH_PROFILES||[];GAME_MODELS=p.GAME_MODELS||[];SCOUT_PLAYERS=p.SCOUT_PLAYERS||[];BUDGETS=p.BUDGETS||[];SKLADKI_DEF=p.SKLADKI_DEF||[];SKLADKI_WPL=p.SKLADKI_WPL||[];}
+    if(d){var p=JSON.parse(d);EXS=p.EXS||[];CYC=p.CYC||[];KONSP=p.KONSP||[];TEAMS=p.TEAMS||getDefaultTeams();COACHES=p.COACHES||getDefaultCoaches();PLAYERS=p.PLAYERS||[];TRAININGS=p.TRAININGS||[];MATCHES=p.MATCHES||[];TESTS=p.TESTS||[];currentSeason=p.currentSeason||'2025/26';COACH_PROFILES=p.COACH_PROFILES||[];GAME_MODELS=p.GAME_MODELS||[];SCOUT_PLAYERS=p.SCOUT_PLAYERS||[];BUDGETS=p.BUDGETS||[];FAKTURY=p.FAKTURY||[];SQUAD_PROPOSALS=p.SQUAD_PROPOSALS||[];SKLADKI_DEF=p.SKLADKI_DEF||[];SKLADKI_WPL=p.SKLADKI_WPL||[];}
   }catch(e){console.warn('loadLocal error',e);}
 }
 function loadLS(){loadFromLocal();} // zachowany dla kompatybilności
@@ -5006,8 +4976,6 @@ function showSyncStatus(status){
     },3000);
   }
 }
-
-// ═══════════════ DRUŻYNY & TRENERZY ═══════════════
 var TEAMS=[];var COACHES=[];var editTeamIdx=null;var editCoachIdx=null;
 var currentSeason='2025/26';
 
@@ -5425,8 +5393,6 @@ var _origSE=sE;
 sE=function(isNew){_origSE(isNew);saveLS();supaSetEXS();};
 var _origUC=uC;
 uC=function(){_origUC();saveLS();};
-
-// ═══════════════ KARTA ZAWODNIKA ═══════════════
 var GRADE_CFG={
   A:{bg:'#E1F5EE',tc:'#085041',bc:'#5DCAA5',label:'Bezpieczny',desc:'Zawodnik spełnia wymagania — brak zagrożeń'},
   B:{bg:'#FAEEDA',tc:'#633806',bc:'#E5A03B',label:'Zagrożony',desc:'Zawodnik wymaga poprawy — pod obserwacją'},
@@ -6035,8 +6001,6 @@ function delOcena(playerIdx,ocenaIdx){
   ST('Ocena usunięta');
 }
 
-// ═══════════════ MECZE — DODAJ / EDYTUJ / SKŁAD / PROTOKÓŁ ═══════════════
-
 var editMatchIdx=null;
 var currentMatchId=null; // dla protokołu
 
@@ -6405,8 +6369,6 @@ function saveProtokol(){
   if(obserwacja&&obserwacja.trim())syncScoutFromMatch(editMatchIdx);
   ST('✓ Protokół meczowy zapisany');
 }
-
-// ═══════════════ STATYSTYKI MECZOWE ZAWODNIKA ═══════════════
 // Przelicza statystyki zawodnika na żywo z MATCHES — nie cachuje,
 // żeby zawsze odzwierciedlały aktualny stan protokołów.
 
@@ -6474,7 +6436,6 @@ function getPlayerMatches(playerName, teamFilter){
   return result.sort((a,b)=>a.match.date<b.match.date?1:-1);
 }
 
-
 function oMatchDay(matchId){
   var idx=MATCHES.findIndex(m=>m.id===matchId);
   if(idx<0)return;
@@ -6482,9 +6443,6 @@ function oMatchDay(matchId){
   renderMatchForm(MATCHES[idx]);
   oM('mo-match');
 }
-
-
-// ═══════════════ EKSPORT KARTA ZAWODNIKA PDF ═══════════════
 function dlIOZpdf(){
   if(typeof window.jspdf==='undefined'||!window.jspdf.jsPDF){ST('Biblioteka PDF nie załadowana. Odśwież (F5).');return;}
   var jsPDF=window.jspdf.jsPDF;
@@ -6622,8 +6580,6 @@ function dlIOZpdf(){
   doc.save('IOZ_'+currentSeason.replace('/','_')+'_'+(fTeam?fTeam.replace(/\s/g,'_')+'_':'')+new Date().toISOString().slice(0,10)+'.pdf');
   ST('✓ PDF Karty zawodników pobrany ('+filtered.length+' zawodnikow)');
 }
-
-// ═══════════════ WYKRESY ANTROPOMETRYCZNE W WIDOKU ZAWODNIKA ═══════════════
 function renderAnthroCharts(playerIdx){
   var p=PLAYERS[playerIdx];
   var anthro=p.anthro||[];
@@ -6720,8 +6676,6 @@ function sparklineSVG(labels,values,color){
   svg+='</svg>';
   return svg;
 }
-
-// ═══════════════ STATYSTYKI KONSPEKTÓW ═══════════════
 var statsCharts={};
 
 function rStats(){
@@ -6921,8 +6875,6 @@ renderPlayerView=function(idx){
   // Poczekaj aż DOM się zaktualizuje, potem narysuj wykresy
   setTimeout(function(){renderAnthroCharts(idx);renderTestCharts(idx);},50);
 };
-
-// ═══════════════ TESTY MOTORYCZNE ═══════════════
 var TEST_CATEGORIES=['Siła','Szybkość','Wytrzymałość','Koordynacja','Gibkość','Technika'];
 var TEST_HIGHER_BETTER={'Skok w dal z miejsca':true,'Skok wzwyż':true,'Rzut piłką lekarską':true,'Bieg 30m':false,'Bieg 10m':false,'Bieg 60m':false,'Yo-Yo test':true,'Cooper':true,'Slalom':false,'Beep test':true};
 var editTestIdx=null;
@@ -7314,9 +7266,6 @@ function delTestResultGroup(playerIdx,testId){
   PLAYERS[playerIdx].tests=(PLAYERS[playerIdx].tests||[]).filter(r=>r.testId!==testId);
   saveLS();renderPlayerView(playerIdx);
 }
-
-// ═══════════════ AUTH ═══════════════
-// ═══════════════ AUTH — Supabase ═══════════════
 var currentUser=null; // {id, role, name, email}
 var _supaSession=null;
 
@@ -7775,8 +7724,6 @@ async function sendInvite(){
     }
   }catch(e){err.textContent='Błąd: '+e.message;err.style.display='';}
 }
-
-// ═══════════════ COACH PROFILES (moduł dyrektorski) ═══════════════
 var COACH_PROFILES=[]; // {id, coachId, name, dob, role, license, predispositions, preferredRole, notes, filosofia, kontrakt:{od,do}, zaswNiekaralnosc:{data,powiadom}, zaswRejestr:{data,powiadom}, oceny:[]}
 var SQUAD_PROPOSALS=[]; // {id, coachName, team, formation, lineup, savedAt, notes}
 var GAME_MODELS=[]; // {id, ageCategory, sections:[{title, items:[{text}]}], notes, updatedAt}
@@ -7848,9 +7795,7 @@ function coachHasProfile(coachId){return !!COACH_PROFILES.find(p=>p.coachId===co
 // ── WIDOK DIR: BAZA ĆWICZEŃ (read-only) ──
 
 // ── DYREKTOR: KONSPEKTY ────────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════════════
 // PROPOZYCJE SKŁADÓW — TRENER (modal z poziomu karty drużyny)
-// ═══════════════════════════════════════════════════════════════════════════
 var _sqLineup = {};
 var _sqTeam = '';
 
@@ -8408,7 +8353,6 @@ function dirExCF(){
 // ── WIDOK DIR: PRZEGLĄD ──
 // ── Planowanie dyrektora (readonly) ──
 
-
 // ── Karty zawodników w module dyrektora ──
 function rDirIOZ(){
   var grid=document.getElementById('dir-ioz-grid');
@@ -8714,8 +8658,6 @@ function dirDayDelTraining(idx, dateStr){
   ST('Trening usunięty');
 }
 
-
-
 // ── Przegląd akademii (wzbogacony) ──
 function rDirOverview(){
   var body=document.getElementById('dir-ov-body'); if(!body)return;
@@ -8822,8 +8764,6 @@ function rDirOverview(){
 
   body.innerHTML=html;
 }
-
-// ═══════════════ PLANOWANIE DYREKTORA ═══════════════
 var dirPlanView='gantt'; // 'gantt' | 'cal' | 'list'
 var dirPlanCalMonth=TODAY.getMonth(), dirPlanCalYear=TODAY.getFullYear();
 
@@ -8837,8 +8777,6 @@ function setDirPlanView(v){
 }
 function dirPlanPrevY(){cY--;rYL();rDirPlan();}
 function dirPlanNextY(){cY++;rYL();rDirPlan();}
-
-
 
 // ── WIDOK GANTT ──
 function _renderDirGantt(body,fTeam){
@@ -9269,8 +9207,6 @@ function _dirDelVC(){
   if(!confirm('Usunąć ten okres?'))return;
   dC(idx);cM('mo-dir-vc');
 }
-
-// ═══════════════ PLANOWANIE DYREKTORA ═══════════════
 var _dpYear = TODAY.getFullYear();
 var _dpCalYear = TODAY.getFullYear();
 var _dpCalMonth = TODAY.getMonth();
@@ -9681,8 +9617,6 @@ function rDirPlan(){
   dpRenderCal();
   dpRenderMain();
 }
-
-// ═══════════════ TOP TALENT & SKŁAD NA BOISKU ═══════════════
 var _ttView='pitch';
 
 var FORMATIONS={
@@ -9725,7 +9659,6 @@ var GRADE_COLORS={
   B:{bg:'#FAEEDA',tc:'#633806',bc:'#EF9F27'},
   C:{bg:'#FAECE7',tc:'#712B13',bc:'#E24B4A'}
 };
-
 
 function playerInitialsShort(name){
   if(!name)return'?';
@@ -9938,13 +9871,13 @@ function renderPosCard(slot){
 function renderPitchFM(teamName, formationKey, containerId){
   formationKey=formationKey||'4-3-3';
   var slots=assignPlayersToSlots(teamName, formationKey);
-  
+
   // Kolor murawy zielony
   var pitchBg='#2D5A1B';
   var lineCol='rgba(255,255,255,0.35)';
-  
+
   var html='<div style="position:relative;width:100%;padding-bottom:60%;background:'+pitchBg+';overflow:hidden;">';
-  
+
   // SVG boisko POZIOME (bramki po lewej i prawej)
   html+='<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 100 60" preserveAspectRatio="none">';
   // Tło
@@ -9979,12 +9912,12 @@ function renderPitchFM(teamName, formationKey, containerId){
   // Narożniki
   ['3,3','97,3','3,57','97,57'].forEach(function(pt){var c=pt.split(',');html+='<path d="M'+c[0]+' '+(parseFloat(c[1])+2*(parseFloat(c[1])<30?1:-1))+' A2 2 0 0 '+(parseFloat(c[0])<50?'1':'0')+' '+(parseFloat(c[0])+2*(parseFloat(c[0])<50?1:-1))+' '+c[1]+'" fill="none" stroke="'+lineCol+'" stroke-width="0.3"/>';});
   html+='</svg>';
-  
+
   // Zawodnicy
   slots.forEach(function(slot){
     html+=renderPosCard(slot);
   });
-  
+
   html+='</div>';
   return html;
 }
@@ -9993,14 +9926,14 @@ function renderPitchFM(teamName, formationKey, containerId){
 function renderSquadPitch(teamName, formation){
   formation=formation||'4-3-3';
   var players=getTeamPlayersSorted(teamName);
-  
+
   // Zbierz startujących
   var startingSlots=assignPlayersToSlots(teamName, formation);
   var startingNames=startingSlots.filter(function(s){return s.starter;}).map(function(s){return s.starter.name;});
   var bench=players.filter(function(p){return!startingNames.includes(p.name);}).slice(0,7);
-  
+
   var html=renderPitchFM(teamName, formation, null);
-  
+
   // Ławka
   if(bench.length){
     html+='<div style="background:rgba(0,0,0,0.85);padding:6px 10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">';
@@ -10338,8 +10271,6 @@ function rTTList(players){
 }
 
 // ── Podgląd składu w modalu drużyny (w module Akademii) ──
-
-// ═══════════════ GENERATOR AI KONSPEKTU ═══════════════
 var _aiKResult = null;  // wygenerowany konspekt do zastosowania
 
 function oAIKonspekt(){
@@ -10653,8 +10584,6 @@ function aiKApply(){
     ST('✓ Konspekt wczytany do kreatora — sprawdź i zapisz!');
   },300);
 }
-
-
 
 function genNextSeasonLabel(season){
   // '2025/26' → '2026/27'
@@ -11746,10 +11675,7 @@ function oAcademyTeam(teamId){
 }
 
 // ── USTAWIENIA ──
-
-// ═══════════════════════════════════════════════════════════════════════════
 // EKSPORT DANYCH
-// ═══════════════════════════════════════════════════════════════════════════
 
 function exportAllXLSX(){
   if(typeof XLSX==='undefined'){ST('Biblioteka XLSX nie załadowana');return;}
@@ -11992,7 +11918,7 @@ async function clearAllData(){
   if(!confirm('Na pewno? Wszystkie dane zostaną trwale usunięte.'))return;
   EXS=[];CYC=[];KONSP=[];TEAMS=[];COACHES=[];PLAYERS=[];TRAININGS=[];
   MATCHES=[];TESTS=[];COACH_PROFILES=[];GAME_MODELS=[];SCOUT_PLAYERS=[];
-  BUDGETS=[];SKLADKI_DEF=[];SKLADKI_WPL=[];
+  BUDGETS=[];FAKTURY=[];SQUAD_PROPOSALS=[];SKLADKI_DEF=[];SKLADKI_WPL=[];
   // Nie resetuj currentSeason i ustawień użytkowników
   saveLS();
   if(window._supaReady){
@@ -12006,8 +11932,6 @@ async function clearAllData(){
   ST('✓ Wszystkie dane usunięte');
   setTimeout(function(){location.reload();},1200);
 }
-
-// ═══════════════ POTENCJAŁ ZAWODNIKA (ocena dyrektorska) ═══════════════
 var POT_CFG={
   'Duży potencjał':{cls:'pot-high',icon:'⭐',short:'Duży'},
   'Średni potencjał':{cls:'pot-mid',icon:'◆',short:'Średni'},
@@ -12050,8 +11974,6 @@ function oSetPotential(playerIdx){
   document.getElementById('mo-sp-body').innerHTML=html;
   oM('mo-set-potential');
 }
-
-// ═══════════════ MODEL GRY ═══════════════
 var editGMIdx=null;
 var GM_SECTION_DEFAULTS=['Organizacja gry w ataku','Organizacja gry w obronie','Przejście atak→obrona','Przejście obrona→atak','Stałe fragmenty gry','Cele szkoleniowe'];
 
@@ -12553,7 +12475,6 @@ function oViewGameModel(i){
   document.getElementById('mo-gmv-body').innerHTML=html;
   oM('mo-gm-view');
 }
-// ═══════════════ FAKTURY ════════════════════════════════════════════════════
 
 var FAK_KATEGORIE=['Transport','Sprzęt sportowy','Stroje i odzież','Wynajem obiektów','Wynagrodzenia','Turnieje i rozgrywki','Ubezpieczenie','Marketing i reklama','Szkolenie','Administracja','Usługi zewnętrzne','Inne'];
 var FAK_STATUS={
@@ -12930,8 +12851,6 @@ function deleteFaktura(idx){
   rFaktury();
   ST('Faktura usunięta');
 }
-
-// ═══════════════ FINANSE ════════════════════════════════════════════════════
 var MONTHS_SHORT=['STY','LUT','MAR','KWI','MAJ','CZE','LIP','SIE','WRZ','PAŹ','LIS','GRU'];
 var FIN_PRESETS={
   sezonowy:[
@@ -13061,7 +12980,7 @@ function rFinanse(){
       var evType=b.meta&&b.meta.eventType?{mecz:'Mecz',turniej:'Turniej',oboz:'Obóz',inne:'Inne'}[b.meta.eventType]||b.meta.eventType:'';
       metaLine=(evType?evType+' · ':'')+(b.meta&&b.meta.eventDate?b.meta.eventDate+' · ':'')+b.year;
     }
-    html+='<div class="fin-budget-card" onclick="oViewBudget(\''+b.id+'\')">'; 
+    html+='<div class="fin-budget-card" onclick="oViewBudget(\''+b.id+'\')">';
     html+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">';
     html+='<div style="flex:1;min-width:0;">';
     html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">';
@@ -13309,10 +13228,7 @@ function oViewBudget(budgetId){
   if(bt==='wydarzenie'){renderEventBudget(b);}
   else{renderBudgetTable(b);}
 }
-
-// ══════════════════════════════════════════════
 // ── KALKULATOR BUDŻETU WYDARZENIA ──
-// ══════════════════════════════════════════════
 function renderEventBudget(b){
   var body=document.getElementById('fin-body');if(!body)return;
   if(!b.evRows)b.evRows=[];
@@ -13761,8 +13677,6 @@ function renameBudgetSection(bid,sid){
   var name=prompt('Nowa nazwa sekcji:',sec.name);if(!name)return;
   sec.name=name.toUpperCase();saveLS();renderBudgetTable(b);
 }
-
-// ═══════════════ SKAUTING ═══════════════
 var SCOUT_STATUS=['Nowy','W obserwacji','Do kontaktu','Odrzucony'];
 var SCOUT_PRIORITY=['Do ściągnięcia','Do dalszej obserwacji','Za słaby'];
 var editScoutIdx=null;
@@ -13933,8 +13847,6 @@ function saveScout(){
   ST('"'+s.name+'" '+(isNew?'dodany':'zaktualizowany'));
 }
 function delScoutModal(){if(editScoutIdx===null)return;delScout(editScoutIdx);editScoutIdx=null;cM('mo-scout');}
-
-// ═══════════════ SKŁADKI ═══════════════
 var SK2_MONTHS_LABELS=['Lip','Sie','Wrz','Paź','Lis','Gru','Sty','Lut','Mar','Kwi','Maj','Cze'];
 // Sezon zaczyna się w lipcu — generuj 12 miesięcy per sezon
 function sk2SeasonMonths(season){
@@ -14324,8 +14236,6 @@ SP=function(n){
     var grpId=DIR_NAV_GROUPS[n];if(grpId)openNavGroup(grpId);
   }
 };
-
-// ═══════════════ IMPORT XLSX ═══════════════
 var IMPORT_TYPES={
   'cwiczenia':{
     label:'Baza ćwiczeń',
@@ -14409,7 +14319,6 @@ var IMPORT_TYPES={
     }
   }
 };
-
 
 // Pobierz zbiorczy szablon Excel dla importu danych
 function downloadImportTemplate(e){
@@ -14957,8 +14866,6 @@ function parseCwiczenieRows(rows){
   });
   return{ok,errors,type:'cwiczenia'};
 }
-
-// ═══════════════ INIT ═══════════════
 // Najpierw załaduj z localStorage (instant), potem Supabase nadpisze
 loadFromLocal();
 if(!TEAMS.length)TEAMS=getDefaultTeams();
