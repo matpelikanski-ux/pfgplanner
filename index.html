@@ -3501,9 +3501,16 @@ Zwróć WYŁĄCZNIE tablicę JSON. Przetłumacz z angielskiego na polski.`;
 
     _showPdfUI('progress',{done:60,total:100,label:'AI analizuje ćwiczenia…',detail:'Wysyłam do Claude API'});
 
+    var _aiKey=getAiApiKey();
+    if(!_aiKey){
+      _pdfState.processing=false;
+      var res2=document.getElementById('pdf-import-result');
+      if(res2)res2.innerHTML='<div class="card" style="padding:16px;border-left:3px solid var(--am);"><div style="font-size:13px;font-weight:600;margin-bottom:8px;">⚠️ Brak klucza API Claude</div><div style="font-size:12px;color:var(--txt2);margin-bottom:12px;">Aby używać funkcji AI, dodaj klucz API w <strong>Ustawienia systemu → Połączenie z AI (Claude)</strong>.</div><button class="btn pri" onclick="SP(\'dir-settings\')" style="margin-right:8px;">Idź do ustawień</button><button class="btn" onclick="resetPdfImport()">Wróć</button></div>';
+      return;
+    }
     var resp = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','x-api-key':getAiApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:8000,
@@ -9224,7 +9231,7 @@ function dirCalDayClick(d){
         +'</div>';
       html+='</div>';
       html+='<div style="display:flex;gap:4px;flex-shrink:0;">';
-      html+='<button class="btn sm" onclick="cM(\'mo-dir-day\');oEditMatch(\''+m.id+'\')">✎ Edytuj</button>';
+      html+='<button class="btn sm" onclick="cM(\'mo-dir-day\');oEditMatch('+midx+')">✎ Edytuj</button>';
       html+='</div></div></div>';
     });
   }
@@ -11024,7 +11031,7 @@ Odpowiedz WYŁĄCZNIE w formacie JSON (bez markdown, bez \`\`\`, bez opisu przed
   try{
     var resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','x-api-key':getAiApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:2000,
@@ -12417,6 +12424,7 @@ function exportBackupJSON(){
 function rDirSettings(){
   var body=document.getElementById('dir-settings-body');if(!body)return;
   var users=getUsers();
+  var savedKey=localStorage.getItem('pfg_anthropic_key')||'';
   var html='<div class="card" style="max-width:480px;margin-bottom:16px;">';
   html+='<div style="font-size:13px;font-weight:600;margin-bottom:14px;">Hasła dostępu</div>';
   html+='<div class="fr2"><div><label class="fl">Hasło trenera</label><input class="fi" id="set-pass-trener" type="password" value="'+escH(users.trener.pass)+'"/></div>';
@@ -12425,6 +12433,36 @@ function rDirSettings(){
   html+='<div><label class="fl">Nazwa konta dyrektora</label><input class="fi" id="set-name-dyrektor" value="'+escH(users.dyrektor.name||'Dyrektor')+'"/></div></div>';
   html+='<button class="btn pri" onclick="saveSettings()">Zapisz ustawienia</button>';
   html+='</div>';
+
+  // ── SEKCJA AI ──────────────────────────────────────────────────────────
+  html+='<div class="card" style="max-width:480px;margin-bottom:16px;">';
+  html+='<div style="font-size:13px;font-weight:600;margin-bottom:4px;">🤖 Połączenie z AI (Claude)</div>';
+  html+='<div style="font-size:11px;color:var(--txt2);line-height:1.6;margin-bottom:12px;">';
+  html+='Klucz API Claude umożliwia funkcję <strong>Import PDF (AI)</strong> — automatyczne wyodrębnianie ćwiczeń z plików PDF przez sztuczną inteligencję.<br>';
+  html+='Klucz jest przechowywany wyłącznie lokalnie w tej przeglądarce (localStorage). Nie jest wysyłany nigdzie poza zapytaniami do api.anthropic.com.';
+  html+='</div>';
+  html+='<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;">';
+  html+='<div style="flex:1;"><label class="fl">Klucz API Anthropic (sk-ant-...)</label>';
+  html+='<input class="fi" id="set-ai-key" type="password" value="'+escH(savedKey)+'" placeholder="sk-ant-api03-..." style="font-family:monospace;letter-spacing:0.03em;"/></div>';
+  html+='<button class="btn" onclick="testAiKey()" style="flex-shrink:0;white-space:nowrap;">Testuj połączenie</button>';
+  html+='</div>';
+  html+='<div id="ai-key-status" style="font-size:11px;margin-bottom:10px;color:'+(savedKey?'var(--g)':'var(--txt3)')+';">';
+  html+=(savedKey?'✅ Klucz zapisany · AI Import PDF gotowy do użycia':'⚪ Brak klucza · funkcja AI niedostępna');
+  html+='</div>';
+  html+='<div style="display:flex;gap:8px;">';
+  html+='<button class="btn pri" onclick="saveAiKey()">Zapisz klucz</button>';
+  html+=(savedKey?'<button class="btn dan sm" onclick="clearAiKey()">Usuń klucz</button>':'');
+  html+='</div>';
+  html+='<div style="margin-top:12px;padding:10px 12px;background:var(--sur2);border-radius:var(--r2);font-size:11px;color:var(--txt3);line-height:1.6;">';
+  html+='<strong>Jak uzyskać klucz API:</strong><br>';
+  html+='1. Wejdź na <a href="https://console.anthropic.com" target="_blank" style="color:var(--g);">console.anthropic.com</a><br>';
+  html+='2. Zarejestruj się lub zaloguj<br>';
+  html+='3. Wejdź w <strong>API Keys</strong> → kliknij <strong>Create Key</strong><br>';
+  html+='4. Skopiuj klucz (zaczyna się od <code>sk-ant-</code>) i wklej powyżej<br>';
+  html+='Koszt: ok. $0.003 za stronę PDF (bardzo tani)';
+  html+='</div>';
+  html+='</div>';
+
   // ── SEKCJA EKSPORTU ──────────────────────────────────────────────────────
   html+='<div class="card" style="max-width:480px;margin-bottom:16px;">';
   html+='<div style="font-size:13px;font-weight:600;margin-bottom:4px;">Eksport i kopia zapasowa</div>';
@@ -12478,6 +12516,55 @@ function saveSettings(){
   users.dyrektor.pass=document.getElementById('set-pass-dyrektor').value||'dyrektor';
   users.dyrektor.name=document.getElementById('set-name-dyrektor').value||'Dyrektor';
   saveUsers(users);ST('✓ Ustawienia zapisane');
+}
+
+// ── Klucz API Anthropic ────────────────────────────────────────────────────
+function getAiApiKey(){
+  return localStorage.getItem('pfg_anthropic_key')||'';
+}
+function saveAiKey(){
+  var key=(document.getElementById('set-ai-key')||{value:''}).value.trim();
+  if(!key){ST('Wpisz klucz API');return;}
+  if(!key.startsWith('sk-ant-')){ST('Nieprawidłowy format klucza (powinien zaczynać się od sk-ant-)');return;}
+  localStorage.setItem('pfg_anthropic_key', key);
+  var s=document.getElementById('ai-key-status');
+  if(s){s.textContent='✅ Klucz zapisany · AI Import PDF gotowy do użycia';s.style.color='var(--g)';}
+  ST('✅ Klucz API zapisany');
+  // Odśwież stronę ustawień żeby pojawił się przycisk "Usuń"
+  setTimeout(function(){rDirSettings();},300);
+}
+function clearAiKey(){
+  if(!confirm('Usunąć klucz API? Funkcja AI zostanie wyłączona.'))return;
+  localStorage.removeItem('pfg_anthropic_key');
+  var s=document.getElementById('ai-key-status');
+  if(s){s.textContent='⚪ Brak klucza · funkcja AI niedostępna';s.style.color='var(--txt3)';}
+  ST('Klucz API usunięty');
+  setTimeout(function(){rDirSettings();},300);
+}
+async function testAiKey(){
+  var key=(document.getElementById('set-ai-key')||{value:''}).value.trim()||getAiApiKey();
+  var s=document.getElementById('ai-key-status');
+  if(!key){if(s){s.textContent='⚪ Wpisz klucz aby przetestować';s.style.color='var(--txt3)';}return;}
+  if(s){s.textContent='⏳ Testuję połączenie…';s.style.color='var(--txt3)';}
+  try{
+    var r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'ping'}]})
+    });
+    if(r.ok){
+      if(s){s.textContent='✅ Połączenie działa poprawnie!';s.style.color='var(--g)';}
+      ST('✅ Klucz API działa');
+    } else {
+      var err=await r.json().catch(function(){return {};});
+      var msg=err.error&&err.error.message||'Błąd '+r.status;
+      if(s){s.textContent='❌ Błąd: '+msg;s.style.color='var(--red)';}
+      ST('❌ Błąd API: '+msg);
+    }
+  }catch(e){
+    if(s){s.textContent='❌ Brak połączenia z api.anthropic.com';s.style.color='var(--red)';}
+    ST('❌ Brak połączenia z API');
+  }
 }
 function clearCoachProfiles(){COACH_PROFILES=[];saveLS();rDirCoaches();ST('Karty trenerów wyczyszczone');}
 
