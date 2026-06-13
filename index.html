@@ -1283,20 +1283,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="inner" id="pdf-import-body">
 
-    <!-- Sekcja: gotowe zestawy -->
-    <div class="card" style="padding:16px 20px;margin-bottom:20px;">
-      <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Gotowe zestawy ćwiczeń</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--sur2);border-radius:var(--r2);">
-        <div>
-          <div style="font-size:13px;font-weight:600;">🐺 Wolverhampton Wanderers Academy</div>
-          <div style="font-size:11px;color:var(--txt2);">150 ćwiczeń · WU/TP/PP/AD · Kevin Thelwell · już wbudowane w aplikację</div>
-        </div>
-        <button class="btn" onclick="oImportWolves()" style="background:#8B5CF6;color:#fff;border-color:#7C3AED;flex-shrink:0;">
-          <svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>
-          Dodaj do bazy
-        </button>
-      </div>
-    </div>
 
     <!-- Sekcja: import własnego PDF -->
     <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Import własnego pliku PDF</div>
@@ -3585,19 +3571,6 @@ function confirmPdfImport(){
 }
 
 
-
-function oImportWolves(){
-  if(typeof WOLVES_EXS==='undefined'||!WOLVES_EXS.length){ST('Brak danych Wolves Academy');return;}
-  var existing=new Set((EXS||[]).map(function(e){return e.n;}));
-  var toAdd=WOLVES_EXS.filter(function(e){return !existing.has(e.n);});
-  var skipped=WOLVES_EXS.length-toAdd.length;
-  if(!toAdd.length){ST('Wszystkie ćwiczenia Wolves Academy już są w bazie ('+skipped+')');return;}
-  if(!confirm('Dodać '+toAdd.length+' ćwiczeń z programu Wolverhampton Wanderers Academy do bazy?'+(skipped?' ('+skipped+' już istnieje — pominiętych)':'')))return;
-  EXS=toAdd.concat(EXS||[]);
-  saveLS();supaSetEXS();
-  RE();try{rDirEX();}catch(e){}uD();
-  ST('✅ Dodano '+toAdd.length+' ćwiczeń Wolves Academy do bazy'+(skipped?' · pominięto '+skipped+' duplikatów':''));
-}
 
 function oAE(){EI=null;IMG=null;IMN=null;rEF({},true);oM('mo-ex');}
 function oVE(idx){EI=idx;IMG=EXS[idx].img||null;IMN=EXS[idx].imn||null;rEV(EXS[idx],idx);oM('mo-ex');}
