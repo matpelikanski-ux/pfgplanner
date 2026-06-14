@@ -1408,18 +1408,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- ROZGRYWKI -->
 <div id="pg-matches" class="pg">
   <div class="tb">
-    <div><div class="t1">Rozgrywki</div><div class="t2" id="matches-sub">Zestawienie meczów</div></div>
-    <div class="tb-r">
-      <select class="fsel-sm" id="matches-team-sel" style="min-width:140px;"><option value="">Wszystkie drużyny</option></select>
-    </div>
+    <div><div class="t1">Rozgrywki</div><div class="t2" id="matches-sub">Zestawienie meczów i turniejów</div></div>
   </div>
-  <div class="inner" id="matches-body">
-    <div class="empty">
-      <div class="ei2"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M5 5l6 6M11 5L5 11" stroke-width="1"/><circle cx="8" cy="8" r="2.5" fill="none"/></svg></div>
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Rozgrywki drużyny</div>
-      <div style="font-size:12px;color:var(--txt2);">Moduł w przygotowaniu — zestawienie wszystkich meczów wybranej drużyny.</div>
-    </div>
-  </div>
+  <div class="inner" id="matches-body"></div>
 </div>
 
 <!-- DIR: KARTY TRENERÓW -->
@@ -6845,6 +6836,7 @@ function renderProtokol(mIdx){
   document.getElementById('mo-prot-body').innerHTML=html;
   document.getElementById('mo-prot-foot').innerHTML=
     '<button class="btn" onclick="cM(\'mo-prot\')">Anuluj</button>'+
+    '<button class="btn" onclick="cM(\'mo-prot\');oEditMatch('+mIdx+')" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M11 2l3 3-8 8H3v-3z"/></svg>Edytuj mecz</button>'+
     '<button class="btn pri" onclick="saveProtokol()"><svg viewBox="0 0 16 16" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 5h10v8H3zM6 5V3h4v2"/></svg>Zapisz protokół</button>';
 }
 
@@ -9429,6 +9421,78 @@ function ovKpiCircle(label,pct,sub,col,hideRing){
       :'<div style="position:relative;width:60px;height:60px;flex-shrink:0;">'+ring+pctTxt+'</div>')
     +'<div><div class="sl">'+label+'</div>'+(hideRing?'':'<div class="sd">'+sub+'</div>')+'</div>'
     +'</div>';
+}
+
+// ── Rozgrywki (trener) — mecze + turnieje akademii ──
+var coachMatchTeam='';
+function rCoachMatches(){
+  var body=document.getElementById('matches-body');if(!body)return;
+  var teams=TEAMS.filter(t=>t.season===currentSeason);
+
+  var rows=MATCHES.filter(m=>!coachMatchTeam||m.team===coachMatchTeam);
+
+  // KPI — tylko mecze (nie turnieje) z wynikiem
+  var played=rows.filter(m=>(!m.type||m.type==='mecz')&&m.wynikNasz!==null&&m.wynikNasz!==undefined);
+  var won=played.filter(m=>m.wynikNasz>m.wynikRywal).length;
+  var draw=played.filter(m=>m.wynikNasz===m.wynikRywal).length;
+  var lost=played.filter(m=>m.wynikNasz<m.wynikRywal).length;
+  var gf=played.reduce((s,m)=>s+(m.wynikNasz||0),0);
+  var ga=played.reduce((s,m)=>s+(m.wynikRywal||0),0);
+
+  var html='';
+  html+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">';
+  html+='<select class="fsel-sm" id="coach-match-team" style="min-width:160px;" onchange="coachMatchTeam=this.value;rCoachMatches();"><option value="">Wszystkie drużyny</option>'+teams.map(t=>'<option value="'+escH(t.name)+'"'+(t.name===coachMatchTeam?' selected':'')+'>'+escH(t.name)+'</option>').join('')+'</select>';
+  html+='</div>';
+
+  html+='<div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">';
+  html+='<div class="sc"><div class="sl">Rozegrane</div><div class="sv">'+played.length+'</div><div class="sd">z wynikiem</div></div>';
+  html+='<div class="sc"><div class="sl">Bilans</div><div class="sv" style="font-size:18px;"><span style="color:var(--g);">'+won+'</span> · <span style="color:var(--am);">'+draw+'</span> · <span style="color:var(--red);">'+lost+'</span></div><div class="sd">W · R · P</div></div>';
+  html+='<div class="sc"><div class="sl">Bramki</div><div class="sv" style="font-size:18px;">'+gf+':'+ga+'</div><div class="sd">strzelone : stracone</div></div>';
+  html+='<div class="sc"><div class="sl">Skuteczność</div><div class="sv" style="color:var(--g);">'+(played.length?Math.round(won/played.length*100):0)+'%</div><div class="sd">wygranych</div></div>';
+  html+='</div>';
+
+  // Sortowanie: najnowsze u góry
+  var list=rows.slice().sort((a,b)=>(b.date+(b.time||'')).localeCompare(a.date+(a.time||'')));
+
+  html+='<div style="overflow-x:auto;">';
+  html+='<table style="border-collapse:collapse;font-size:11px;width:100%;min-width:820px;">';
+  html+='<thead><tr style="background:var(--sur2);">';
+  ['Data','Godz.','Rodzaj','Drużyna','','Rywal','Wynik',''].forEach(h=>{
+    html+='<th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--brd);font-size:10px;color:var(--txt3);font-weight:600;text-transform:uppercase;">'+h+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+  if(!list.length){
+    html+='<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--txt2);">Brak spotkań do wyświetlenia.</td></tr>';
+  }else{
+    list.forEach(m=>{
+      var isTurniej=m.type==='turniej';
+      var hasRes=!isTurniej&&m.wynikNasz!==null&&m.wynikNasz!==undefined;
+      var win=hasRes&&m.wynikNasz>m.wynikRywal,lose=hasRes&&m.wynikNasz<m.wynikRywal,drw=hasRes&&m.wynikNasz===m.wynikRywal;
+      var resCol=win?'var(--g)':lose?'var(--red)':drw?'var(--am)':'var(--txt3)';
+      var rodzaj=isTurniej?'<span class="bdg" style="background:#FFF8ED;color:#8A5F00;">🏆 Turniej</span>':'<span class="bdg" style="background:#E6F1FB;color:#0C447C;">'+escH(m.rodzaj||'Mecz')+'</span>';
+      var dateCell=fd(m.date)+(isTurniej&&m.dateEnd&&m.dateEnd!==m.date?'–'+fd(m.dateEnd).slice(0,5):'');
+      var rywal=isTurniej?escH(m.nazwa||'Turniej'):escH(m.opponent||'—');
+      var venue=isTurniej?'':(m.home?'<span title="U siebie">🏠</span>':'<span title="Wyjazd">✈️</span>');
+      var wynik=hasRes?'<span style="font-weight:700;color:'+resCol+';">'+m.wynikNasz+':'+m.wynikRywal+'</span>':'<span style="color:var(--txt3);">–:–</span>';
+      var act=isTurniej
+        ?'<button class="btn sm" onclick="event.stopPropagation();oMatchDay(\''+m.id+'\')">✎ Edytuj</button>'
+        :'<button class="btn sm" onclick="event.stopPropagation();oProtkolFromDay(\''+m.id+'\')">Protokół</button>';
+      var rowClick=isTurniej?'oMatchDay(\''+m.id+'\')':'oProtkolFromDay(\''+m.id+'\')';
+      html+='<tr style="border-bottom:1px solid var(--brd);cursor:pointer;" onclick="'+rowClick+'">';
+      html+='<td style="padding:6px 8px;white-space:nowrap;">'+dateCell+'</td>';
+      html+='<td style="padding:6px 8px;">'+(m.time||'—')+'</td>';
+      html+='<td style="padding:6px 8px;">'+rodzaj+'</td>';
+      html+='<td style="padding:6px 8px;font-weight:600;">'+escH(m.team||'')+'</td>';
+      html+='<td style="padding:6px 8px;text-align:center;">'+venue+'</td>';
+      html+='<td style="padding:6px 8px;">'+rywal+'</td>';
+      html+='<td style="padding:6px 8px;">'+wynik+'</td>';
+      html+='<td style="padding:6px 8px;text-align:right;">'+act+'</td>';
+      html+='</tr>';
+    });
+  }
+  html+='</tbody></table></div>';
+
+  body.innerHTML=html;
 }
 
 var dirPlanCalMonth=TODAY.getMonth(), dirPlanCalYear=TODAY.getFullYear();
@@ -14968,6 +15032,7 @@ SP=function(n){
   if(n==='dir-overview')rDirOverview();
   if(n==='dir-trainings')rDirTrainings();
   if(n==='trainings')rCoachTrainings();
+  if(n==='matches')rCoachMatches();
   if(n==='dir-talent')rDirTalent();
   if(n==='dir-ioz')rDirIOZ();
   if(n==='dir-coaches')rDirCoaches();
