@@ -13769,11 +13769,24 @@ function emptyBudget(name,year,budgetType,meta){
     saldoStart:0,
     budgetType:bt,
     meta:meta||{},
-    sections:presets.map(ps=>({
-      id:genId(),name:ps.name,type:ps.type,
-      rows:ps.rows.map(rn=>({id:genId(),name:rn,vals:Array(12).fill(null).map(()=>({budzet:0,aktualny:null}))}))
-    }))
+    periods:MONTHS_SHORT.slice(),
+    sections:[]
   };
+}
+
+// Lista nagłówków kolumn danego budżetu (domyślnie 12 miesięcy dla starych budżetów)
+function budgetPeriods(b){
+  if(b&&Array.isArray(b.periods)&&b.periods.length)return b.periods;
+  return MONTHS_SHORT;
+}
+// Upewnij się, że każdy wiersz ma vals o długości == liczbie kolumn
+function ensureBudgetVals(b){
+  var n=budgetPeriods(b).length;
+  (b.sections||[]).forEach(sec=>(sec.rows||[]).forEach(row=>{
+    if(!Array.isArray(row.vals))row.vals=[];
+    while(row.vals.length<n)row.vals.push({budzet:0,aktualny:null});
+    if(row.vals.length>n)row.vals.length=n;
+  }));
 }
 
 function getBudget(){return BUDGETS.find(b=>b.id===currentBudgetId);}
@@ -14283,6 +14296,9 @@ function evSetIncome(bid,val){
 
 function renderBudgetTable(b){
   var body=document.getElementById('fin-body');if(!body)return;
+  ensureBudgetVals(b);
+  var P=budgetPeriods(b), N=P.length;
+  var EMPTY_TD=N*3+3; // kolumny danych: N okresów ×3 + RAZEM ×3
 
   var html='';
 
@@ -14290,6 +14306,7 @@ function renderBudgetTable(b){
   html+='<div style="display:flex;gap:8px;align-items:center;padding:12px 18px;background:var(--sur);border-bottom:1px solid var(--brd);">';
   html+='<button class="btn sm" onclick="addBudgetSection(\'przychod\')" style="background:var(--lg);color:var(--dg);border-color:#5DCAA5;">+ Sekcja przychodów</button>';
   html+='<button class="btn sm" onclick="addBudgetSection(\'koszt\')" style="background:var(--lred);color:var(--red);border-color:#F0A090;">+ Sekcja kosztów</button>';
+  html+='<button class="btn sm" onclick="addBudgetPeriod(\''+b.id+'\')" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;">+ Kolumna</button>';
   html+='<div style="margin-left:auto;font-size:11px;color:var(--txt2);">Kliknij komórkę → wpisz → Enter lub kliknij poza · Saldo startowe: <b>'+fPLN(b.saldoStart)+'</b></div>';
   html+='</div>';
 
@@ -14299,21 +14316,25 @@ function renderBudgetTable(b){
 
   // ── Nagłówki ──
   html+='<thead style="position:sticky;top:0;z-index:10;">';
-  // Wiersz 1: miesiące
+  // Wiersz 1: okresy
   html+='<tr>'
     +'<th rowspan="2" class="fin-sticky-col" style="min-width:220px;left:0;z-index:11;background:var(--sur2);text-align:left;vertical-align:bottom;">Pozycja</th>'
     +'<th rowspan="2" class="fin-sticky-col" style="min-width:90px;left:220px;z-index:11;background:var(--sur2);text-align:left;vertical-align:bottom;">Kategoria</th>';
-  MONTHS_SHORT.forEach(m=>{
-    html+='<th colspan="3" style="background:#3C3489;color:#fff;text-align:center;padding:5px 4px;font-size:10px;letter-spacing:.04em;border:1px solid #4a3aaa;">'+m+'</th>';
+  P.forEach((m,pi)=>{
+    html+='<th colspan="3" style="background:#3C3489;color:#fff;text-align:center;padding:5px 4px;font-size:10px;letter-spacing:.04em;border:1px solid #4a3aaa;position:relative;">'
+      +'<span ondblclick="renameBudgetPeriod(\''+b.id+'\','+pi+')" title="Dwuklik: zmień nazwę" style="cursor:text;">'+escH(m)+'</span>'
+      +(N>1?' <span onclick="delBudgetPeriod(\''+b.id+'\','+pi+')" title="Usuń kolumnę" style="cursor:pointer;opacity:.6;font-size:10px;">×</span>':'')
+      +'</th>';
   });
   html+='<th colspan="3" style="background:#085041;color:#fff;text-align:center;padding:5px 4px;font-size:10px;letter-spacing:.04em;border:1px solid #0d6b52;">RAZEM</th>';
   html+='</tr>';
   // Wiersz 2: B / A / Δ
   html+='<tr>';
-  for(var hi=0;hi<13;hi++){
-    html+='<th style="background:'+(hi<12?'#4a3aaa':'#0d6b52')+';color:#fff;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+(hi<12?'#5a4adb':'#1a8a6a')+';">B</th>';
-    html+='<th style="background:'+(hi<12?'#4a3aaa':'#0d6b52')+';color:#ddf;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+(hi<12?'#5a4adb':'#1a8a6a')+';">A</th>';
-    html+='<th style="background:'+(hi<12?'#4a3aaa':'#0d6b52')+';color:#ffd;padding:3px 5px;font-size:8px;min-width:50px;border:1px solid '+(hi<12?'#5a4adb':'#1a8a6a')+';">Δ</th>';
+  for(var hi=0;hi<N+1;hi++){
+    var isTot=hi>=N;
+    html+='<th style="background:'+(!isTot?'#4a3aaa':'#0d6b52')+';color:#fff;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+(!isTot?'#5a4adb':'#1a8a6a')+';">B</th>';
+    html+='<th style="background:'+(!isTot?'#4a3aaa':'#0d6b52')+';color:#ddf;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+(!isTot?'#5a4adb':'#1a8a6a')+';">A</th>';
+    html+='<th style="background:'+(!isTot?'#4a3aaa':'#0d6b52')+';color:#ffd;padding:3px 5px;font-size:8px;min-width:50px;border:1px solid '+(!isTot?'#5a4adb':'#1a8a6a')+';">Δ</th>';
   }
   html+='</tr>';
   html+='</thead>';
@@ -14321,19 +14342,22 @@ function renderBudgetTable(b){
   html+='<tbody>';
 
   // ── Akumulatory globalne ──
-  var totalPrzychBud=Array(12).fill(0), totalPrzychAkt=Array(12).fill(null);
-  var totalKosztBud=Array(12).fill(0), totalKosztAkt=Array(12).fill(null);
+  var totalPrzychBud=Array(N).fill(0), totalPrzychAkt=Array(N).fill(null);
+  var totalKosztBud=Array(N).fill(0), totalKosztAkt=Array(N).fill(null);
 
   function accAdd(arr,idx,v){
-    // null+val = val, val+null = val, null+null = null
     if(v===null)return;
     arr[idx]=(arr[idx]===null?0:arr[idx])+v;
   }
 
+  if(!b.sections.length){
+    html+='<tr><td colspan="'+(EMPTY_TD+2)+'" style="padding:30px;text-align:center;color:var(--txt2);font-size:12px;">Budżet jest pusty. Dodaj sekcję przychodów lub kosztów, aby rozpocząć.</td></tr>';
+  }
+
   b.sections.forEach(sec=>{
     var isPrzychod=sec.type==='przychod';
-    var secBud=Array(12).fill(0);
-    var secAkt=Array(12).fill(null);
+    var secBud=Array(N).fill(0);
+    var secAkt=Array(N).fill(null);
 
     // ── Nagłówek sekcji ──
     var headerBg=isPrzychod?'#E1F5EE':'#EEEDFE';
@@ -14347,12 +14371,12 @@ function renderBudgetTable(b){
       +'<button onclick="renameBudgetSection(\''+b.id+'\',\''+sec.id+'\')" style="font-size:9px;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.1);border-radius:3px;padding:1px 5px;cursor:pointer;">✎</button>'
       +'<button onclick="delBudgetSection(\''+b.id+'\',\''+sec.id+'\')" style="font-size:9px;background:rgba(200,0,0,.1);color:#c00;border:1px solid rgba(200,0,0,.2);border-radius:3px;padding:1px 5px;cursor:pointer;">×</button>'
       +'</span></div></td>';
-    for(var ci=0;ci<39;ci++)html+='<td style="background:'+headerBg+';"></td>';
+    for(var ci=0;ci<EMPTY_TD;ci++)html+='<td style="background:'+headerBg+';"></td>';
     html+='</tr>';
 
     // ── Wiersze danych ──
     sec.rows.forEach(row=>{
-      var rowBud=Array(12).fill(0), rowAkt=Array(12).fill(null);
+      var rowBud=Array(N).fill(0), rowAkt=Array(N).fill(null);
       row.vals.forEach((v,vi)=>{
         rowBud[vi]=v.budzet||0;
         rowAkt[vi]=v.aktualny;  // może być null
@@ -14407,7 +14431,7 @@ function renderBudgetTable(b){
     html+='<tr style="font-weight:700;">';
     html+='<td colspan="2" class="fin-sticky-col" style="left:0;z-index:5;background:'+secBg+';color:'+secTc+';padding:5px 10px;font-size:11px;border:1px solid var(--brd);">Suma: '+escH(sec.name)+'</td>';
     var secTotalB=0,secTotalA=null;
-    for(var mi=0;mi<12;mi++){
+    for(var mi=0;mi<N;mi++){
       var sb=secBud[mi]; var sa=secAkt[mi];
       var sd=sa!==null?sa-sb:null;
       html+='<td style="text-align:right;padding:4px 6px;background:'+secBg+';color:#0C447C;border:1px solid var(--brd);">'+Math.round(sb).toLocaleString('pl-PL')+'</td>';
@@ -14443,7 +14467,7 @@ function renderBudgetTable(b){
     var annualDiff=annualA!==null?annualA-annualB:null;
     html+='<tr>';
     html+='<td colspan="2" class="fin-sticky-col" style="left:0;z-index:5;background:'+row.bg+';color:'+row.tc+';font-weight:700;font-size:12px;padding:7px 10px;border:1px solid rgba(0,0,0,.15);">'+row.label+'</td>';
-    for(var mi2=0;mi2<12;mi2++){
+    for(var mi2=0;mi2<N;mi2++){
       var bv2=row.bArr[mi2]; var av2=row.aArr[mi2];
       var d2=av2!==null?av2-bv2:null;
       var pos=bv2>=0;var apos=av2!==null&&av2>=0;
@@ -14498,14 +14522,49 @@ function addBudgetSection(type){
   var b=getBudget();if(!b)return;
   var name=prompt('Nazwa nowej sekcji:',type==='przychod'?'NOWY PRZYCHÓD':'NOWE KOSZTY');
   if(!name)return;
-  b.sections.push({id:genId(),name:name.toUpperCase(),type,rows:[{id:genId(),name:'Pozycja 1',category:'',vals:Array(12).fill(null).map(()=>({budzet:0,aktualny:null}))}]});
+  var n=budgetPeriods(b).length;
+  b.sections.push({id:genId(),name:name.toUpperCase(),type,rows:[{id:genId(),name:'Pozycja 1',category:'',vals:Array(n).fill(null).map(()=>({budzet:0,aktualny:null}))}]});
+  saveLS();renderBudgetTable(b);
+}
+// ── Kolumny (okresy) budżetu ──
+function addBudgetPeriod(bid){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  if(!Array.isArray(b.periods)||!b.periods.length)b.periods=MONTHS_SHORT.slice();
+  var label=prompt('Nazwa nowej kolumny:','Kolumna '+(b.periods.length+1));
+  if(label===null)return;
+  b.periods.push(label.trim()||('Kolumna '+(b.periods.length+1)));
+  (b.sections||[]).forEach(sec=>(sec.rows||[]).forEach(row=>{
+    if(!Array.isArray(row.vals))row.vals=[];
+    row.vals.push({budzet:0,aktualny:null});
+  }));
+  saveLS();renderBudgetTable(b);
+}
+function renameBudgetPeriod(bid,pi){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  if(!Array.isArray(b.periods)||!b.periods.length)b.periods=MONTHS_SHORT.slice();
+  var cur=b.periods[pi]||'';
+  var label=prompt('Nazwa kolumny:',cur);
+  if(label===null)return;
+  b.periods[pi]=label.trim()||cur;
+  saveLS();renderBudgetTable(b);
+}
+function delBudgetPeriod(bid,pi){
+  var b=BUDGETS.find(x=>x.id===bid);if(!b)return;
+  if(!Array.isArray(b.periods)||!b.periods.length)b.periods=MONTHS_SHORT.slice();
+  if(b.periods.length<=1){alert('Budżet musi mieć co najmniej jedną kolumnę.');return;}
+  if(!confirm('Usunąć kolumnę „'+(b.periods[pi]||'')+'” wraz z danymi?'))return;
+  b.periods.splice(pi,1);
+  (b.sections||[]).forEach(sec=>(sec.rows||[]).forEach(row=>{
+    if(Array.isArray(row.vals))row.vals.splice(pi,1);
+  }));
   saveLS();renderBudgetTable(b);
 }
 function addBudgetRow(secId){
   var b=getBudget();if(!b)return;
   var sec=b.sections.find(s=>s.id===secId);if(!sec)return;
   var name=prompt('Nazwa pozycji:','Nowa pozycja');if(!name)return;
-  sec.rows.push({id:genId(),name,category:'',vals:Array(12).fill(null).map(()=>({budzet:0,aktualny:null}))});
+  var n=budgetPeriods(b).length;
+  sec.rows.push({id:genId(),name,category:'',vals:Array(n).fill(null).map(()=>({budzet:0,aktualny:null}))});
   saveLS();renderBudgetTable(b);
 }
 function delBudgetRow(bid,sid,rid){
