@@ -5752,10 +5752,12 @@ function rTeams(){
     html+='<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:32px;text-align:center;margin-bottom:16px;">';
     html+='<div style="font-size:13px;color:var(--txt2);">Brak drużyn w sezonie '+currentSeason+'.</div>';
     html+='<div style="font-size:11px;color:var(--txt3);margin-top:4px;">Kliknij "Dodaj drużynę" lub skopiuj z poprzedniego sezonu.</div>';
-    // Kopiuj z poprzedniego
-    var prevSeason=SEASONS[SEASONS.indexOf(currentSeason)-1];
-    var prevTeams=TEAMS.filter(t=>t.season===prevSeason);
-    if(prevTeams.length) html+='<button class="btn sm" style="margin-top:12px;" onclick="copySeasonTeams(\''+prevSeason+'\')">Kopiuj drużyny z '+prevSeason+' →</button>';
+    // Kopiuj z poprzedniego — znajdź dowolny sezon, który MA drużyny
+    var seasonsWithTeams=[...new Set(TEAMS.map(t=>t.season).filter(Boolean))].filter(s=>s!==currentSeason);
+    var prevSeason=null;
+    seasonsWithTeams.forEach(s=>{ if(genNextSeasonLabel(s)===currentSeason) prevSeason=s; });
+    if(!prevSeason&&seasonsWithTeams.length) prevSeason=seasonsWithTeams.sort().reverse()[0];
+    if(prevSeason) html+='<button class="btn sm" style="margin-top:12px;" onclick="copySeasonTeams(\''+prevSeason+'\')">Kopiuj drużyny z '+prevSeason+' →</button>';
     html+='</div>';
   } else {
     html+='<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">';
@@ -5997,8 +5999,12 @@ function updCoachSelect(selId,currentVal){
 
 function copySeasonTeams(fromSeason){
   var src=TEAMS.filter(t=>t.season===fromSeason);
-  src.forEach(t=>{TEAMS.push({...t,id:genId(),season:currentSeason});});
-  saveLS();rTeams();ST('Skopiowano '+src.length+' drużyn do sezonu '+currentSeason);}
+  var added=0;
+  src.forEach(t=>{
+    if(TEAMS.some(x=>x.season===currentSeason&&x.name===t.name))return;
+    TEAMS.push({...t,id:genId(),season:currentSeason});added++;
+  });
+  saveLS();rTeams();try{rDirDash();}catch(e){}ST('Skopiowano '+added+' drużyn do sezonu '+currentSeason);}
 
 // Modal drużyny
 function oAddTeam(){editTeamIdx=null;openTeamModal({id:genId(),name:'',color:TEAM_COLORS[TEAMS.length%TEAM_COLORS.length],category:'',players:16,season:currentSeason,coach:'',coach2:'',notes:''});}
@@ -11498,9 +11504,37 @@ function switchViewSeason(season){
   if(!season)return;
   currentSeason=season;
   saveLS();
+
+  // Jeśli docelowy sezon nie ma żadnych drużyn, zaproponuj skopiowanie z poprzedniego
+  var hasTeams=TEAMS.some(t=>t.season===season);
+  if(!hasTeams){
+    // Znajdź sezon źródłowy z drużynami (najpierw chronologicznie poprzedni, potem dowolny)
+    var withTeams=[...new Set(TEAMS.map(t=>t.season).filter(Boolean))];
+    var src=null;
+    // preferuj sezon o etykiecie bezpośrednio poprzedzającej
+    withTeams.forEach(s=>{ if(genNextSeasonLabel(s)===season) src=s; });
+    if(!src&&withTeams.length) src=withTeams.sort().reverse()[0];
+    if(src&&confirm('Sezon '+season+' nie ma jeszcze drużyn.\n\nSkopiować drużyny i zawodników z sezonu '+src+'?')){
+      var srcTeams=TEAMS.filter(t=>t.season===src);
+      var addedT=0,addedP=0;
+      srcTeams.forEach(t=>{
+        if(TEAMS.some(x=>x.season===season&&x.name===t.name))return;
+        TEAMS.push(Object.assign({},t,{id:genId(),season:season}));addedT++;
+      });
+      var srcPlayers=PLAYERS.filter(p=>srcTeams.some(t=>t.name===p.team));
+      srcPlayers.forEach(p=>{
+        if(PLAYERS.some(x=>x.name===p.name&&x.team===p.team&&x.season===season))return;
+        PLAYERS.push(Object.assign({},p,{id:genId(),season:season}));addedP++;
+      });
+      saveLS();
+      ST('✓ Skopiowano '+addedT+' drużyn · '+addedP+' zawodników do sezonu '+season);
+    }
+  }
+
   // Odśwież aktualną stronę
   refreshCurrentPage();
   rDirDash();
+  if(typeof rTeams==='function'){try{rTeams();}catch(e){}}
   ST('Aktywny sezon: '+season);
 }
 
