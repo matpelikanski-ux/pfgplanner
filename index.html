@@ -2523,22 +2523,31 @@ function rPlanGoals(){
   var html='';
   fazaList.sort().forEach(faza=>{
     var c=CCloc[faza]||{bg:'var(--sur2)',tc:'var(--txt2)'};
-    // suma fazy (po wartościach efektywnych)
+    // suma fazy (po wartościach efektywnych) — baza dla procentu udziału
     var fazaTotal=0;
     Object.keys(tree[faza]).forEach(kon=>Object.keys(tree[faza][kon]).forEach(szc=>{
       fazaTotal+=effVal(teamFilter,faza,kon,szc,tree[faza][kon][szc]);
     }));
     grandTotal+=fazaTotal;
+    var pct=function(v){return fazaTotal>0?Math.round(v/fazaTotal*1000)/10:0;};
 
     html+='<div style="margin-bottom:14px;border:1px solid var(--brd);border-radius:var(--r2);overflow:hidden;">';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:'+c.bg+';color:'+c.tc+';font-weight:700;font-size:12px;">'
-      +'<span>'+escH(faza)+'</span><span>Σ '+fazaTotal+'</span></div>';
+    // Nagłówek fazy
+    html+='<div style="display:flex;align-items:center;padding:8px 12px;background:'+c.bg+';color:'+c.tc+';font-weight:700;font-size:12px;">'
+      +'<span style="flex:1;">'+escH(faza)+'</span>'
+      +'<span style="width:90px;text-align:right;">Suma</span>'
+      +'<span style="width:70px;text-align:right;">Procent</span>'
+      +'</div>';
 
     Object.keys(tree[faza]).sort().forEach(kon=>{
       var konTotal=0;
       Object.keys(tree[faza][kon]).forEach(szc=>{konTotal+=effVal(teamFilter,faza,kon,szc,tree[faza][kon][szc]);});
-      html+='<div style="padding:6px 12px;background:var(--sur2);border-top:1px solid var(--brd);font-size:11px;font-weight:600;color:var(--txt2);display:flex;justify-content:space-between;">'
-        +'<span>'+escH(kon)+'</span><span style="color:var(--txt3);">'+konTotal+'</span></div>';
+      // Nagłówek konceptu z sumą i procentem
+      html+='<div style="display:flex;align-items:center;padding:6px 12px;background:var(--sur2);border-top:1px solid var(--brd);font-size:11px;font-weight:600;color:var(--txt2);">'
+        +'<span style="flex:1;">'+escH(kon)+'</span>'
+        +'<span style="width:90px;text-align:right;color:var(--txt3);">'+konTotal+'</span>'
+        +'<span style="width:70px;text-align:right;color:var(--txt3);">'+pct(konTotal)+'%</span>'
+        +'</div>';
 
       Object.keys(tree[faza][kon]).sort().forEach(szc=>{
         var auto=tree[faza][kon][szc];
@@ -2551,10 +2560,17 @@ function rPlanGoals(){
         html+='<input type="number" min="0" value="'+val+'" title="Ręczna korekta (puste = wartość auto)" '
           +'onchange="setGoalOverride(\''+jsq(teamFilter)+'\',\''+jsq(faza)+'\',\''+jsq(kon)+'\',\''+jsq(szc)+'\',this.value)" '
           +'style="width:64px;text-align:right;font-size:12px;border:1px solid '+(overridden?'#534AB7':'var(--brd)')+';border-radius:4px;padding:2px 6px;'+(overridden?'background:#EEEDFE;color:#3C3489;font-weight:600;':'')+'"/>';
+        html+='<span style="width:54px;text-align:right;font-size:11px;color:var(--txt2);font-weight:600;">'+pct(val)+'%</span>';
         html+=overridden?'<button title="Przywróć auto" onclick="clearGoalOverride(\''+jsq(teamFilter)+'\',\''+jsq(faza)+'\',\''+jsq(kon)+'\',\''+jsq(szc)+'\')" style="background:none;border:none;cursor:pointer;color:var(--txt3);font-size:13px;">↺</button>':'<span style="width:13px;"></span>';
         html+='</div>';
       });
     });
+    // Stopka fazy: Suma obszaru = 100%
+    html+='<div style="display:flex;align-items:center;padding:7px 12px;background:'+c.bg+';color:'+c.tc+';font-weight:700;font-size:12px;border-top:1px solid var(--brd);">'
+      +'<span style="flex:1;">Suma: '+escH(faza)+'</span>'
+      +'<span style="width:90px;text-align:right;">'+fazaTotal+'</span>'
+      +'<span style="width:70px;text-align:right;">'+(fazaTotal>0?100:0)+'%</span>'
+      +'</div>';
     html+='</div>';
   });
 
