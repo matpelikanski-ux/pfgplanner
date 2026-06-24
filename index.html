@@ -14332,9 +14332,10 @@ function renderBudgetTable(b){
   html+='<tr>';
   for(var hi=0;hi<N+1;hi++){
     var isTot=hi>=N;
-    html+='<th style="background:'+(!isTot?'#4a3aaa':'#0d6b52')+';color:#fff;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+(!isTot?'#5a4adb':'#1a8a6a')+';">B</th>';
-    html+='<th style="background:'+(!isTot?'#4a3aaa':'#0d6b52')+';color:#ddf;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+(!isTot?'#5a4adb':'#1a8a6a')+';">A</th>';
-    html+='<th style="background:'+(!isTot?'#4a3aaa':'#0d6b52')+';color:#ffd;padding:3px 5px;font-size:8px;min-width:50px;border:1px solid '+(!isTot?'#5a4adb':'#1a8a6a')+';">Δ</th>';
+    var bgc=!isTot?'#4a3aaa':'#0d6b52', brc=!isTot?'#5a4adb':'#1a8a6a';
+    html+='<th title="Plan" style="background:'+bgc+';color:#fff;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+brc+';">Plan</th>';
+    html+='<th title="Realizacja" style="background:'+bgc+';color:#ddf;padding:3px 5px;font-size:8px;min-width:62px;border:1px solid '+brc+';">Realizacja</th>';
+    html+='<th title="Różnica" style="background:'+bgc+';color:#ffd;padding:3px 5px;font-size:8px;min-width:50px;border:1px solid '+brc+';">Różnica</th>';
   }
   html+='</tr>';
   html+='</thead>';
