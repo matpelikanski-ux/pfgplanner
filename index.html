@@ -5460,6 +5460,7 @@ function loadLS(){loadFromLocal();} // zachowany dla kompatybilności
 var _lastSyncTime=Date.now();
 var _realtimeWS=null;
 var _pollTimer=null;
+var _hbTimer=null;
 var _pageVisible=!document.hidden;
 
 // Supabase Realtime — subskrypcja zmian tabeli pfg_store przez WebSocket
@@ -5493,8 +5494,9 @@ function startRealtimeChannel(){
       // Automatyczny reconnect po 5s
       setTimeout(function(){if(_supaReady&&currentUser)startRealtimeChannel();},5000);
     };
-    // Heartbeat co 25s (Supabase wymaga)
-    setInterval(function(){
+    // Heartbeat co 25s (Supabase wymaga) — jeden timer, nie mnozy sie przy reconnect
+    if(_hbTimer)clearInterval(_hbTimer);
+    _hbTimer=setInterval(function(){
       if(_realtimeWS&&_realtimeWS.readyState===1){
         _realtimeWS.send(JSON.stringify({topic:'phoenix',event:'heartbeat',payload:{},ref:'hb'}));
       }
@@ -5562,21 +5564,28 @@ function startPollingFallback(){
   _pollTimer=setInterval(async function(){
     if(!_supaReady||!currentUser||!_pageVisible)return;
     try{
-      var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,updated_at,updated_by,data',{
+      // KROK 1: pobierz TYLKO metadane (bez kolumny data) — kilkaset bajtów zamiast megabajtów
+      var r=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&select=store_name,updated_at,updated_by',{
         headers:_supaHeaders()
       });
       if(!r.ok)return;
       var rows=await r.json();
+      // KROK 2: pobierz 'data' wyłącznie dla store'ów, ktore faktycznie sie zmienily
       for(var row of rows){
         if(row.updated_by===_deviceId)continue;
         var ts=new Date(row.updated_at).getTime();
         if(ts>_lastSyncTime){
           _lastSyncTime=Date.now();
-          await _handleRemoteChange(row.store_name, row.data);
+          var rd=await fetch(SUPA_URL+'/rest/v1/pfg_store?club_key=eq.'+CLUB_KEY+'&store_name=eq.'+encodeURIComponent(row.store_name)+'&select=data',{
+            headers:_supaHeaders()
+          });
+          if(!rd.ok)continue;
+          var dj=await rd.json();
+          if(dj&&dj[0])await _handleRemoteChange(row.store_name, dj[0].data);
         }
       }
     }catch(e){}
-  },10000);
+  },60000);
 }
 
 function startRealtimeSync(){
@@ -7975,7 +7984,8 @@ async function supaAuth(path, body){
     headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
     body:JSON.stringify(body)
   });
-  return {ok:r.ok, data:await r.json()};
+  var _d={}; try{_d=await r.json();}catch(e){}
+  return {ok:r.ok, status:r.status, data:_d};
 }
 async function supaAuthGet(path, token){
   var r=await fetch(SUPA_URL+'/auth/v1'+path,{
@@ -8030,7 +8040,14 @@ async function doLogin(){
   try{
     var res=await supaAuth('/token?grant_type=password',{email,password:pass});
     if(!res.ok){
-      errEl.textContent=(res.data.error_description||res.data.msg||'Nieprawidłowy email lub hasło.');
+      var _m=(res.data&&(res.data.message||res.data.error_description||res.data.msg))||'';
+      if(res.status===402||/egress|quota|restricted|spend cap/i.test(_m)){
+        errEl.textContent='Baza danych jest tymczasowo zablokowana (przekroczony limit transferu). Skontaktuj się z administratorem systemu.';
+      }else if(res.status===540||/paused/i.test(_m)){
+        errEl.textContent='Baza danych jest wstrzymana. Skontaktuj się z administratorem systemu.';
+      }else{
+        errEl.textContent=(_m||'Nieprawidłowy email lub hasło.');
+      }
       errEl.style.display='';setLoginLoading(false);return;
     }
     var token=res.data.access_token;
