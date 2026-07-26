@@ -5423,6 +5423,8 @@ async function loadFromSupabase(){
     SKLADKI_DEF=_pick('SKLADKI_DEF',[]);
     SKLADKI_WPL=_pick('SKLADKI_WPL',[]);
 
+    migratePlayers();
+
     // Jeśli lokalnie były dane których nie ma w Supabase — wyślij je teraz
     var _needsUpload=false;
     ['EXS','KONSP','TEAMS','COACHES','PLAYERS','TRAININGS','MATCHES','TESTS','CYC'].forEach(function(k){
@@ -5452,6 +5454,7 @@ function loadFromLocal(){
   try{
     var d=localStorage.getItem(LS_KEY);
     if(d){var p=JSON.parse(d);EXS=p.EXS||[];CYC=p.CYC||[];KONSP=p.KONSP||[];GOAL_OVERRIDES=p.GOAL_OVERRIDES||{};TEAMS=p.TEAMS||getDefaultTeams();COACHES=p.COACHES||getDefaultCoaches();PLAYERS=p.PLAYERS||[];TRAININGS=p.TRAININGS||[];MATCHES=p.MATCHES||[];TESTS=p.TESTS||[];currentSeason=p.currentSeason||'2025/26';COACH_PROFILES=p.COACH_PROFILES||[];GAME_MODELS=p.GAME_MODELS||[];SCOUT_PLAYERS=p.SCOUT_PLAYERS||[];BUDGETS=p.BUDGETS||[];FAKTURY=p.FAKTURY||[];SQUAD_PROPOSALS=p.SQUAD_PROPOSALS||[];SKLADKI_DEF=p.SKLADKI_DEF||[];SKLADKI_WPL=p.SKLADKI_WPL||[];}
+    migratePlayers();
   }catch(e){console.warn('loadLocal error',e);}
 }
 function loadLS(){loadFromLocal();} // zachowany dla kompatybilności
@@ -5517,7 +5520,7 @@ async function _handleRemoteChange(storeName, data){
     CYC:function(d){CYC=d||[];},
     TEAMS:function(d){if(d&&d.length)TEAMS=d;},
     COACHES:function(d){if(d&&d.length)COACHES=d;},
-    PLAYERS:function(d){PLAYERS=d||[];},
+    PLAYERS:function(d){PLAYERS=d||[];migratePlayers();},
     TRAININGS:function(d){TRAININGS=d||[];},
     MATCHES:function(d){MATCHES=d||[];},
     TESTS:function(d){TESTS=d||[];},
@@ -5688,6 +5691,220 @@ function getDefaultTeams(){return [];}
 function getDefaultCoaches(){return [];}
 
 function genId(){return 't-'+Date.now();}
+function genUid(pfx){return (pfx||'p')+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);}
+
+/* ═══════════════════════════════════════════════════════════════
+   ZAWODNICY PER-SEZON + KOPIOWANIE MIĘDZY SEZONAMI (v26)
+   Zawodnik ma stałą tożsamość (pid) ciągnącą się przez sezony,
+   ale rekord i dane (oceny/pomiary/testy) są osobne dla każdego sezonu.
+   Karta zawodnika agreguje historię ze wszystkich sezonów po pid.
+   ═══════════════════════════════════════════════════════════════ */
+function playerSeason(p){return (p&&p.season)?p.season:currentSeason;}
+function inCurSeason(p){return playerSeason(p)===currentSeason;}
+
+// Migracja: nadaj każdemu zawodnikowi pid + season; usuń puste duplikaty po starym kopiowaniu
+function migratePlayers(){
+  if(!Array.isArray(PLAYERS))return;
+  var teamSeasons={};
+  (TEAMS||[]).forEach(function(t){ if(t&&t.name){(teamSeasons[t.name]=teamSeasons[t.name]||[]).push(t.season);} });
+  var seenPid={};
+  PLAYERS.forEach(function(p){
+    if(!p)return;
+    if(!p.pid) p.pid = p.id || genUid('pid');
+    if(seenPid[p.pid]) p.pid = genUid('pid');   // kolizje id ze starego genId
+    seenPid[p.pid]=true;
+    if(!p.season){
+      var ss = teamSeasons[p.team]||[];
+      if(ss.indexOf(currentSeason)>=0) p.season=currentSeason;
+      else if(ss.length===1) p.season=ss[0];
+      else if(ss.length>1) p.season=ss.slice().sort().reverse()[0];
+      else p.season=currentSeason;
+    }
+    if(!Array.isArray(p.anthro))p.anthro=[];
+    if(!Array.isArray(p.oceny))p.oceny=[];
+    if(!Array.isArray(p.tests))p.tests=[];
+    if(!Array.isArray(p.zapros))p.zapros=[];
+  });
+  // usuń puste duplikaty (name+team+season) — pozostałość po starym kopiowaniu
+  var seen={};
+  PLAYERS = PLAYERS.filter(function(p){
+    var key=(p.name||'')+'|'+(p.team||'')+'|'+(p.season||'');
+    var empty=!(p.oceny&&p.oceny.length)&&!(p.anthro&&p.anthro.length)&&!(p.tests&&p.tests.length)&&!(p.zapros&&p.zapros.length);
+    if(seen[key]){ if(empty) return false; }
+    seen[key]=true; return true;
+  });
+}
+
+// Rekordy tego samego zawodnika (po pid) w innych sezonach
+function playerOtherSeasons(p){
+  if(!p)return [];
+  var pid=p.pid||p.id;
+  return PLAYERS.filter(function(x){return x!==p && (x.pid||x.id)===pid;})
+    .sort(function(a,b){return (a.season||'').localeCompare(b.season||'');});
+}
+
+// Podgląd historii z innych sezonów w karcie zawodnika (read-only)
+function crossSeasonHistoryHtml(p){
+  var others=playerOtherSeasons(p);
+  if(!others.length)return '';
+  var h='<div class="sh">Historia z innych sezonów</div>';
+  h+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">';
+  others.forEach(function(o){
+    var lg=lastGrade(o);
+    var la=lastAnthro(o);
+    var nOc=(o.oceny||[]).length, nAn=(o.anthro||[]).length, nTe=(o.tests||[]).length;
+    h+='<div style="border:1px solid var(--brd);border-radius:var(--r2);padding:9px 12px;background:var(--sur2);">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">';
+    h+='<div style="font-size:12px;font-weight:600;">Sezon '+escH(o.season||'—')+(o.team?' · '+escH(o.team):'')+'</div>';
+    h+=(lg?'<span class="ioz-grade '+lg+'" style="width:20px;height:20px;font-size:11px;flex-shrink:0;">'+lg+'</span>':'');
+    h+='</div>';
+    h+='<div style="font-size:11px;color:var(--txt2);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap;">';
+    h+='<span>Ocen: <b>'+nOc+'</b></span><span>Pomiarów: <b>'+nAn+'</b></span><span>Testów: <b>'+nTe+'</b></span>';
+    if(la&&(la.height||la.weight))h+='<span>'+(la.height?la.height+' cm':'')+(la.height&&la.weight?' · ':'')+(la.weight?la.weight+' kg':'')+'</span>';
+    h+='</div></div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+/* ── KOPIOWANIE ZAWODNIKÓW MIĘDZY SEZONAMI ── */
+var _cpMap={}; // drużyna źródłowa -> drużyna docelowa (lub '__keep__')
+function oCopyPlayers(){
+  var mo=document.getElementById('mo-copy-players');
+  if(!mo){
+    mo=document.createElement('div');mo.className='mo';mo.id='mo-copy-players';
+    mo.innerHTML='<div class="mbox" style="width:760px;max-width:98%;max-height:94vh;display:flex;flex-direction:column;">'
+      +'<div class="mh"><div class="mt2">Kopiuj zawodników między sezonami</div><button class="mc2" onclick="cM(\'mo-copy-players\')"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11"/></svg></button></div>'
+      +'<div class="mbody" id="mo-cp-body" style="overflow:auto;"></div>'
+      +'<div class="mf"><button class="btn" onclick="cM(\'mo-copy-players\')">Anuluj</button><button class="btn pri" onclick="doCopyPlayers()">Kopiuj zaznaczonych →</button></div></div>';
+    mo.addEventListener('click',function(e){if(e.target===mo)mo.classList.remove('op');});
+    document.body.appendChild(mo);
+  }
+  var seasonsWithPlayers=[...new Set(PLAYERS.map(playerSeason))].sort().reverse();
+  var defSrc=seasonsWithPlayers.filter(function(s){return s!==currentSeason;})[0] || seasonsWithPlayers[0] || SEASONS[0];
+  _cpMap={};
+  cpRenderBody(defSrc, currentSeason);
+  oM('mo-copy-players');
+}
+
+function cpRenderBody(srcSeason, tgtSeason){
+  var body=document.getElementById('mo-cp-body');if(!body)return;
+  var srcPlayers=PLAYERS.filter(function(p){return playerSeason(p)===srcSeason;})
+    .sort(function(a,b){return (a.team||'').localeCompare(b.team||'')||(a.name||'').localeCompare(b.name||'');});
+  var srcTeams=[...new Set(srcPlayers.map(function(p){return p.team||'(bez drużyny)';}))];
+  var tgtTeams=TEAMS.filter(function(t){return t.season===tgtSeason;}).map(function(t){return t.name;});
+
+  var h='';
+  h+='<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;">';
+  h+='<div><label class="fl">Z sezonu</label><select class="fsel" id="cp-src" onchange="cpOnSrcChange()" style="min-width:130px;">';
+  SEASONS.forEach(function(s){var n=PLAYERS.filter(function(p){return playerSeason(p)===s;}).length;h+='<option value="'+escH(s)+'"'+(s===srcSeason?' selected':'')+'>'+escH(s)+' ('+n+')</option>';});
+  h+='</select></div>';
+  h+='<div style="font-size:18px;color:var(--txt3);padding-bottom:8px;">→</div>';
+  h+='<div><label class="fl">Do sezonu</label><select class="fsel" id="cp-tgt" onchange="cpOnSrcChange()" style="min-width:130px;">';
+  SEASONS.forEach(function(s){h+='<option value="'+escH(s)+'"'+(s===tgtSeason?' selected':'')+'>'+escH(s)+'</option>';});
+  h+='</select></div>';
+  h+='<div style="margin-left:auto;display:flex;gap:6px;"><button class="btn sm" onclick="cpToggleAll(true)">Zaznacz wszystkich</button><button class="btn sm" onclick="cpToggleAll(false)">Odznacz</button></div>';
+  h+='</div>';
+
+  if(srcSeason===tgtSeason){
+    h+='<div style="background:var(--lred);color:var(--red);border-radius:var(--r2);padding:10px 14px;font-size:12px;">Sezon źródłowy i docelowy są takie same — wybierz różne sezony.</div>';
+    body.innerHTML=h; return;
+  }
+  if(!srcPlayers.length){
+    h+='<div style="background:var(--sur2);border-radius:var(--r2);padding:16px;font-size:12px;color:var(--txt2);text-align:center;">Sezon '+escH(srcSeason)+' nie ma zawodników.</div>';
+    body.innerHTML=h; return;
+  }
+
+  h+='<div style="font-size:11px;color:var(--txt3);margin-bottom:10px;line-height:1.5;">Zaznacz zawodników do przeniesienia. Dane podstawowe i notatki zdrowotne zostaną skopiowane; oceny, pomiary i testy zaczną się w nowym sezonie od zera (pełna historia pozostaje widoczna w karcie zawodnika).</div>';
+
+  srcTeams.forEach(function(tm){
+    var pls=srcPlayers.filter(function(p){return (p.team||'(bez drużyny)')===tm;});
+    var defTgt = tgtTeams.indexOf(tm)>=0 ? tm : '__keep__';
+    _cpMap[tm]=_cpMap[tm]||defTgt;
+    var tmJs=tm.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    h+='<div style="border:1px solid var(--brd);border-radius:var(--r2);margin-bottom:10px;overflow:hidden;">';
+    h+='<div style="background:var(--sur2);padding:8px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
+    h+='<label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;"><input type="checkbox" class="cp-team-cb" data-team="'+escH(tm)+'" checked onchange="cpTeamToggle(this)" style="width:15px;height:15px;">'+escH(tm)+' <span style="font-weight:400;color:var(--txt3);font-size:11px;">('+pls.length+')</span></label>';
+    h+='<div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2);">→ drużyna: ';
+    h+='<select class="fsel-sm" onchange="_cpMap[\''+tmJs+'\']=this.value;" style="min-width:150px;">';
+    h+='<option value="__keep__"'+(_cpMap[tm]==='__keep__'?' selected':'')+'>Zachowaj nazwę „'+escH(tm)+'”</option>';
+    tgtTeams.forEach(function(tt){h+='<option value="'+escH(tt)+'"'+(_cpMap[tm]===tt?' selected':'')+'>'+escH(tt)+'</option>';});
+    h+='</select></div>';
+    h+='</div>';
+    h+='<div style="padding:6px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;">';
+    pls.forEach(function(p){
+      var idx=PLAYERS.indexOf(p);
+      var already=PLAYERS.some(function(x){return (x.pid||x.id)===(p.pid||p.id)&&playerSeason(x)===tgtSeason;});
+      h+='<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:'+(already?'not-allowed':'pointer')+';opacity:'+(already?'.45':'1')+';padding:2px 0;">';
+      h+='<input type="checkbox" class="cp-pl-cb" data-team="'+escH(tm)+'" value="'+idx+'"'+(already?' disabled':' checked')+' style="width:14px;height:14px;">';
+      h+='<span>'+escH(p.name)+(p.position?' <span style="color:var(--txt3);">'+escH(p.position)+'</span>':'')+(already?' <span style="color:var(--txt3);">(już w '+escH(tgtSeason)+')</span>':'')+'</span>';
+      h+='</label>';
+    });
+    h+='</div></div>';
+  });
+
+  body.innerHTML=h;
+}
+
+function cpOnSrcChange(){
+  var s=(document.getElementById('cp-src')||{}).value||currentSeason;
+  var t=(document.getElementById('cp-tgt')||{}).value||currentSeason;
+  _cpMap={};
+  cpRenderBody(s,t);
+}
+function cpToggleAll(on){
+  document.querySelectorAll('#mo-cp-body .cp-pl-cb:not(:disabled)').forEach(function(cb){cb.checked=on;});
+  document.querySelectorAll('#mo-cp-body .cp-team-cb').forEach(function(cb){cb.checked=on;});
+}
+function cpTeamToggle(cb){
+  var tm=cb.getAttribute('data-team');
+  document.querySelectorAll('#mo-cp-body .cp-pl-cb:not(:disabled)').forEach(function(x){if(x.getAttribute('data-team')===tm)x.checked=cb.checked;});
+}
+
+function doCopyPlayers(){
+  var srcSeason=(document.getElementById('cp-src')||{}).value;
+  var tgtSeason=(document.getElementById('cp-tgt')||{}).value;
+  if(!srcSeason||!tgtSeason||srcSeason===tgtSeason){ST('Wybierz różne sezony');return;}
+  var boxes=[].slice.call(document.querySelectorAll('#mo-cp-body .cp-pl-cb:checked:not(:disabled)'));
+  if(!boxes.length){ST('Nie zaznaczono żadnego zawodnika');return;}
+
+  var addedT=0, addedP=0, skipped=0;
+  boxes.forEach(function(cb){
+    var p=PLAYERS[parseInt(cb.value)];
+    if(!p)return;
+    var srcTeam=p.team||'(bez drużyny)';
+    var mapped=_cpMap[srcTeam]||'__keep__';
+    var tgtTeam=(mapped==='__keep__')?(p.team||''):mapped;
+
+    if(PLAYERS.some(function(x){return (x.pid||x.id)===(p.pid||p.id)&&playerSeason(x)===tgtSeason;})){skipped++;return;}
+
+    if(tgtTeam && !TEAMS.some(function(t){return t.season===tgtSeason&&t.name===tgtTeam;})){
+      var srcT=TEAMS.find(function(t){return t.name===(p.team||'')&&t.season===srcSeason;}) || TEAMS.find(function(t){return t.name===(p.team||'');});
+      var base=srcT?{color:srcT.color,category:srcT.category,players:srcT.players,coach:srcT.coach,coach2:srcT.coach2,notes:srcT.notes}:{color:TEAM_COLORS[TEAMS.length%TEAM_COLORS.length],category:'',players:16};
+      TEAMS.push(Object.assign({id:genUid('t'),name:tgtTeam,season:tgtSeason},base));
+      addedT++;
+    }
+
+    PLAYERS.push({
+      id:genUid('p'),
+      pid:p.pid||p.id||genUid('pid'),
+      season:tgtSeason,
+      name:p.name,
+      dob:p.dob||'',
+      position:p.position||'',
+      team:tgtTeam,
+      healthNotes:p.healthNotes||'',
+      anthro:[], oceny:[], tests:[], zapros:[]
+    });
+    addedP++;
+  });
+
+  saveLS();
+  cM('mo-copy-players');
+  if(typeof rDirDash==='function')try{rDirDash();}catch(e){}
+  refreshCurrentPage();
+  ST('✓ Skopiowano '+addedP+' zawodników do sezonu '+tgtSeason+(addedT?' · utworzono '+addedT+' drużyn':'')+(skipped?' · pominięto '+skipped+' (już istnieją)':''));
+}
 
 function oTeamSquad(teamName){
   // Pobierz lub stwórz modal
@@ -6011,7 +6228,7 @@ function copySeasonTeams(fromSeason){
   var added=0;
   src.forEach(t=>{
     if(TEAMS.some(x=>x.season===currentSeason&&x.name===t.name))return;
-    TEAMS.push({...t,id:genId(),season:currentSeason});added++;
+    TEAMS.push({...t,id:genUid('t'),season:currentSeason});added++;
   });
   saveLS();rTeams();try{rDirDash();}catch(e){}ST('Skopiowano '+added+' drużyn do sezonu '+currentSeason);}
 
@@ -6125,6 +6342,7 @@ function rIOZ(){
   var fGrade=(document.getElementById('ioz-ff-grade')||{}).value||'';
 
   var filtered=PLAYERS.filter(p=>{
+    if(!inCurSeason(p))return false;
     if(q&&!(p.name||'').toLowerCase().includes(q))return false;
     if(fTeam&&p.team!==fTeam)return false;
     if(fGrade){var lg=lastGrade(p);if(lg!==fGrade)return false;}
@@ -6205,7 +6423,9 @@ function savePlayer(){
   var isNew=editPlayerIdx===null;
   var prev=isNew?{}:PLAYERS[editPlayerIdx];
   var p={
-    id:isNew?genId():prev.id,
+    id:isNew?genUid('p'):prev.id,
+    pid:isNew?genUid('pid'):(prev.pid||prev.id||genUid('pid')),
+    season:isNew?currentSeason:(prev.season||currentSeason),
     name:name.trim(),
     dob:(document.getElementById('pl-dob')||{}).value||'',
     team:(document.getElementById('pl-team')||{}).value||'',
@@ -6213,7 +6433,8 @@ function savePlayer(){
     healthNotes:(document.getElementById('pl-health')||{}).value||'',
     anthro:isNew?[]:([...(prev.anthro||[])]),
     oceny:isNew?[]:([...(prev.oceny||[])]),
-    tests:isNew?[]:([...(prev.tests||[])])
+    tests:isNew?[]:([...(prev.tests||[])]),
+    zapros:isNew?[]:([...(prev.zapros||[])])
   };
   if(isNew)PLAYERS.push(p);else PLAYERS[editPlayerIdx]=p;
   cM('mo-player');saveLS();rIOZ();
@@ -6278,6 +6499,9 @@ function renderPlayerView(idx){
   html+='<div class="vf" style="margin-bottom:0;"><div class="vl">Pozycja</div><div class="vv '+(p.position?'':'m')+'">'+(p.position||'—')+'</div></div>';
   html+='<div class="vf" style="margin-bottom:0;"><div class="vl">Drużyna</div><div class="vv '+(p.team?'':'m')+'">'+(p.team||'—')+'</div></div>';
   html+='</div>';
+
+  // ── Historia z innych sezonów (po pid) ──
+  html+=crossSeasonHistoryHtml(p);
 
   // ── Sekcja 1b: Obecność ──
   var att=getAttendanceStats(pid,p.team||'');
@@ -7160,6 +7384,7 @@ function dlIOZpdf(){
   var fTeam=(document.getElementById('ioz-ff-team')||{}).value||'';
   var fGrade=(document.getElementById('ioz-ff-grade')||{}).value||'';
   var filtered=PLAYERS.filter(p=>{
+    if(!inCurSeason(p))return false;
     if(fTeam&&p.team!==fTeam)return false;
     if(fGrade){var lg=lastGrade(p);if(lg!==fGrade)return false;}
     return true;
@@ -7822,7 +8047,7 @@ function oAddTestResultFromTest(testId){
 
 function refreshTrtPlayerList(){
   var teamFilter=(document.getElementById('trt-team')||{}).value||'';
-  var filtered=teamFilter?PLAYERS.filter(p=>p.team===teamFilter):[...PLAYERS];
+  var filtered=(teamFilter?PLAYERS.filter(p=>p.team===teamFilter):[...PLAYERS]).filter(inCurSeason);
   filtered.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   var sel=document.getElementById('trt-player');if(!sel)return;
   sel.innerHTML=filtered.map(p=>{
@@ -8563,7 +8788,7 @@ function oSquadProposal(teamName){
 
 function rSqPlayerList(){
   var listEl=document.getElementById('mo-sq-player-list');if(!listEl)return;
-  var pool=PLAYERS.filter(function(p){return p.team===_sqTeam;}).sort(function(a,b){
+  var pool=PLAYERS.filter(function(p){return p.team===_sqTeam&&inCurSeason(p);}).sort(function(a,b){
     var gv=function(g){return g==='A'?0:g==='B'?1:g==='C'?2:3;};
     return gv(lastGrade(a))-gv(lastGrade(b))||(a.name||'').localeCompare(b.name||'');
   });
@@ -8651,7 +8876,7 @@ function removeSqRankModal(slotKey,ri){
 }
 
 function oSqAssignModal(slotKey,posAbbr){
-  var pool=PLAYERS.filter(function(p){return p.team===_sqTeam;});
+  var pool=PLAYERS.filter(function(p){return p.team===_sqTeam&&inCurSeason(p);});
   var otherUsed=Object.entries(_sqLineup).filter(function(e){return e[0]!==slotKey;}).flatMap(function(e){return(e[1]||[]).map(function(v){return v.playerIdx;});});
   var curSlot=_sqLineup[slotKey]||[];
   var posGroups=POS_ABBR_MAP[posAbbr]||[posAbbr];
@@ -9086,6 +9311,7 @@ function rDirIOZ(){
   var fPos=(document.getElementById('dir-ioz-ff-pos')||{}).value||'';
   var fQ=((document.getElementById('dir-ioz-search')||{}).value||'').toLowerCase();
   var fil=PLAYERS.filter(p=>{
+    if(!inCurSeason(p))return false;
     if(fTeam&&p.team!==fTeam)return false;
     if(fPos&&p.position!==fPos)return false;
     if(fQ&&!(p.name||'').toLowerCase().includes(fQ))return false;
@@ -9417,7 +9643,7 @@ function rDirOverview(){
     html+='<div class="sh">Drużyny akademii — '+season+'</div>';
     html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:20px;">';
     teams.forEach(t=>{
-      var teamPlayers=players.filter(p=>p.team===t.name);
+      var teamPlayers=players.filter(p=>p.team===t.name&&playerSeason(p)===season);
       var teamMatches=MATCHES.filter(m=>m.team===t.name&&(!m.season||m.season===season));
       var teamWon=teamMatches.filter(m=>{if(!m.score)return false;var s=m.score.split('-');return s.length===2&&parseInt(s[0])>parseInt(s[1]);}).length;
       var teamKonsp=KONSP.filter(k=>k.team===t.name).length;
@@ -10678,7 +10904,7 @@ function rDirTalent(){
 // ═══ BOISKO POZIOME — FM STYLE ═══
 // Pobierz zawodników przypisanych do drużyny, posortowanych wg oceny A>B>C
 function getTeamPlayersSorted(teamName){
-  return PLAYERS.filter(function(p){return p.team===teamName;}).sort(function(a,b){
+  return PLAYERS.filter(function(p){return p.team===teamName&&inCurSeason(p);}).sort(function(a,b){
     var gv=function(g){return g==='A'?0:g==='B'?1:g==='C'?2:3;};
     return gv(lastGrade(a))-gv(lastGrade(b));
   });
@@ -11536,12 +11762,12 @@ function switchViewSeason(season){
       var addedT=0,addedP=0;
       srcTeams.forEach(t=>{
         if(TEAMS.some(x=>x.season===season&&x.name===t.name))return;
-        TEAMS.push(Object.assign({},t,{id:genId(),season:season}));addedT++;
+        TEAMS.push(Object.assign({},t,{id:genUid('t'),season:season}));addedT++;
       });
-      var srcPlayers=PLAYERS.filter(p=>srcTeams.some(t=>t.name===p.team));
+      var srcPlayers=PLAYERS.filter(p=>playerSeason(p)===src);
       srcPlayers.forEach(p=>{
-        if(PLAYERS.some(x=>x.name===p.name&&x.team===p.team&&x.season===season))return;
-        PLAYERS.push(Object.assign({},p,{id:genId(),season:season}));addedP++;
+        if(PLAYERS.some(x=>(x.pid||x.id)===(p.pid||p.id)&&playerSeason(x)===season))return;
+        PLAYERS.push({id:genUid('p'),pid:p.pid||p.id||genUid('pid'),season:season,name:p.name,dob:p.dob||'',position:p.position||'',team:p.team||'',healthNotes:p.healthNotes||'',anthro:[],oceny:[],tests:[],zapros:[]});addedP++;
       });
       saveLS();
       ST('✓ Skopiowano '+addedT+' drużyn · '+addedP+' zawodników do sezonu '+season);
@@ -11558,7 +11784,7 @@ function switchViewSeason(season){
 function oNewSeason(){
   var nextSeason=genNextSeasonLabel(currentSeason);
   var srcTeams=TEAMS.filter(t=>t.season===currentSeason);
-  var srcPlayers=PLAYERS.filter(p=>srcTeams.some(t=>t.name===p.team));
+  var srcPlayers=PLAYERS.filter(p=>playerSeason(p)===currentSeason);
 
   var body=document.getElementById('mo-ns-body');
   if(!body)return;
@@ -11644,7 +11870,7 @@ function doNewSeason(){
     srcTeams.forEach(t=>{
       // Sprawdź czy drużyna już istnieje w nowym sezonie
       if(TEAMS.some(x=>x.season===nextSeason&&x.name===t.name))return;
-      var newT=Object.assign({},t,{id:genId(),season:nextSeason});
+      var newT=Object.assign({},t,{id:genUid('t'),season:nextSeason});
       TEAMS.push(newT);
       newTeamNames.add(t.name);
       added++;
@@ -11654,13 +11880,11 @@ function doNewSeason(){
   // Kopiuj zawodników
   var addedPlayers=0;
   if(copyPlayers){
-    var srcPlayers=PLAYERS.filter(p=>srcTeams.some(t=>t.name===p.team));
+    var srcPlayers=PLAYERS.filter(p=>playerSeason(p)===currentSeason);
     srcPlayers.forEach(p=>{
-      // Sprawdź czy zawodnik już istnieje (po imieniu + drużynie) w nowym sezonie
-      var alreadyExists=PLAYERS.some(x=>x.name===p.name&&x.team===p.team&&x.season===nextSeason);
+      var alreadyExists=PLAYERS.some(x=>(x.pid||x.id)===(p.pid||p.id)&&playerSeason(x)===nextSeason);
       if(alreadyExists)return;
-      var newP=Object.assign({},p,{id:genId(),season:nextSeason});
-      PLAYERS.push(newP);
+      PLAYERS.push({id:genUid('p'),pid:p.pid||p.id||genUid('pid'),season:nextSeason,name:p.name,dob:p.dob||'',position:p.position||'',team:p.team||'',healthNotes:p.healthNotes||'',anthro:[],oceny:[],tests:[],zapros:[]});
       addedPlayers++;
     });
   }
@@ -11679,7 +11903,7 @@ function rDirDash(){
   var body=document.getElementById('dir-dash-body');if(!body)return;
   var totalCoaches=COACH_PROFILES.length;
   var totalTeams=TEAMS.filter(t=>t.season===currentSeason).length;
-  var totalPlayers=PLAYERS.filter(p=>TEAMS.filter(t=>t.season===currentSeason).some(t=>t.name===p.team)).length;
+  var totalPlayers=PLAYERS.filter(p=>inCurSeason(p)&&TEAMS.filter(t=>t.season===currentSeason).some(t=>t.name===p.team)).length;
   var totalMatches=MATCHES.filter(m=>(!m.type||m.type==='mecz')).length;
   var html='';
 
@@ -11712,6 +11936,9 @@ function rDirDash(){
     html+='<button class="btn" onclick="switchViewSeason(\''+escH(nextSeasonLabel)+'\')" style="background:#fff;color:#085041;border-color:#fff;font-weight:600;white-space:nowrap;">'
       +'Przełącz na '+escH(nextSeasonLabel)+' →</button>';
   }
+  html+='<button class="btn" onclick="oCopyPlayers()" style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.35);font-weight:600;white-space:nowrap;">'
+    +'<svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:#fff;fill:none;stroke-width:1.8;"><rect x="5" y="5" width="8" height="8" rx="1.5"/><path d="M3 11V4a1 1 0 011-1h7"/></svg>'
+    +'Kopiuj zawodników</button>';
   if(prevSeason){
     html+='<div style="font-size:10px;color:rgba(255,255,255,0.6);text-align:right;cursor:pointer;" onclick="switchViewSeason(\''+escH(prevSeason)+'\')">'
       +'↩ Poprzedni: '+escH(prevSeason)+'</div>';
@@ -12375,7 +12602,7 @@ function rDirAcademy(){
     var tIdx=TEAMS.indexOf(t);
     var coach=COACHES.find(c=>c.id===t.coach);
     var coach2=COACHES.find(c=>c.id===t.coach2);
-    var players=PLAYERS.filter(p=>p.team===t.name);
+    var players=PLAYERS.filter(p=>p.team===t.name&&playerSeason(p)===t.season);
     var teamKonsp=KONSP.filter(k=>k.team===t.name);
     var sessWAtt=teamKonsp.filter(k=>k.obecni&&k.obecni.length);
     var teamMatches=MATCHES.filter(m=>(m.type==='mecz'||!m.type)&&m.team===t.name&&m.wynikNasz!==null&&m.wynikNasz!==undefined);
@@ -12459,7 +12686,7 @@ function oAcademyTeam(teamId){
 
   var coach=COACHES.find(c=>c.id===t.coach);
   var coach2=COACHES.find(c=>c.id===t.coach2);
-  var players=PLAYERS.filter(p=>p.team===t.name);
+  var players=PLAYERS.filter(p=>p.team===t.name&&playerSeason(p)===t.season);
   var teamKonsp=KONSP.filter(k=>k.team===t.name);
   var sessWAtt=teamKonsp.filter(k=>k.obecni&&k.obecni.length);
   var teamMatches=MATCHES.filter(m=>(m.type==='mecz'||!m.type)&&m.team===t.name);
