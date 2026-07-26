@@ -1039,7 +1039,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 <!-- BAZA ĆWICZEŃ -->
 <div id="pg-ex" class="pg">
-  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn" onclick="oImportJSON()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Import motoryka</button><button class="btn" onclick="oImport('cwiczenia')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
+  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn" onclick="oImportJSON()" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC;"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Import motoryka</button><button class="btn" onclick="oImport('cwiczenia')" style="background:var(--sur2);"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 11V3M4 7l4-4 4 4"/><path d="M3 13h10"/></svg>Importuj XLSX</button><button class="btn" id="exs-xlsx-btn" onclick="exsCloudClick()" title="Zapisuj bazę ćwiczeń do pliku Excel (automatyczna aktualizacja)"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 2h7l3 3v9H3z"/><path d="M6.5 8l3 3M9.5 8l-3 3"/></svg><span>Plik Excel</span></button><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
   <div class="inner">
     <div style="display:flex;gap:8px;margin-bottom:10px;"><input class="fi" id="ex-s" placeholder="Szukaj po nazwie lub opisie..." oninput="RE()" style="flex:1;"/></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
@@ -1772,7 +1772,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- DIR: BAZA ĆWICZEŃ (read-only) -->
 <div id="pg-dir-ex" class="pg">
-  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="dir-ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
+  <div class="tb"><div><div class="t1">Baza ćwiczeń</div><div class="t2" id="dir-ex-lbl">0 ćwiczeń</div></div><div class="tb-r"><button class="btn" id="exs-xlsx-btn-dir" onclick="exsCloudClick()" title="Zapisuj bazę ćwiczeń do pliku Excel (automatyczna aktualizacja)"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M3 2h7l3 3v9H3z"/><path d="M6.5 8l3 3M9.5 8l-3 3"/></svg><span>Plik Excel</span></button><button class="btn pri" onclick="oAE()"><svg viewBox="0 0 16 16" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M8 3v10M3 8h10"/></svg>Dodaj ćwiczenie</button></div></div>
   <div class="inner">
     <div style="display:flex;gap:8px;margin-bottom:10px;"><input class="fi" id="dir-ex-s" placeholder="Szukaj po nazwie lub opisie..." oninput="rDirEX()" style="flex:1;"/></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;">
@@ -3792,8 +3792,8 @@ function rEV(e,idx){
 
 function MFC(){var fa=document.getElementById('ef-f').value;var ts=document.getElementById('ef-t'),ks=document.getElementById('ef-k');ts.innerHTML='<option value="">'+(fa?'— wybierz —':'— wybierz fazę —')+'</option>';ts.disabled=!fa;ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=true;if(fa)GT(fa).forEach(t=>{var o=document.createElement('option');o.textContent=t;ts.appendChild(o);});}
 function MTC(){var fa=document.getElementById('ef-f').value,tm=document.getElementById('ef-t').value;var ks=document.getElementById('ef-k');ks.innerHTML='<option value="">— wybierz —</option>';ks.disabled=!tm;if(tm)GK(fa,tm).forEach(k=>{var o=document.createElement('option');o.textContent=k;ks.appendChild(o);});}
-function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',imgUrl:(document.getElementById('ef-imgurl')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();try{rDirEX();}catch(e2){}uD();}
-function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();try{rDirEX();}catch(e2){}uD();saveLS();supaSetEXS();ST('"'+n+'" usunięte');}
+function sE(isNew){var n=(document.getElementById('ef-n')||{}).value||'';if(!n.trim()){ST('Podaj nazwę ćwiczenia');return;}var f=(document.getElementById('ef-f')||{}).value||'';if(!f){ST('Wybierz fazę');return;}var cz=parseInt((document.getElementById('ef-cz')||{}).value)||0;if(!cz){ST('Podaj czas trwania');return;}var obj={n:n.trim(),lv:(document.getElementById('ef-v')||{}).value||'',imgUrl:(document.getElementById('ef-imgurl')||{}).value||'',f,t:(document.getElementById('ef-t')||{}).value||'',k:(document.getElementById('ef-k')||{}).value||'',i:(document.getElementById('ef-i')||{}).value||'',km:(document.getElementById('ef-km')||{}).value||'',kx:(document.getElementById('ef-kx')||{}).value||'',cz,p:(document.getElementById('ef-p')||{}).value||'',sp:(document.getElementById('ef-sp')||{}).value||'',o:(document.getElementById('ef-o')||{}).value||'',z:(document.getElementById('ef-z')||{}).value||'',pk:(document.getElementById('ef-pk')||{}).value||'',w:(document.getElementById('ef-w')||{}).value||'',u:(document.getElementById('ef-u')||{}).value||'',fb:(document.getElementById('ef-fb')||{}).value||'',img:IMG||null,imn:IMN||null};if(isNew){EXS.unshift(obj);ST('"'+obj.n+'" dodano do bazy');}else{EXS[EI]=obj;ST('"'+obj.n+'" zaktualizowane');}cM('mo-ex');RE();try{rDirEX();}catch(e2){}uD();saveLS();try{supaSetEXS();}catch(e4){}try{autoExportExs();}catch(e3){}}
+function delE(idx){if(!confirm('Usunąć "'+EXS[idx].n+'"?'))return;var n=EXS[idx].n;EXS.splice(idx,1);cM('mo-ex');RE();try{rDirEX();}catch(e2){}uD();saveLS();supaSetEXS();try{autoExportExs();}catch(e3){}ST('"'+n+'" usunięte');}
 function HFS(e){
   var f=e.target.files[0];
   if(!f)return;
@@ -12883,6 +12883,216 @@ function oAcademyTeam(teamId){
 }
 
 // ── USTAWIENIA ──
+// ===== AUTO-EKSPORT BAZY ĆWICZEŃ DO PLIKU EXCEL =====
+// Stały plik .xlsx aktualizowany po każdej zmianie ćwiczenia.
+// Wykorzystuje File System Access API (Chrome/Edge/Opera na komputerze);
+// uchwyt pliku przechowujemy w IndexedDB, więc przetrwa odświeżenie strony.
+var _exsFileHandle=null;
+var _exsAutoBusy=false;
+
+function _exsIDB(){
+  return new Promise(function(res,rej){
+    var r=indexedDB.open('pfg_exs_excel',1);
+    r.onupgradeneeded=function(){r.result.createObjectStore('h');};
+    r.onsuccess=function(){res(r.result);};
+    r.onerror=function(){rej(r.error);};
+  });
+}
+async function _exsIDBset(h){try{var db=await _exsIDB();await new Promise(function(res,rej){var tx=db.transaction('h','readwrite');tx.objectStore('h').put(h,'handle');tx.oncomplete=res;tx.onerror=function(){rej(tx.error);};});}catch(e){}}
+async function _exsIDBget(){try{var db=await _exsIDB();return await new Promise(function(res){var tx=db.transaction('h','readonly');var g=tx.objectStore('h').get('handle');g.onsuccess=function(){res(g.result||null);};g.onerror=function(){res(null);};});}catch(e){return null;}}
+async function _exsIDBclear(){try{var db=await _exsIDB();await new Promise(function(res){var tx=db.transaction('h','readwrite');tx.objectStore('h').delete('handle');tx.oncomplete=res;tx.onerror=res;});}catch(e){}}
+
+function exsExcelSupported(){return typeof window!=='undefined'&&('showSaveFilePicker'in window);}
+
+// Skoroszyt z pełną bazą ćwiczeń (te same kolumny co eksport zbiorczy)
+function buildExsWorkbook(){
+  if(typeof XLSX==='undefined')return null;
+  var FAZA_MAP={'a':'Atakowanie','b':'Bronienie','u':'Umiejętności','m':'Motoryka'};
+  var rows=[['Nazwa ćwiczenia','Faza gry','Temat','Koncept','Szczegół konceptu','Kat. min','Kat. max','Czas (min)','Liczba zawodników','Przestrzeń','Sprzęt','Intensywność','Opis','Coaching points','Link wideo']];
+  (EXS||[]).forEach(function(e){
+    rows.push([e.n||'',FAZA_MAP[e.f]||e.f||'',e.t||'',e.k||'',e.sk||'',e.km||'',e.kx||'',e.cz||'',e.lz||'',e.p||'',e.sp||'',e.i||'',e.o||'',e.z||'',e.lv||'']);
+  });
+  var ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:28},{wch:14},{wch:18},{wch:18},{wch:18},{wch:10},{wch:10},{wch:6},{wch:8},{wch:12},{wch:14},{wch:12},{wch:40},{wch:30},{wch:30}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Ćwiczenia');
+  return wb;
+}
+
+async function _exsHandlePerm(h,request){
+  if(!h||!h.queryPermission)return 'granted';
+  var opts={mode:'readwrite'};
+  var p=await h.queryPermission(opts);
+  if(p==='granted')return 'granted';
+  if(request&&h.requestPermission){p=await h.requestPermission(opts);}
+  return p;
+}
+
+// Zapis do połączonego pliku. silent=true → bez komunikatu o sukcesie.
+async function writeExsToFile(silent){
+  if(!_exsFileHandle||_exsAutoBusy)return false;
+  _exsAutoBusy=true;
+  try{
+    var perm=await _exsHandlePerm(_exsFileHandle,!silent);
+    if(perm!=='granted'){ if(!silent)ST('Plik Excel wymaga ponownego połączenia — kliknij „Plik Excel"'); _exsAutoBusy=false; updateExsExcelBtn(); return false; }
+    var wb=buildExsWorkbook();
+    if(!wb){ _exsAutoBusy=false; return false; }
+    var bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    var w=await _exsFileHandle.createWritable();
+    await w.write(bytes);
+    await w.close();
+    if(!silent)ST('Zapisano bazę ćwiczeń do pliku Excel');
+    _exsAutoBusy=false; updateExsExcelBtn(); return true;
+  }catch(e){
+    _exsAutoBusy=false;
+    if(!silent)ST('Nie udało się zapisać pliku Excel');
+    return false;
+  }
+}
+
+// Wywoływane po każdej zmianie w bazie ćwiczeń (cicho)
+function autoExportExs(){ if(_exsFileHandle)writeExsToFile(true); try{if(_exsCloudOn)uploadExsToCloud(true);}catch(e){} }
+
+function downloadExsExcelOnce(){
+  var wb=buildExsWorkbook();
+  if(!wb){ST('Biblioteka XLSX nie załadowana');return;}
+  try{ XLSX.writeFile(wb,'baza_cwiczen_iskra.xlsx'); }catch(e){ ST('Nie udało się wygenerować pliku'); }
+}
+
+async function connectExsExcel(){
+  if(!exsExcelSupported()){
+    downloadExsExcelOnce();
+    ST('Ta przeglądarka nie wspiera stałego pliku — pobrano kopię. Użyj Chrome/Edge na komputerze, aby plik aktualizował się sam.');
+    return;
+  }
+  try{
+    var h=await window.showSaveFilePicker({
+      suggestedName:'baza_cwiczen_iskra.xlsx',
+      types:[{description:'Skoroszyt Excel',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]
+    });
+    _exsFileHandle=h;
+    await _exsIDBset(h);
+    await writeExsToFile(false);
+  }catch(e){ /* użytkownik anulował wybór pliku */ }
+  updateExsExcelBtn();
+}
+async function disconnectExsExcel(){
+  _exsFileHandle=null;
+  await _exsIDBclear();
+  ST('Odłączono plik Excel — automatyczny zapis wyłączony');
+  updateExsExcelBtn();
+}
+
+async function initExsExcel(){
+  if(exsExcelSupported()){
+    var h=await _exsIDBget();
+    if(h)_exsFileHandle=h;
+  }
+  updateExsExcelBtn();
+}
+
+function updateExsExcelBtn(){
+  var connected=!!_exsFileHandle;
+  var nm=connected&&_exsFileHandle.name?_exsFileHandle.name:'';
+  ['exs-xlsx-btn','exs-xlsx-btn-dir'].forEach(function(id){
+    var b=document.getElementById(id);if(!b)return;
+    var sp=b.querySelector('span');
+    if(connected){ b.classList.add('pri'); b.title='Połączono: '+nm+' — kliknij, aby zarządzać'; if(sp)sp.textContent='Excel: połączony'; }
+    else { b.classList.remove('pri'); b.title='Zapisuj bazę ćwiczeń do pliku Excel (automatyczna aktualizacja)'; if(sp)sp.textContent='Plik Excel'; }
+  });
+}
+
+function exsExcelClick(){
+  if(!_exsFileHandle){ connectExsExcel(); return; }
+  var name=(_exsFileHandle.name)||'plik.xlsx';
+  var d=document.getElementById('mo-exs-xlsx');
+  if(!d){ d=document.createElement('div');d.className='mo';d.id='mo-exs-xlsx';d.addEventListener('click',function(e){if(e.target===d)cM('mo-exs-xlsx');});document.body.appendChild(d); }
+  d.innerHTML='<div class="mbox" style="width:460px;"><div class="mh"><div class="mt2">Plik Excel bazy ćwiczeń</div><button class="mc2" onclick="cM(\'mo-exs-xlsx\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody"><div style="font-size:12px;color:var(--txt2);margin-bottom:4px;">Połączony plik:</div><div style="font-size:13px;font-weight:600;word-break:break-all;">'+escH(name)+'</div><div style="font-size:12px;color:var(--txt3);margin-top:10px;">Baza zapisuje się do tego pliku automatycznie po każdej zmianie ćwiczenia (dodanie, edycja, usunięcie).</div></div><div class="mfs"><button class="btn dan" onclick="disconnectExsExcel();cM(\'mo-exs-xlsx\')">Odłącz plik</button><div style="display:flex;gap:8px;"><button class="btn" onclick="cM(\'mo-exs-xlsx\')">Zamknij</button><button class="btn pri" onclick="writeExsToFile(false);cM(\'mo-exs-xlsx\')">Zapisz teraz</button></div></div></div>';
+  oM('mo-exs-xlsx');
+}
+
+// ===== KOPIA BAZY ĆWICZEŃ W CHMURZE (Supabase Storage) =====
+var EXS_BUCKET='eksporty';
+var EXS_CLOUD_PATH='baza_cwiczen_iskra.xlsx';
+var EXS_XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+var _exsCloudOn=(function(){try{return localStorage.getItem('pfg_exs_cloud')==='1';}catch(e){return false;}})();
+var _exsCloudLast=(function(){try{return localStorage.getItem('pfg_exs_cloud_last')||'';}catch(e){return '';}})();
+var _exsCloudBusy=false;
+
+function _exsBytes(){var wb=buildExsWorkbook();if(!wb)return null;return XLSX.write(wb,{bookType:'xlsx',type:'array'});}
+
+// Wyślij aktualną bazę do Supabase Storage (nadpisanie tego samego pliku).
+// silent=true → bez komunikatów o sukcesie. Zwraca 'ok'|'nobucket'|'noauth'|'err'.
+async function uploadExsToCloud(silent){
+  if(_exsCloudBusy)return 'busy';
+  if(!currentUser||!currentUser.token){ if(!silent)ST('Zaloguj się, aby zapisać w chmurze'); return 'noauth'; }
+  var bytes=_exsBytes(); if(!bytes){ if(!silent)ST('Biblioteka XLSX nie załadowana'); return 'err'; }
+  _exsCloudBusy=true;
+  try{
+    var url=SUPA_URL+'/storage/v1/object/'+EXS_BUCKET+'/'+EXS_CLOUD_PATH;
+    var r=await fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+currentUser.token,'apikey':SUPA_KEY,'x-upsert':'true','Content-Type':EXS_XLSX_MIME},body:new Blob([bytes],{type:EXS_XLSX_MIME})});
+    if(r.ok){
+      _exsCloudLast=new Date().toISOString();
+      try{localStorage.setItem('pfg_exs_cloud_last',_exsCloudLast);}catch(e){}
+      if(!silent)ST('Baza ćwiczeń zapisana w chmurze');
+      _exsCloudBusy=false; updateExsCloudBtn(); return 'ok';
+    }
+    var txt=''; try{txt=await r.text();}catch(e){}
+    _exsCloudBusy=false;
+    if(r.status===404||/bucket not found/i.test(txt)){ if(!silent)ST('Brak kosza „'+EXS_BUCKET+'" w Supabase — otwórz „Kopia w chmurze" po instrukcję'); updateExsCloudBtn(); return 'nobucket'; }
+    if(r.status===401||r.status===403||r.status===400){ if(!silent)ST('Brak uprawnień do zapisu w chmurze — sprawdź polityki kosza'); return 'noauth'; }
+    if(!silent)ST('Nie udało się zapisać w chmurze (błąd '+r.status+')');
+    return 'err';
+  }catch(e){ _exsCloudBusy=false; if(!silent)ST('Nie udało się zapisać w chmurze'); return 'err'; }
+}
+
+async function exsCloudDownload(){
+  if(!currentUser||!currentUser.token){ST('Zaloguj się, aby pobrać z chmury');return;}
+  try{
+    var r=await fetch(SUPA_URL+'/storage/v1/object/sign/'+EXS_BUCKET+'/'+EXS_CLOUD_PATH,{method:'POST',headers:{'Authorization':'Bearer '+currentUser.token,'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({expiresIn:3600})});
+    if(r.ok){ var j=await r.json(); var sp=j.signedURL||j.signedUrl||''; window.open(SUPA_URL+'/storage/v1'+sp,'_blank'); return; }
+    window.open(SUPA_URL+'/storage/v1/object/public/'+EXS_BUCKET+'/'+EXS_CLOUD_PATH,'_blank');
+  }catch(e){ ST('Nie udało się pobrać z chmury'); }
+}
+
+function setExsCloud(on){
+  _exsCloudOn=!!on;
+  try{localStorage.setItem('pfg_exs_cloud',_exsCloudOn?'1':'0');}catch(e){}
+  updateExsCloudBtn();
+  if(_exsCloudOn) uploadExsToCloud(false); // pierwszy zapis + test konfiguracji
+  else ST('Synchronizacja z chmurą wyłączona');
+}
+
+function updateExsCloudBtn(){
+  ['exs-xlsx-btn','exs-xlsx-btn-dir'].forEach(function(id){
+    var b=document.getElementById(id);if(!b)return;var sp=b.querySelector('span');
+    if(_exsCloudOn){ b.classList.add('pri'); b.title='Kopia w chmurze włączona — kliknij, aby zarządzać'; if(sp)sp.textContent='Chmura: wł.'; }
+    else { b.classList.remove('pri'); b.title='Zapisuj bazę ćwiczeń do chmury (Supabase)'; if(sp)sp.textContent='Kopia w chmurze'; }
+  });
+}
+
+function _fmtLast(iso){ if(!iso)return 'brak'; try{return new Date(iso).toLocaleString('pl-PL');}catch(e){return iso;} }
+
+function exsCloudClick(){
+  var d=document.getElementById('mo-exs-cloud');
+  if(!d){ d=document.createElement('div');d.className='mo';d.id='mo-exs-cloud';d.addEventListener('click',function(e){if(e.target===d)cM('mo-exs-cloud');});document.body.appendChild(d); }
+  var on=_exsCloudOn;
+  var sql='create policy "eksporty_rw" on storage.objects for all to authenticated using (bucket_id = \''+EXS_BUCKET+'\') with check (bucket_id = \''+EXS_BUCKET+'\');';
+  d.innerHTML='<div class="mbox" style="width:560px;max-height:92vh;"><div class="mh"><div class="mt2">Kopia bazy ćwiczeń w chmurze</div><button class="mc2" onclick="cM(\'mo-exs-cloud\')"><svg><path d="M1 1l10 10M11 1L1 11"/></svg></button></div><div class="mbody">'
+   +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><span style="font-size:13px;font-weight:600;">Automatyczny zapis do chmury:</span><span class="bdg" style="background:'+(on?'#E1F5EE':'#F1EFE8')+';color:'+(on?'#085041':'#6B6860')+';">'+(on?'Włączony':'Wyłączony')+'</span></div>'
+   +'<div style="font-size:12px;color:var(--txt2);margin-bottom:4px;">Ostatni zapis w chmurze: <b>'+_fmtLast(_exsCloudLast)+'</b></div>'
+   +'<div style="font-size:12px;color:var(--txt3);margin-bottom:14px;">Po włączeniu baza wysyła się do Supabase po każdej zmianie ćwiczenia i nadpisuje ten sam plik <code>'+escH(EXS_CLOUD_PATH)+'</code> w koszu <code>'+escH(EXS_BUCKET)+'</code>.</div>'
+   +'<details style="margin-bottom:8px;"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--g);">Konfiguracja (jednorazowo w panelu Supabase)</summary>'
+   +'<div style="font-size:12px;color:var(--txt2);margin-top:8px;line-height:1.5;">1. Storage → New bucket → nazwa <code>'+escH(EXS_BUCKET)+'</code> (może być prywatny).<br>2. SQL Editor → wklej i uruchom politykę dostępu dla zalogowanych:</div>'
+   +'<pre style="white-space:pre-wrap;background:var(--sur2);border:1px solid var(--brd);border-radius:6px;padding:8px;font-size:11px;margin-top:6px;">'+escH(sql)+'</pre></div>'
+   +'</div><div class="mfs"><button class="btn '+(on?'dan':'pri')+'" onclick="setExsCloud('+(on?'false':'true')+');cM(\'mo-exs-cloud\')">'+(on?'Wyłącz':'Włącz')+' synchronizację</button><div style="display:flex;gap:8px;"><button class="btn" onclick="exsCloudDownload()">Pobierz z chmury</button><button class="btn pri" onclick="uploadExsToCloud(false)">Wyślij teraz</button></div></div></div>';
+  oM('mo-exs-cloud');
+}
+
+// Inicjalizacja etykiety przycisku chmury przy starcie
+if(document.readyState!=='loading'){setTimeout(function(){try{updateExsCloudBtn();}catch(e){}},0);}
+else{window.addEventListener('DOMContentLoaded',function(){try{updateExsCloudBtn();}catch(e){}});}
+
 // EKSPORT DANYCH
 
 function exportAllXLSX(){
