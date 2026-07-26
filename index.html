@@ -2662,7 +2662,7 @@ function rCalTeamFilter(){
   if(!sel)return;
   var prev=sel.value;
   sel.innerHTML='<option value="">Wszystkie drużyny</option>';
-  TEAMS.filter(t=>t.season===currentSeason).forEach(t=>{
+  visibleTeams(currentSeason).forEach(t=>{
     var o=document.createElement('option');o.value=t.name;o.textContent=t.name;
     if(t.name===prev)o.selected=true;sel.appendChild(o);
   });
@@ -5944,8 +5944,40 @@ function refreshTeamSquadModal(){
   body.innerHTML=renderSquadPitch(teamName, formation);
 }
 
+// === Zawężanie widoku do zalogowanego trenera ===
+// Trener łączy się z rekordem COACHES po e-mailu (priorytet) lub nazwisku.
+function getMyCoachId(){
+  if(!currentUser)return null;
+  var em=(currentUser.email||'').toLowerCase().trim();
+  var nm=(currentUser.name||'').toLowerCase().trim();
+  var c=(em&&COACHES.find(x=>x.email&&x.email.toLowerCase().trim()===em))
+      ||(nm&&COACHES.find(x=>x.name&&x.name.toLowerCase().trim()===nm));
+  return c?c.id:null;
+}
+// true tylko dla konta o roli 'trener' (dyrektor/admin nie są ograniczani)
+function trainerScoped(){return !!(currentUser&&currentUser.role==='trener');}
+// Drużyny widoczne w danym sezonie: trener → tylko jego, pozostali → wszystkie.
+// Jeśli trenera nie uda się dopasować do rekordu COACHES, zwracamy wszystkie
+// (bezpieczny fallback, żeby nie zablokować legalnego trenera).
+function visibleTeams(season){
+  var list=TEAMS.filter(t=>t.season===season);
+  if(!trainerScoped())return list;
+  var cid=getMyCoachId();
+  if(!cid)return list;
+  return list.filter(t=>t.coach===cid||t.coach2===cid);
+}
+// Zbiór nazw drużyn zalogowanego trenera w sezonie (lub null = brak ograniczenia).
+function myTeamNameSet(season){
+  if(!trainerScoped())return null;
+  var cid=getMyCoachId();
+  if(!cid)return null;
+  return new Set(TEAMS.filter(t=>t.season===season&&(t.coach===cid||t.coach2===cid)).map(t=>t.name));
+}
+
 function rTeams(){
   var body=document.getElementById('t-body');
+  var _scid=trainerScoped()?getMyCoachId():null;
+  var _scopedTeams=_scid?TEAMS.filter(t=>t.coach===_scid||t.coach2===_scid):TEAMS;
   var seasons=[...new Set(TEAMS.map(t=>t.season))].sort().reverse();
   var allSeasons=SEASONS;
 
@@ -5971,7 +6003,7 @@ function rTeams(){
   html+='</div>';
 
   // DRUŻYNY aktualnego sezonu
-  var seasonTeams=TEAMS.filter(t=>t.season===currentSeason);
+  var seasonTeams=_scopedTeams.filter(t=>t.season===currentSeason);
   html+='<div style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Drużyny · '+currentSeason+'</div>';
 
   if(!seasonTeams.length){
@@ -6025,7 +6057,8 @@ function rTeams(){
     html+='<div class="card" style="text-align:center;padding:24px;"><div style="font-size:12px;color:var(--txt2);">Brak trenerów. Dodaj pierwszego trenera.</div></div>';
   } else {
     html+='<div style="display:flex;flex-direction:column;gap:8px;">';
-    COACHES.forEach((c,idx)=>{
+    var _coachList=_scid?COACHES.filter(c=>c.id===_scid):COACHES;
+    _coachList.forEach((c,idx)=>{
       var ini=c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       var myTeams=TEAMS.filter(t=>t.season===currentSeason&&(t.coach===c.id||t.coach2===c.id)).map(t=>t.name);
       html+='<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px;">';
@@ -6049,12 +6082,12 @@ function rTeams(){
   }
 
   // Historia sezonów
-  var histSeasons=[...new Set(TEAMS.map(t=>t.season))].filter(s=>s!==currentSeason).sort().reverse();
+  var histSeasons=[...new Set(_scopedTeams.map(t=>t.season))].filter(s=>s!==currentSeason).sort().reverse();
   if(histSeasons.length){
     html+='<div style="margin-top:20px;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Historia sezonów</div>';
     html+='<div style="display:flex;flex-direction:column;gap:6px;">';
     histSeasons.forEach(s=>{
-      var sts=TEAMS.filter(t=>t.season===s);
+      var sts=_scopedTeams.filter(t=>t.season===s);
       html+='<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:12px;">';
       html+='<div style="flex:1;"><div style="font-size:13px;font-weight:600;">Sezon '+s+'</div><div style="font-size:11px;color:var(--txt2);">'+sts.length+' drużyn: '+sts.map(t=>t.name).join(', ')+'</div></div>';
       html+='<button class="btn sm" onclick="currentSeason=\''+s+'\';document.getElementById(\'season-sel\').value=\''+s+'\';rTeams();">Pokaż</button>';
@@ -6335,22 +6368,25 @@ function rIOZ(){
   if(teamSel){
     var prevT=teamSel.value;
     teamSel.innerHTML='<option value="">Wszystkie drużyny</option>';
-    TEAMS.filter(t=>t.season===currentSeason).forEach(t=>{var o=document.createElement('option');o.value=t.name;o.textContent=t.name;if(t.name===prevT)o.selected=true;teamSel.appendChild(o);});
+    visibleTeams(currentSeason).forEach(t=>{var o=document.createElement('option');o.value=t.name;o.textContent=t.name;if(t.name===prevT)o.selected=true;teamSel.appendChild(o);});
   }
   var q=((document.getElementById('ioz-search')||{}).value||'').toLowerCase();
   var fTeam=(document.getElementById('ioz-ff-team')||{}).value||'';
   var fGrade=(document.getElementById('ioz-ff-grade')||{}).value||'';
 
+  var _myT=myTeamNameSet(currentSeason);
   var filtered=PLAYERS.filter(p=>{
     if(!inCurSeason(p))return false;
+    if(_myT&&!_myT.has(p.team))return false;
     if(q&&!(p.name||'').toLowerCase().includes(q))return false;
     if(fTeam&&p.team!==fTeam)return false;
     if(fGrade){var lg=lastGrade(p);if(lg!==fGrade)return false;}
     return true;
   });
 
+  var _base=_myT?PLAYERS.filter(p=>inCurSeason(p)&&_myT.has(p.team)).length:PLAYERS.length;
   var lbl=document.getElementById('ioz-sub');
-  if(lbl)lbl.textContent=PLAYERS.length+' zawodników'+(filtered.length!==PLAYERS.length?' ('+filtered.length+' wyników)':'');
+  if(lbl)lbl.textContent=_base+' zawodników'+(filtered.length!==_base?' ('+filtered.length+' wyników)':'');
 
   var grid=document.getElementById('ioz-grid');
   if(!grid)return;
